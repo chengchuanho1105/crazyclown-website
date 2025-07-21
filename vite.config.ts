@@ -17,7 +17,7 @@ export default defineConfig({
     Pages({
       dirs: [
         { dir: 'src/pages', baseRoute: '' },
-        { dir: 'src/pages/crazyclown', baseRoute: 'crazyclown' },
+        { dir: 'src/pages/chuanlife', baseRoute: 'chuanlife' },
         { dir: 'src/pages/yuanpinxiang', baseRoute: 'yuanpinxiang' },
       ],
       extensions: ['vue'],
@@ -25,7 +25,7 @@ export default defineConfig({
       onRoutesGenerated: (routes) => {
         generateSitemap({
           routes,
-          hostname: 'https://chuan.life',
+          hostname: 'https://crazyclown.online',
         })
       },
     }),

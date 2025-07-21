@@ -6,7 +6,7 @@ import { brandSEOConfig as yuanpinxiangSEO } from './config/yuanpinxiang.seo'
 import { brandSEOConfig as chuanlifeSEO } from './config/chuanlife.seo'
 import { brandSEOConfig as crazyclownSEO } from './config/crazyclown.seo'
 
-export const MAIN_BRAND = 'chuanlife'
+export const MAIN_BRAND = 'crazyclown'
 export const BRANDS = ['yuanpinxiang', 'chuanlife', 'crazyclown']
 
 export const BRAND_INFOS = {

@@ -10,7 +10,7 @@ export const pageConfig: PageConfig = {
     {
       path: '/',
       name: `${brandName}-Home`,
-      component: () => import('@/pages/crazyclown/index.vue'),
+      component: () => import(`@/pages/${brandName}/index.vue`),
       meta: {
         title: `首頁 | ${brandDisplayName}`,
         description:
@@ -32,7 +32,7 @@ export const pageConfig: PageConfig = {
     {
       path: '/about',
       name: `${brandName}-About`,
-      component: () => import('@/pages/crazyclown/about.vue'),
+      component: () => import(`@/pages/${brandName}/about.vue`),
       meta: {
         title: `關於我們 | ${brandDisplayName}`,
         description:
@@ -54,7 +54,7 @@ export const pageConfig: PageConfig = {
     {
       path: '/store',
       name: `${brandName}-Store`,
-      component: () => import('@/pages/crazyclown/store.vue'),
+      component: () => import(`@/pages/${brandName}/store.vue`),
       meta: {
         title: `特惠商店 | ${brandDisplayName}`,
         description: 'G-Coin 是 Crazy_Clown 戰隊的獨家貨幣，可以購買戰隊獨享優惠。',
@@ -75,7 +75,7 @@ export const pageConfig: PageConfig = {
     {
       path: '/join',
       name: `${brandName}-Join`,
-      component: () => import('@/pages/crazyclown/join.vue'),
+      component: () => import(`@/pages/${brandName}/join.vue`),
       meta: {
         title: `加入我們 | ${brandDisplayName}`,
         description:
