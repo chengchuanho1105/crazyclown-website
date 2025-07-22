@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useHybridData } from '@/composables/useHybridData'
+import { useHead } from '@unhead/vue'
 import rawLocalNewsData from '@/data/pageData/yuanpinxiang/news/newsData.json'
 
 // 直接使用原始資料，先轉 unknown 再轉 Record<string, string>[]
@@ -43,6 +44,38 @@ onMounted(() => {
 
 // 找到對應新聞
 const news = computed(() => newsData.value.find(n => n.id === newsId.value))
+
+// 動態設定 meta
+const metaTitle = computed(() => {
+  if (!news.value) return '新聞詳情'
+  return news.value.title
+})
+
+const metaDescription = computed(() => {
+  if (!news.value) return '新聞詳情'
+  // 將 title + content 組合作為 description
+  const title = news.value.title || ''
+  const content = news.value.content || ''
+  const combined = `${title} - ${content}`.trim()
+  return combined.length > 160 ? combined.substring(0, 157) + '...' : combined
+})
+
+// 使用 useHead 設定 meta
+useHead({
+  title: metaTitle,
+  meta: [
+    { name: 'description', content: metaDescription },
+    { property: 'og:title', content: metaTitle },
+    { property: 'og:description', content: metaDescription },
+    { name: 'twitter:title', content: metaTitle },
+    { name: 'twitter:description', content: metaDescription },
+  ]
+})
+
+// 監聽 news 變化，更新 meta
+watch(news, () => {
+  // useHead 會自動更新，不需要額外處理
+}, { immediate: true })
 
 function parseTags(tags: string): string[] {
   if (typeof tags !== 'string') return []

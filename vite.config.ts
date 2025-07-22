@@ -1,4 +1,5 @@
 import { fileURLToPath, URL } from 'node:url'
+import { execSync } from 'child_process'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -6,12 +7,17 @@ import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import Pages from 'vite-plugin-pages'
 import tailwindcss from '@tailwindcss/vite'
-import generateSitemap from 'vite-plugin-pages-sitemap'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    vue(),
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag.startsWith('lord-icon'),
+        },
+      },
+    }),
     vueJsx(),
     vueDevTools(),
     Pages({
@@ -21,12 +27,13 @@ export default defineConfig({
         { dir: 'src/pages/yuanpinxiang', baseRoute: 'yuanpinxiang' },
       ],
       extensions: ['vue'],
-      // 這裡整合 sitemap 產生
-      onRoutesGenerated: (routes) => {
-        generateSitemap({
-          routes,
-          hostname: 'https://crazyclown.online',
-        })
+      // 生成包含動態路由的完整 sitemap
+      onRoutesGenerated: () => {
+        try {
+          execSync('node scripts/generate-sitemap.js', { stdio: 'inherit' })
+        } catch (error: unknown) {
+          console.warn('生成動態 sitemap 時發生錯誤:', (error as Error).message)
+        }
       },
     }),
     tailwindcss(),

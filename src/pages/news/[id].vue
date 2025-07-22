@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useHybridData } from '@/composables/useHybridData'
+import { useHead } from '@unhead/vue'
 import rawLocalNewsData from '@/data/pageData/crazyclown/news/newsData.json'
 
 // 直接使用原始資料，先轉 unknown 再轉 Record<string, string>[]
@@ -46,6 +47,38 @@ onMounted(() => {
 // 找到對應新聞
 const news = computed(() => newsData.value.find(n => n.id === newsId.value))
 
+// 動態設定 meta
+const metaTitle = computed(() => {
+  if (!news.value) return '新聞詳情'
+  return news.value.title
+})
+
+const metaDescription = computed(() => {
+  if (!news.value) return '新聞詳情'
+  // 將 title + content 組合作為 description
+  const title = news.value.title || ''
+  const content = news.value.content || ''
+  const combined = `${title} - ${content}`.trim()
+  return combined.length > 160 ? combined.substring(0, 157) + '...' : combined
+})
+
+// 使用 useHead 設定 meta
+useHead({
+  title: metaTitle,
+  meta: [
+    { name: 'description', content: metaDescription },
+    { property: 'og:title', content: metaTitle },
+    { property: 'og:description', content: metaDescription },
+    { name: 'twitter:title', content: metaTitle },
+    { name: 'twitter:description', content: metaDescription },
+  ]
+})
+
+// 監聽 news 變化，更新 meta
+watch(news, () => {
+  // useHead 會自動更新，不需要額外處理
+}, { immediate: true })
+
 // 處理文章 HTML，統一添加 CSS 類別
 const processedArticle = computed(() => {
   if (!news.value?.article) {
@@ -81,6 +114,15 @@ const processedArticle = computed(() => {
   // 為 strong 標籤添加樣式
   html = html.replace(/<strong>/g, '<strong class="font-bold">')
   html = html.replace(/<\/strong>/g, '</strong>')
+
+  // 為 a 標籤添加樣式
+  html = html.replace(/<a\s+(?!class=)/gi, '<a class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium" ')
+
+  // 為外部連結添加圖示和特殊樣式
+  html = html.replace(/<a([^>]*href="https?:\/\/[^"]*"[^>]*)>/gi, '<a$1 class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium inline-flex items-center"><svg class="inline-block w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>')
+
+  // 為內部連結（錨點連結）添加特殊樣式
+  html = html.replace(/<a([^>]*href="#[^"]*"[^>]*)>/gi, '<a$1 class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 font-medium">')
 
   return html
 })
