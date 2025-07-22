@@ -32,8 +32,7 @@ interface NewsData {
 }
 
 /** 2. 取得 News Data CSV 來源 */
-const NEWS_CSV_URL = ''
-// https://docs.google.com/spreadsheets/d/e/2PACX-1vSpK4IAJ0lQCD_pEHh4smflPpCiMbgsMqUfp24uQc-0Ru87ZN2izl7W-O9GbL97Ej6mPGb1eHfd37hx/pub?output=csv
+const NEWS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7y16Qi2dNWRFl7OVgU78wv0SIMi_lPFt0WbZ6-7OqBFo7z2pN7LHs2heesTI4W5TnHM3lTcsXJS8s/pub?output=csv'
 
 /** 3. 定義 CSV 欄位轉換函式 */
 const mapNewsData = (item: Record<string, string>): NewsData => {
