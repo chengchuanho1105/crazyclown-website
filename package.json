@@ -15,7 +15,8 @@
     "lint:eslint": "eslint . --fix",
     "lint": "run-s lint:*",
     "format": "prettier --write src/",
-    "generate-sitemap": "node scripts/generate-sitemap.js"
+    "generate-sitemap": "node scripts/generate-sitemap.js",
+    "facebook-debug": "node scripts/facebook-debug.js"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.16",

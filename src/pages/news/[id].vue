@@ -69,8 +69,14 @@ useHead({
     { name: 'description', content: metaDescription },
     { property: 'og:title', content: metaTitle },
     { property: 'og:description', content: metaDescription },
+    { property: 'og:image', content: news.value?.image || '' },
+    { property: 'og:url', content: `https://crazyclown.online/news/${newsId.value}` },
+    { property: 'og:type', content: 'article' },
+    { property: 'og:site_name', content: 'Crazy Clown' },
     { name: 'twitter:title', content: metaTitle },
     { name: 'twitter:description', content: metaDescription },
+    { name: 'twitter:image', content: news.value?.image || '' },
+    { name: 'twitter:card', content: 'summary_large_image' },
   ]
 })
 
