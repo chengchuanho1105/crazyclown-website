@@ -39,7 +39,7 @@ export function setupFavicon(router: Router) {
     // 建立新的 favicon 連結
     const link = document.createElement('link')
     link.rel = 'icon'
-    link.type = 'image/x-icon'
+    link.type = faviconUrl.endsWith('.png') ? 'image/png' : 'image/x-icon'
     link.href = faviconUrl
     document.head.appendChild(link)
 
@@ -49,6 +49,11 @@ export function setupFavicon(router: Router) {
     appleTouchIcon.href = faviconUrl
     document.head.appendChild(appleTouchIcon)
   }
+
+  // 初始化 favicon
+  const currentRoute = router.currentRoute.value
+  const initialBrand = currentRoute.meta?.brand || currentRoute.params?.brand || MAIN_BRAND
+  updateFavicon(typeof initialBrand === 'string' ? initialBrand : MAIN_BRAND)
 
   // 路由切換時更新 favicon
   router.afterEach((to) => {

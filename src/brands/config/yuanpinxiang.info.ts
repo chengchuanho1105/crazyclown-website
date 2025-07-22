@@ -10,8 +10,8 @@ export const brandInfoConfig: BrandInfoConfig = {
   shortName: '源品香', // 品牌簡稱
   logo: logoLight, // 品牌LOGO
   logoDark: logoDark, // 品牌LOGO（暗色）
-  favicon: 'https://yuanpinxiang.com/assets/favicon/yuanpinxiang/favicon-light.ico', // 品牌FAVICON
-  faviconDark: 'https://yuanpinxiang.com/assets/favicon/yuanpinxiang/favicon-dark.ico', // 品牌FAVICON（暗色）
+  favicon: '/favicon/yuanpinxiang/favicon-light.png', // 品牌FAVICON
+  faviconDark: '/favicon/yuanpinxiang/favicon-dark.png', // 品牌FAVICON（暗色）
   primaryColor: '#000000', // 品牌主色
   secondaryColor: '#000000', // 品牌輔色
   accentColor: '#000000', // 品牌強調色

@@ -10,8 +10,8 @@ export const brandInfoConfig: BrandInfoConfig = {
   shortName: '銓生活', // 品牌簡稱
   logo: logoLight, // 品牌LOGO
   logoDark: logoDark, // 品牌LOGO（暗色）
-  favicon: 'https://chuan.life/assets/favicon/chuanlife/favicon-light.ico', // 品牌FAVICON
-  faviconDark: 'https://chuan.life/assets/favicon/chuanlife/favicon-dark.ico', // 品牌FAVICON（暗色）
+  favicon: '/favicon/chuanlife/favicon-light.png', // 品牌FAVICON
+  faviconDark: '/favicon/chuanlife/favicon-dark.png', // 品牌FAVICON（暗色）
   primaryColor: '#000000', // 品牌主色
   secondaryColor: '#000000', // 品牌輔色
   accentColor: '#000000', // 品牌強調色
