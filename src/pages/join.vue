@@ -2,25 +2,118 @@
 defineOptions({ name: 'CrazyClown-Join' });
 
 // ---------- Vue 核心工具函式 ----------
-import { ref, watch } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 import type { Ref } from 'vue';
 import { useRouter } from 'vue-router';
+
+// ---------- 工具函式 ----------
+import { useHybridData } from '@/composables/useHybridData'
 
 // ---------- 組件引入區（版面用） ----------
 import DecorSection from '@/components/DecorSection.vue';
 
+// ---------- 資料來源 ----------
+import localClanStatusData from '@/data/pageData/crazyclown/join/clanStatusData.json'
+import localReviewStatusData from '@/data/pageData/crazyclown/join/reviewStatusData.json'
 
+/** ========== Clan Status Data 資料處裡 ========== */
+
+/** 1. Clan Status Data 的資料格式 */
+interface ClanStatusData {
+  clanMemberCount: number
+  availableSlots: number
+  pendingReviewCount: number
+}
+
+/** 2. 取得 Clan Status Data CSV 來源 */
+const CLANSTATUSDATA_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRV4Q8MsKLZY-Acfw7jn6Ed9vMduP0gJ6R6eVVcq6cwXA24B_cx5OQ0mYT1VCcEZ3_BKaN7F4Vw0gya/pub?gid=0&single=true&output=csv'
+
+/** 3. 定義 CSV 欄位轉換函式 */
+const mapClanStatusData = (item: Record<string, string>): ClanStatusData => {
+  return {
+    clanMemberCount: Number(item.clanMemberCount) || 0,
+    availableSlots: Number(item.availableSlots) || 0,
+    pendingReviewCount: Number(item.pendingReviewCount) || 0,
+  }
+}
+
+/** 4. 使用 useHybridData 來取得 Clan Status Data */
+const { data: clanStatusData, loading: clanStatusLoading, load: loadClanStatusData } = useHybridData<ClanStatusData>(localClanStatusData, CLANSTATUSDATA_CSV_URL, mapClanStatusData)
+
+onMounted(() => {
+  loadClanStatusData()
+})
+
+/** ========== Review Status Data 資料處裡 ========== */
+
+/** 1. Review Status Data 的資料格式 */
+interface ReviewStatusData {
+  status: string
+  result: string
+  rank: number
+  nickName: string
+  discordID: string
+  pubgID: string
+  gameAge: number
+  weekTime: number
+  date: string
+  checkInA: boolean
+  checkInB: boolean
+  applyInGgame: boolean
+  note: string
+}
+
+/** 2. 取得 Review Status Data CSV 來源 */
+const REVIEWSTATUSDATA_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRV4Q8MsKLZY-Acfw7jn6Ed9vMduP0gJ6R6eVVcq6cwXA24B_cx5OQ0mYT1VCcEZ3_BKaN7F4Vw0gya/pub?gid=165769337&single=true&output=csv'
+
+/** 3. 定義 CSV 欄位轉換函式 */
+const mapReviewStatusData = (item: Record<string, string>): ReviewStatusData => {
+  return {
+    status: item.status || '',
+    result: item.result || '',
+    rank: Number(item.rank) || 0,
+    nickName: item.nickName || '',
+    discordID: item.discordID || '',
+    pubgID: item.pubgID || '',
+    gameAge: Number(item.gameAge) || 0,
+    weekTime: Number(item.weekTime) || 0,
+    date: item.date || '',
+    checkInA: item.checkInA === 'true' || item.checkInA === 'TRUE' || item.checkInA === '1',
+    checkInB: item.checkInB === 'true' || item.checkInB === 'TRUE' || item.checkInB === '1',
+    applyInGgame: item.applyInGgame === 'true' || item.applyInGgame === 'TRUE' || item.applyInGgame === '1',
+    note: item.note || '',
+  }
+}
+
+/** 4. 使用 useHybridData 來取得 Review Status Data */
+const { data: reviewStatusData, load: loadReviewStatusData } = useHybridData<ReviewStatusData>(localReviewStatusData, REVIEWSTATUSDATA_CSV_URL, mapReviewStatusData)
+
+onMounted(() => {
+  loadReviewStatusData()
+})
+
+/** ========== 排序 Review Status Data ========== */
+
+/** 1. 排序 Review Status Data */
+// 排序 reviewStatusData
+const sortedReviewStatusData = computed(() => {
+  return [...(reviewStatusData.value || [])].sort((a, b) => Number(a.rank) - Number(b.rank))
+})
+
+/** ========== 輔助函式 ========== */
+
+/** 1. 檢查字串是否為空 (考慮 trim()) */
 // 輔助函式：檢查字串是否為空 (考慮 trim())
 const isStringEmpty = (value: string | null | undefined): boolean => {
   return value === null || value === undefined || (typeof value === 'string' && value.trim() === '');
 };
 
-// 輔助函式：檢查數字是否為有效非負數字
+/** 2. 檢查數字是否為有效非負數字 */
 const isValidPositiveNumber = (value: number | null | undefined): boolean => {
   return value !== null && value !== undefined && !isNaN(value) && value >= 0;
 };
 
-// 輔助函式：根據值和焦點狀態更新驗證狀態
+/** 3. 根據值和焦點狀態更新驗證狀態 */
 const updateValidationStatus = <T>(
   value: T,
   isFocused: Ref<boolean>,
@@ -36,7 +129,7 @@ const updateValidationStatus = <T>(
   }
 };
 
-// 輔助函式：檢查 Discord 使用者名稱是否符合規範 (數字、字母、底線、英文句號)
+/** 4. 檢查 Discord 使用者名稱是否符合規範 (數字、字母、底線、英文句號) */
 const isValidDiscordUsernameFormat = (value: string | null | undefined): boolean => {
   if (isStringEmpty(value)) {
     return false; // 如果為空，則直接視為不符合格式
@@ -47,9 +140,9 @@ const isValidDiscordUsernameFormat = (value: string | null | undefined): boolean
 };
 
 
-// --- Form State Variables ---
+/** ========== Form State Variables ========== */
 
-// 暱稱
+/** 1. 暱稱 */
 const nickName = ref('');
 const isNickNameFocused = ref(false);
 const nickNameStatus = ref<null | 'success' | 'error'>(null);
@@ -61,7 +154,7 @@ watch(nickName, (newValue) => {
   updateValidationStatus(newValue, isNickNameFocused, nickNameStatus, (val) => !isStringEmpty(val));
 });
 
-// Discord 使用者名稱
+/** 2. Discord 使用者名稱 */
 const discordUsername = ref('');
 const isDiscordUsernameFocused = ref(false);
 const discordUsernameStatus = ref<null | 'success' | 'error'>(null);
@@ -73,7 +166,7 @@ watch(discordUsername, (newValue) => {
   updateValidationStatus(newValue, isDiscordUsernameFocused, discordUsernameStatus, isValidDiscordUsernameFormat);
 });
 
-// 申請遊戲 (下拉選單)
+/** 3. 申請遊戲 (下拉選單) */
 const gameOptions = [{ value: '', label: '請選擇遊戲' }, { value: 'PUBG', label: 'PUBG' }];
 const gameApplied = ref<string | null>(null); // 將初始值設為 null
 const isGameAppliedFocused = ref(false);
@@ -87,7 +180,7 @@ watch(gameApplied, (newValue) => {
   updateValidationStatus(newValue, isGameAppliedFocused, gameAppliedStatus, (val) => !isStringEmpty(val));
 });
 
-// 遊戲 ID
+/** 4. 遊戲 ID */
 const gameId = ref('');
 const isGameIdFocused = ref(false);
 const gameIdStatus = ref<null | 'success' | 'error'>(null);
@@ -99,7 +192,7 @@ watch(gameId, (newValue) => {
   updateValidationStatus(newValue, isGameIdFocused, gameIdStatus, (val) => !isStringEmpty(val));
 });
 
-// 累計遊玩時數
+/** 5. 累計遊玩時數 */
 const totalPlaytime = ref<number | null>(null);
 const isTotalPlaytimeFocused = ref(false);
 const totalPlaytimeStatus = ref<null | 'success' | 'error'>(null);
@@ -111,7 +204,7 @@ watch(totalPlaytime, (newValue) => {
   updateValidationStatus(newValue, isTotalPlaytimeFocused, totalPlaytimeStatus, isValidPositiveNumber);
 });
 
-// 每週遊玩時數
+/** 6. 每週遊玩時數 */
 const weeklyPlaytime = ref<number | null>(null);
 const isWeeklyPlaytimeFocused = ref(false);
 const weeklyPlaytimeStatus = ref<null | 'success' | 'error'>(null);
@@ -123,7 +216,7 @@ watch(weeklyPlaytime, (newValue) => {
   updateValidationStatus(newValue, isWeeklyPlaytimeFocused, weeklyPlaytimeStatus, isValidPositiveNumber);
 });
 
-// 是否有朋友一同加入
+/** 7. 是否有朋友一同加入 */
 const hasFriends = ref(false);
 watch(hasFriends, (newValue) => {
   if (!newValue) {
@@ -132,7 +225,7 @@ watch(hasFriends, (newValue) => {
   }
 });
 
-// 朋友遊戲 ID
+/** 8. 朋友遊戲 ID */
 const friendGameId = ref('');
 const isFriendGameIdFocused = ref(false);
 const friendGameIdStatus = ref<null | 'success' | 'error'>(null);
@@ -153,7 +246,7 @@ watch(friendGameId, (newValue) => {
 });
 
 
-// 備註
+/** 9. 備註 */
 const notes = ref('');
 const isNotesFocused = ref(false);
 const notesStatus = ref<null | 'success' | 'error'>(null);
@@ -165,14 +258,17 @@ watch(notes, (newValue) => {
   notesStatus.value = newValue.trim() !== '' ? 'success' : null;
 });
 
-// --- Form Submission and Validation ---
+/** ========== Form Submission and Validation ========== */
+
+/** 1. 表單驗證 */
 const isFormValid = ref(false);
 const showErrorMessage = ref(false); // 保持錯誤訊息在原位顯示
 
-// 新增 Modal 相關狀態
+/** 2. 新增 Modal 相關狀態 */
 const showSuccessModal = ref(false);
 const showDiscordTooltipModal = ref(false); // New state for Discord tooltip modal
 
+/** 3. 驗證表單 */
 const validateForm = () => {
   // 觸發所有必填欄位的驗證，確保在提交前更新狀態
   handleNickNameBlur();
@@ -194,6 +290,7 @@ const validateForm = () => {
   );
 };
 
+/** 4. 提交表單 */
 const handleSubmit = async (event: Event) => {
   // 防止表單預設提交行為
   event.preventDefault();
@@ -251,7 +348,9 @@ const handleSubmit = async (event: Event) => {
   }
 };
 
-// --- Reset Function ---
+/** ========== Reset Function ========== */
+
+/** 1. 重置表單 */
 const handleResetForm = () => {
   nickName.value = '';
   isNickNameFocused.value = false;
@@ -300,10 +399,174 @@ const closeSuccessModalAndResetForm = () => {
   handleResetForm();
   router.push({ name: 'crazyclown' });
 };
+
+// ICONS
+const memberIcon = `<svg class='w-8 h-8 text-blue-500' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-4a4 4 0 11-8 0 4 4 0 018 0zm6 4v2a2 2 0 01-2 2h-1M3 16v2a2 2 0 002 2h1'></path></svg>`
+const slotIcon = `<svg class='w-8 h-8 text-green-500' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-4.418 0-8-1.79-8-4V6a2 2 0 012-2h12a2 2 0 012 2v8c0 2.21-3.582 4-8 4z'></path></svg>`
+const pendingIcon = `<svg class='w-8 h-8 text-yellow-500' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'></path></svg>`
+
+// Chevron Down/Up SVG
+const chevronDown = `<svg class='w-5 h-5 inline-block ml-1 transition-transform' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'></path></svg>`
+const chevronUp = `<svg class='w-5 h-5 inline-block ml-1 transition-transform rotate-180' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'></path></svg>`
+
+// ICON for Discord/PUBG
+const discordIcon = `<svg class='w-4 h-4 inline-block mr-1 text-indigo-500' fill='currentColor' viewBox='0 0 24 24'><path d='M20.317 4.369A19.791 19.791 0 0016.885 3.2a.117.117 0 00-.124.06c-.537.96-1.13 2.22-1.552 3.2a18.524 18.524 0 00-5.034 0c-.423-.98-1.015-2.24-1.553-3.2a.117.117 0 00-.124-.06A19.736 19.736 0 003.684 4.369a.105.105 0 00-.047.043C.533 9.045-.32 13.579.099 18.057a.12.12 0 00.045.083c2.087 1.53 4.104 2.47 6.077 3.09a.115.115 0 00.125-.042c.47-.65.89-1.34 1.25-2.06a.112.112 0 00-.06-.155c-.66-.25-1.29-.55-1.89-.89a.112.112 0 01-.011-.19c.127-.096.254-.192.38-.29a.112.112 0 01.114-.01c3.927 1.793 8.18 1.793 12.062 0a.112.112 0 01.115.01c.127.098.253.194.38.29a.112.112 0 01-.011.19c-.6.34-1.23.64-1.89.89a.112.112 0 00-.06.155c.36.72.78 1.41 1.25 2.06a.115.115 0 00.125.042c1.973-.62 3.99-1.56 6.077-3.09a.12.12 0 00.045-.083c.5-5.177-.838-9.673-3.637-13.645a.104.104 0 00-.047-.043z'></path></svg>`
+const pubgIcon = `<svg class='w-4 h-4 inline-block mr-1 text-yellow-500' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'/><path d='M16 8v8M8 8v8M8 12h8'/></svg>`
+
+// Info icon for 備註
+const infoIcon = `<svg class='w-4 h-4 inline-block mr-1 text-blue-400' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M13 16h-1v-4h-1m1-4h.01'></path><circle cx='12' cy='12' r='10' /></svg>`
+
+// 展開狀態（只允許一個展開）
+const expandedRow = ref<number | null>(null)
+function toggleRow(idx: number) {
+  expandedRow.value = expandedRow.value === idx ? null : idx
+}
 </script>
 
 <template>
   <div class="max-w-7xl m-auto px-4 py-8">
+    <DecorSection main-title="戰隊狀態" en-title="Clan Status" :is-loading="clanStatusLoading">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div
+          class="flex flex-col items-center bg-white dark:bg-zinc-800 rounded-lg shadow p-6 border border-blue-100 dark:border-zinc-700">
+          <span v-html="memberIcon"></span>
+          <div class="mt-2 text-2xl font-bold text-blue-700 dark:text-blue-300">
+            {{ clanStatusData[0]?.clanMemberCount || 0 }}
+          </div>
+          <div class="text-gray-600 dark:text-gray-300 mt-1">當前成員人數</div>
+        </div>
+        <div
+          class="flex flex-col items-center bg-white dark:bg-zinc-800 rounded-lg shadow p-6 border border-green-100 dark:border-zinc-700">
+          <span v-html="slotIcon"></span>
+          <div class="mt-2 text-2xl font-bold text-green-700 dark:text-green-300">
+            {{ clanStatusData[0]?.availableSlots || 0 }}
+          </div>
+          <div class="text-gray-600 dark:text-gray-300 mt-1">開放加入人數</div>
+        </div>
+        <div
+          class="flex flex-col items-center bg-white dark:bg-zinc-800 rounded-lg shadow p-6 border border-yellow-100 dark:border-zinc-700">
+          <span v-html="pendingIcon"></span>
+          <div class="mt-2 text-2xl font-bold text-yellow-700 dark:text-yellow-300">
+            {{ clanStatusData[0]?.pendingReviewCount || 0 }}
+          </div>
+          <div class="text-gray-600 dark:text-gray-300 mt-1">等候審核人數</div>
+        </div>
+      </div>
+    </DecorSection>
+
+    <DecorSection main-title="審核進度" en-title="Review Progress">
+
+      <div class="p-4 mb-6 border-l-4 border-yellow-500 bg-yellow-50 dark:bg-zinc-700 rounded-md shadow-inner">
+        <p class="text-gray-700 dark:text-zinc-200">
+          本頁面資料非即時更新，請以
+          <a href="https://discord.gg/3TEHPZhYUK" target="_blank" rel="noopener noreferrer"
+            class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
+            「戰隊Discord社群<i class="bi bi-box-arrow-up-right ml-1"></i>」
+          </a>的<a href="https://discord.com/channels/490129931808931840/1182389838582915162" target="_blank"
+            rel="noopener noreferrer"
+            class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
+            「⚖️⇜戰隊審核進度<i class="bi bi-box-arrow-up-right ml-1"></i>」
+          </a>頻道資料為準。
+        </p>
+      </div>
+
+
+      <div class="space-y-6">
+        <div v-for="(item, idx) in sortedReviewStatusData" :key="item.rank + '-' + item.nickName"
+          class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg border border-gray-100 dark:border-zinc-700 transition-transform duration-200 hover:shadow-2xl hover:-translate-y-1">
+          <button @click="toggleRow(idx)"
+            class="w-full flex items-center justify-between px-6 py-4 focus:outline-none group">
+            <div class="flex items-center space-x-6">
+              <span class="font-semibold text-blue-700 dark:text-blue-300 text-base">{{ item.status }}</span>
+              <span class="text-gray-700 dark:text-gray-200 text-base">{{ item.result }}</span>
+              <span class="text-gray-500 dark:text-gray-400 text-base">{{ item.nickName }}</span>
+            </div>
+            <span v-html="expandedRow === idx ? chevronUp : chevronDown"
+              class="text-blue-500 group-hover:text-blue-700 transition-transform duration-300"
+              :class="expandedRow === idx ? 'rotate-180' : ''"></span>
+          </button>
+          <transition name="fade-slide">
+            <div v-if="expandedRow === idx"
+              class="px-6 pb-6 pt-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-100 dark:border-zinc-700 bg-gradient-to-br from-blue-50/60 via-white/80 to-white dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 rounded-b-xl">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                <div class="flex items-center gap-2"><span class="text-gray-400"><svg class='w-4 h-4' fill='none'
+                      stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'>
+                      <path stroke-linecap='round' stroke-linejoin='round'
+                        d='M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z'></path>
+                      <circle cx='12' cy='12' r='10' />
+                    </svg></span><b>審核排名：</b>{{ item.rank }}</div>
+                <div class="flex items-center gap-2"><span class="text-gray-400"><svg class='w-4 h-4' fill='none'
+                      stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'>
+                      <path stroke-linecap='round' stroke-linejoin='round'
+                        d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'>
+                      </path>
+                    </svg></span><b>申請日期：</b>{{ item.date }}</div>
+                <div class="flex items-center gap-2"><span v-html="discordIcon"></span><b>Discord ID：</b>{{
+                  item.discordID }}</div>
+                <div class="flex items-center gap-2"><span v-html="pubgIcon"></span><b>PUBG ID：</b>{{ item.pubgID }}
+                </div>
+                <div class="flex items-center gap-2"><span class="text-pink-400"><svg class='w-4 h-4' fill='none'
+                      stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'>
+                      <path stroke-linecap='round' stroke-linejoin='round' d='M12 8v4l3 3'></path>
+                      <circle cx='12' cy='12' r='10' />
+                    </svg></span><b>累計遊玩時數：</b>{{ item.gameAge }}</div>
+                <div class="flex items-center gap-2"><span class="text-yellow-400"><svg class='w-4 h-4' fill='none'
+                      stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'>
+                      <path stroke-linecap='round' stroke-linejoin='round' d='M12 8v4l3 3'></path>
+                      <circle cx='12' cy='12' r='10' />
+                    </svg></span><b>每週遊玩時數：</b>{{ item.weekTime }}</div>
+              </div>
+              <div class="flex flex-wrap gap-3 items-center mb-4">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm"
+                  :class="item.checkInA ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'">
+                  <svg v-if="item.checkInA" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <svg v-else class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  報到第一站
+                </span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm"
+                  :class="item.checkInB ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'">
+                  <svg v-if="item.checkInB" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <svg v-else class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  報到第二站
+                </span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm"
+                  :class="item.applyInGgame ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-gray-100 text-gray-500 border border-gray-200'">
+                  <svg v-if="item.applyInGgame" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <svg v-else class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  遊戲內申請
+                </span>
+              </div>
+              <div
+                class="bg-blue-50 dark:bg-zinc-900 rounded p-3 mt-2 text-gray-700 dark:text-gray-200 flex items-start">
+                <span v-html="infoIcon" class="mr-2 mt-0.5"></span>
+                <span><b>備註：</b>{{ item.note || '—' }}</span>
+              </div>
+            </div>
+          </transition>
+        </div>
+      </div>
+    </DecorSection>
+
+
+
     <DecorSection mainTitle="加入我們" enTitle="Join Us">
       <form class="text-gray-900 dark:bg-zinc-900" autocomplete="off" @submit="handleSubmit">
         <div class="mb-8 p-6 bg-white rounded-lg shadow-md dark:bg-zinc-800">
@@ -734,4 +997,21 @@ const closeSuccessModalAndResetForm = () => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s cubic-bezier(.4, 2, .6, 1);
+}
+
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.fade-slide-enter-to,
+.fade-slide-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>

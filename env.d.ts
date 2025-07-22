@@ -5,3 +5,9 @@ declare module 'virtual:generated-pages' {
   const routes: RouteRecordRaw[]
   export default routes
 }
+
+// JSON 模組型別宣告
+declare module '*.json' {
+  const value: Record<string, unknown>
+  export default value
+}

@@ -94,11 +94,11 @@ const processedArticle = computed(() => {
   let html = news.value.article
 
   // 為 h2 標籤添加樣式
-  html = html.replace(/<h2>/g, '<h2 class="text-2xl font-bold mb-4 mt-12">')
+  html = html.replace(/<h2>/g, '<h2 class="text-2xl font-bold mb-2 mt-16">')
   html = html.replace(/<\/h2>/g, '</h2>')
 
   // 為 h3 標籤添加樣式
-  html = html.replace(/<h3>/g, '<h3 class="text-xl font-bold mb-3 mt-8">')
+  html = html.replace(/<h3>/g, '<h3 class="text-xl font-bold mb-2 mt-12">')
   html = html.replace(/<\/h3>/g, '</h3>')
 
   // 為 p 標籤添加樣式
@@ -106,15 +106,15 @@ const processedArticle = computed(() => {
   html = html.replace(/<\/p>/g, '</p>')
 
   // 為 ul 標籤添加樣式
-  html = html.replace(/<ul>/g, '<ul class="list-disc ml-4 mb-8">')
+  html = html.replace(/<ul>/g, '<ul class="list-disc ml-4 mb-12">')
   html = html.replace(/<\/ul>/g, '</ul>')
 
   // 為 ol 標籤添加樣式
-  html = html.replace(/<ol>/g, '<ol class="list-decimal ml-4 mb-8">')
+  html = html.replace(/<ol>/g, '<ol class="list-decimal ml-4 mb-12">')
   html = html.replace(/<\/ol>/g, '</ol>')
 
   // 為 li 標籤添加樣式
-  html = html.replace(/<li>/g, '<li class="ml-4 mb-4">')
+  html = html.replace(/<li>/g, '<li class="ml-4 mb-2">')
   html = html.replace(/<\/li>/g, '</li>')
 
   // 為 strong 標籤添加樣式
@@ -149,7 +149,7 @@ function parseTags(tags: string): string[] {
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto p-6">
+  <div class="max-w-5xl mx-auto my-8 p-6 bg-white dark:bg-zinc-800 rounded-lg shadow-lg">
     <div v-if="news">
       <div class="mb-6">
         <img v-if="news.image" :src="news.image" :alt="news.title" class="w-full rounded-lg mb-4" />
