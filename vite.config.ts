@@ -31,8 +31,9 @@ export default defineConfig({
       onRoutesGenerated: () => {
         try {
           execSync('node scripts/generate-sitemap.js', { stdio: 'inherit' })
+          execSync('node scripts/generate-static-news.js', { stdio: 'inherit' })
         } catch (error: unknown) {
-          console.warn('生成動態 sitemap 時發生錯誤:', (error as Error).message)
+          console.warn('生成 sitemap 或靜態頁面時發生錯誤:', (error as Error).message)
         }
       },
     }),

@@ -6,13 +6,18 @@ function generateFacebookDebugUrls() {
   const baseUrl = 'https://crazyclown.online'
   const urls = []
 
-  // 添加新聞頁面
+  // 添加動態新聞頁面
   const newsIds = ['1'] // 可以根據實際新聞 ID 擴展
 
   newsIds.forEach((id) => {
     urls.push(`${baseUrl}/news/${id}`)
     urls.push(`${baseUrl}/yuanpinxiang/news/${id}`)
   })
+
+  // 添加靜態新聞頁面
+  urls.push(`${baseUrl}/news-1.html`)
+  urls.push(`${baseUrl}/yuanpinxiang-news-1.html`)
+  urls.push(`${baseUrl}/test-facebook.html`)
 
   // 生成 Facebook 調試 URL
   const debugUrls = urls.map((url) => {
@@ -29,6 +34,7 @@ function generateFacebookDebugUrls() {
   console.log('2. 點擊 "Scrape Again" 重新抓取頁面')
   console.log('3. 檢查 meta 標籤是否正確顯示')
   console.log('4. 如果還是不正確，可能需要等待幾分鐘讓快取更新')
+  console.log('\n💡 建議優先測試靜態頁面（.html 結尾的 URL）')
 
   // 生成測試用的 HTML 片段
   const testHtml = `
@@ -56,6 +62,11 @@ function generateFacebookDebugUrls() {
   console.log(
     `🔗 Facebook 調試: https://developers.facebook.com/tools/debug/?q=${encodeURIComponent(`${baseUrl}/test-facebook.html`)}`,
   )
+
+  console.log('\n🎯 推薦測試順序:')
+  console.log('1. 先測試靜態頁面: https://crazyclown.online/news-1.html')
+  console.log('2. 再測試動態頁面: https://crazyclown.online/news/1')
+  console.log('3. 比較兩者的差異')
 }
 
 generateFacebookDebugUrls()
