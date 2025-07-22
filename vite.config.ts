@@ -21,17 +21,12 @@ export default defineConfig({
     vueJsx(),
     vueDevTools(),
     Pages({
-      dirs: [
-        { dir: 'src/pages', baseRoute: '' },
-        { dir: 'src/pages/chuanlife', baseRoute: 'chuanlife' },
-        { dir: 'src/pages/yuanpinxiang', baseRoute: 'yuanpinxiang' },
-      ],
+      dirs: [{ dir: 'src/pages', baseRoute: '' }],
       extensions: ['vue'],
       // 生成包含動態路由的完整 sitemap
       onRoutesGenerated: () => {
         try {
           execSync('node scripts/generate-sitemap.js', { stdio: 'inherit' })
-          execSync('node scripts/generate-static-news.js', { stdio: 'inherit' })
         } catch (error: unknown) {
           console.warn('生成 sitemap 或靜態頁面時發生錯誤:', (error as Error).message)
         }

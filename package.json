@@ -16,8 +16,7 @@
     "lint": "run-s lint:*",
     "format": "prettier --write src/",
     "generate-sitemap": "node scripts/generate-sitemap.js",
-    "facebook-debug": "node scripts/facebook-debug.js",
-    "generate-static-news": "node scripts/generate-static-news.js"
+    "test-robots": "node scripts/test-robots.js"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.16",
