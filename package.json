@@ -17,11 +17,13 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@tailwindcss/typography": "^0.5.16",
     "@types/swiper": "^5.4.3",
     "@unhead/vue": "^2.0.11",
     "@vueuse/core": "^13.5.0",
     "aos": "^2.3.4",
     "bootstrap-icons": "^1.13.1",
+    "marked": "^16.1.1",
     "pinia": "^3.0.3",
     "puppeteer": "^24.11.2",
     "swiper": "^11.2.10",

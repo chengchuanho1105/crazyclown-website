@@ -73,6 +73,49 @@ export const pageConfig: PageConfig = {
       },
     },
     {
+      path: '/news',
+      name: `${brandName}-News`,
+      component: () => import(`@/pages/${brandName}/news/index.vue`),
+      meta: {
+        title: `最新消息 | ${brandDisplayName}`,
+        description: '',
+        layout: 'default',
+        requiresAuth: false,
+        roles: ['admin', 'user', 'guest'],
+        seo: {
+          sitemap: true,
+          sitemapXml: true,
+          robots: true,
+        },
+        ui: {
+          navbar: true,
+          navbarOrder: 5,
+        },
+      },
+      children: [
+        {
+          path: ':id',
+          name: `${brandName}-News-Detail`,
+          component: () => import(`@/pages/${brandName}/news/[id].vue`),
+          meta: {
+            title: `最新消息詳情 | ${brandDisplayName}`,
+            description: '',
+            layout: 'default',
+            requiresAuth: false,
+            roles: ['admin', 'user', 'guest'],
+            seo: {
+              sitemap: false,
+              sitemapXml: false,
+              robots: true,
+            },
+            ui: {
+              navbar: false,
+            },
+          },
+        },
+      ],
+    },
+    {
       path: '/join',
       name: `${brandName}-Join`,
       component: () => import(`@/pages/${brandName}/join.vue`),

@@ -2,6 +2,7 @@
 defineOptions({ name: 'Layout-CrazyClown-Default' })
 
 // ---------- Vue 核心工具函式 ----------
+import { ref } from 'vue'
 import { RouterView } from 'vue-router'
 import { useIsHomePage } from '@/composables/useIsHomePage'
 
@@ -12,6 +13,7 @@ import Footer from '@/components/layouts/Footer.vue'
 
 // 判斷是否為首頁
 const { isHomePage } = useIsHomePage()
+
 </script>
 
 <template>
@@ -41,20 +43,20 @@ const { isHomePage } = useIsHomePage()
                     無論你是剛起步的新手，還是久經沙場的老兵，只要你是高活躍玩家，要的就是你！<br>
                   </p>
 
-                  <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 sm:mt-6">
+                  <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 sm:mt-6">
                     <router-link
-                      class="inline-block rounded-lg border border-blue-200 px-5 py-3 font-medium text-center text-blue-700 dark:text-blue-300 shadow-sm transition-colors hover:bg-blue-50 hover:text-blue-900"
+                      class="inline-block py-3 rounded-lg shadow-sm font-medium text-center border border-blue-200 text-blue-700 dark:text-blue-300 hover:bg-blue-50 hover:text-blue-900 transition-colors"
                       :to="{ name: 'join' }" data-aos="fade-up">
                       入隊申請
                     </router-link>
 
                     <router-link
-                      class="inline-block rounded-lg border border-yellow-200 px-5 py-3 font-medium text-center text-yellow-700 dark:text-yellow-300 shadow-sm transition-colors hover:bg-yellow-50 hover:text-yellow-900"
+                      class="inline-block py-3 rounded-lg shadow-sm font-medium text-center border border-yellow-200 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-50 hover:text-yellow-900 transition-colors"
                       :to="{ name: 'store' }" data-aos="fade-up">
                       特惠商店
                     </router-link>
 
-                    <a class="inline-block rounded-lg border border-indigo-200 px-5 py-3 font-medium text-center text-indigo-700 dark:text-indigo-300 shadow-sm transition-colors hover:bg-indigo-50 hover:text-indigo-900"
+                    <a class="inline-block py-3 rounded-lg shadow-sm font-medium text-center border border-indigo-200 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 hover:text-indigo-900 transition-colors"
                       href=" https://discord.gg/3TEHPZhYUK" data-aos="fade-up">
                       Discord 社群
                     </a>
