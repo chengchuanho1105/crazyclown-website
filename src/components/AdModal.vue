@@ -34,14 +34,17 @@ const isVisible = ref(false)
 
 const closeModal = () => {
   isVisible.value = false
-  // 儲存到 localStorage，避免再次顯示
-  localStorage.setItem('adModalShown', 'true')
+  // 使用 sessionStorage，關閉瀏覽器後會自動清除
+  sessionStorage.setItem('adModalShown', 'true')
 }
 
 onMounted(() => {
-  // 檢查是否已經顯示過
-  const hasShown = localStorage.getItem('adModalShown')
-  if (!hasShown) {
+  // 檢查是否已經顯示過（使用 sessionStorage）
+  const hasShown = sessionStorage.getItem('adModalShown')
+  // 檢查 URL 參數是否要強制顯示（用於測試）
+  const forceShow = new URLSearchParams(window.location.search).get('showAd')
+
+  if (!hasShown || forceShow === 'true') {
     // 延遲一下再顯示，確保頁面載入完成
     setTimeout(() => {
       isVisible.value = true

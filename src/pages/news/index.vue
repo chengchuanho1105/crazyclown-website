@@ -147,13 +147,6 @@ function goToFeaturedPage(page: number) {
     </div>
     -->
 
-
-
-
-
-
-
-
     <!-- 最新消息區塊 -->
     <DecorSection ref="regularSectionRef" main-title="最新消息" en-title="LATEST NEWS">
       <div v-if="regularPaged.length > 0" class="space-y-6">
