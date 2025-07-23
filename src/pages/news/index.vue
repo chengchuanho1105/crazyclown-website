@@ -116,12 +116,50 @@ function goToFeaturedPage(page: number) {
 
 <template>
   <div class="max-w-7xl mx-auto p-4 md:p-8 space-y-12">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      <div
+        class="flex flex-col h-full group rounded-xl shadow-lg hover:shadow-xl transition-shadow bg-white dark:bg-zinc-800 overflow-hidden cursor-pointer">
+        <img src="https://i.meee.com.tw/SEDqQby.jpg" alt=""
+          class="mb-2 aspect-video object-cover group-hover:scale-105 transition-transform duration-300 ">
+        <div class="p-4 flex flex-col h-full">
+          <div class="flex mb-2 gap-2 ">
+            <span
+              class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900 text-xs font-medium text-green-800 dark:text-green-200">
+              標籤
+            </span>
+            <span
+              class="px-2 py-1 rounded-full bg-sky-100 dark:bg-sky-900 text-xs font-medium text-sky-800 dark:text-sky-200">
+              標籤
+            </span>
+          </div>
+          <h3
+            class="mb-2 text-xl font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2 ">
+            標題</h3>
+          <p class="mb-2 text-base text-zinc-500 dark:text-zinc-400 line-clamp-3">內容</p>
+          <div class="mt-auto flex justify-between text-sm text-zinc-500 dark:text-zinc-400">
+            <span class="">作者</span>
+            <span class="">2025-07-23</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+
+
+
+
+
+
     <!-- 最新消息區塊 -->
     <DecorSection ref="regularSectionRef" main-title="最新消息" en-title="LATEST NEWS">
       <div v-if="regularPaged.length > 0" class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div v-for="news in regularPaged" :key="news.id"
-            class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group"
+            class="flex flex-col h-full bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group"
             @click="openNewsDetail(news)">
             <div class="aspect-video bg-gray-200 dark:bg-gray-700 overflow-hidden">
               <img :src="news.image" :alt="news.title"
@@ -145,7 +183,7 @@ function goToFeaturedPage(page: number) {
               <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
                 {{ news.content }}
               </p>
-              <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+              <div class="mt-auto flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                 <span>{{ formatDate(news.date || '') }}</span>
                 <span>{{ news.author }}</span>
               </div>
