@@ -117,8 +117,8 @@ function goToFeaturedPage(page: number) {
 <template>
   <div class="max-w-7xl mx-auto p-4 md:p-8 space-y-12">
 
+    <!--
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
       <div
         class="flex flex-col h-full group rounded-xl shadow-lg hover:shadow-xl transition-shadow bg-white dark:bg-zinc-800 overflow-hidden cursor-pointer">
         <img src="https://i.meee.com.tw/SEDqQby.jpg" alt=""
@@ -144,8 +144,8 @@ function goToFeaturedPage(page: number) {
           </div>
         </div>
       </div>
-
     </div>
+    -->
 
 
 
