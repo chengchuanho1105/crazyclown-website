@@ -10,7 +10,6 @@ import { createHead } from '@unhead/vue/client'
 import { setupFavicon } from '@/routes/hook/setFavicon'
 import { setupPageTitleDescription } from '@/routes/hook/setTitlrDescription'
 import { setupPageSeo } from '@/routes/hook/setSeo'
-
 import App from './App.vue'
 import router from './router'
 

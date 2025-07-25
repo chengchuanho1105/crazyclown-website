@@ -15,9 +15,10 @@ export function useHybridData<T>(
     isUsingLocal.value = true
     loading.value = true
 
-    setTimeout(async () => {
+    const loadSheetData = async () => {
       try {
         const sheetData = await loadCsvData<T, T[]>(sheetUrl, mapFn, undefined, true)
+
         if (sheetData && sheetData.length > 0) {
           data.value = sheetData
           isUsingLocal.value = false
@@ -25,8 +26,16 @@ export function useHybridData<T>(
       } finally {
         loading.value = false
       }
-    })
+    }
+
+    // 立即載入 Google Sheets 資料
+    await loadSheetData()
   }
 
-  return { data, isUsingLocal, loading, load }
+  return {
+    data,
+    isUsingLocal,
+    loading,
+    load,
+  }
 }

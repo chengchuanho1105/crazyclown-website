@@ -7,14 +7,10 @@ import type { Ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 // ---------- 工具函式 ----------
-import { useHybridData } from '@/composables/useHybridData'
+import { useSheetData } from '@/composables/useSheetData'
 
 // ---------- 組件引入區（版面用） ----------
 import DecorSection from '@/components/DecorSection.vue';
-
-// ---------- 資料來源 ----------
-import localClanStatusData from '@/data/pageData/crazyclown/join/clanStatusData.json'
-import localReviewStatusData from '@/data/pageData/crazyclown/join/reviewStatusData.json'
 
 /** ========== Clan Status Data 資料處裡 ========== */
 
@@ -38,7 +34,7 @@ const mapClanStatusData = (item: Record<string, string>): ClanStatusData => {
 }
 
 /** 4. 使用 useHybridData 來取得 Clan Status Data */
-const { data: clanStatusData, loading: clanStatusLoading, load: loadClanStatusData } = useHybridData<ClanStatusData>(localClanStatusData, CLANSTATUSDATA_CSV_URL, mapClanStatusData)
+const { data: clanStatusData, loading: clanStatusLoading, load: loadClanStatusData } = useSheetData<ClanStatusData>(CLANSTATUSDATA_CSV_URL, mapClanStatusData)
 
 onMounted(() => {
   loadClanStatusData()
@@ -86,7 +82,7 @@ const mapReviewStatusData = (item: Record<string, string>): ReviewStatusData => 
 }
 
 /** 4. 使用 useHybridData 來取得 Review Status Data */
-const { data: reviewStatusData, load: loadReviewStatusData } = useHybridData<ReviewStatusData>(localReviewStatusData, REVIEWSTATUSDATA_CSV_URL, mapReviewStatusData)
+const { data: reviewStatusData, load: loadReviewStatusData } = useSheetData<ReviewStatusData>(REVIEWSTATUSDATA_CSV_URL, mapReviewStatusData)
 
 onMounted(() => {
   loadReviewStatusData()

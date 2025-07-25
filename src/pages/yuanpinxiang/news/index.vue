@@ -10,10 +10,10 @@ import type { Ref } from 'vue'
 import DecorSection from '@/components/DecorSection.vue'
 
 // ---------- 工具函式 ----------
-import { useHybridData } from '@/composables/useHybridData'
+import { useSheetData } from '@/composables/useSheetData'
 
 // ---------- 資料來源 ----------
-import localNewsData from '@/data/pageData/yuanpinxiang/news/newsData.json' // 本地新聞資料
+// 移除本地資料引入
 
 /** ========== News Data 資料處裡 ========== */
 
@@ -51,9 +51,10 @@ const mapNewsData = (item: Record<string, string>): NewsData => {
 
 const {
   data: newsData,
+  loading: newsDataLoading,
+  error: newsDataError,
   load: loadNewsData
-} = useHybridData<NewsData>(
-  localNewsData as unknown as NewsData[],
+} = useSheetData<NewsData>(
   NEWS_CSV_URL,
   mapNewsData
 )

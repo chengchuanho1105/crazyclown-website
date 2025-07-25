@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { computed, onMounted, watch } from 'vue'
-import { useHybridData } from '@/composables/useHybridData'
+import { useSheetData } from '@/composables/useSheetData'
 import { useHead } from '@unhead/vue'
-import rawLocalNewsData from '@/data/pageData/yuanpinxiang/news/newsData.json'
 
-// 直接使用原始資料，先轉 unknown 再轉 Record<string, string>[]
-const localNewsData = rawLocalNewsData as unknown as Record<string, string>[]
+// 移除本地資料引入
 
 // 取得路由參數
 const route = useRoute()
@@ -15,8 +13,10 @@ const newsId = computed(() => route.params.id as string)
 // 取得所有新聞資料
 const {
   data: newsData,
+  loading: newsDataLoading,
+  error: newsDataError,
   load: loadNewsData
-} = useHybridData<{
+} = useSheetData<{
   id: string
   slot: string
   category: string
@@ -26,7 +26,7 @@ const {
   tags: string
   title: string
   content: string
-}>(localNewsData as unknown as { id: string; slot: string; category: string; date: string; author: string; image: string; tags: string; title: string; content: string; }[], 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpK4IAJ0lQCD_pEHh4smflPpCiMbgsMqUfp24uQc-0Ru87ZN2izl7W-O9GbL97Ej6mPGb1eHfd37hx/pub?output=csv', (item: Record<string, string>) => ({
+}>('https://docs.google.com/spreadsheets/d/e/2PACX-1vSpK4IAJ0lQCD_pEHh4smflPpCiMbgsMqUfp24uQc-0Ru87ZN2izl7W-O9GbL97Ej6mPGb1eHfd37hx/pub?output=csv', (item: Record<string, string>) => ({
   id: item.id || '',
   slot: item.slot || '',
   category: item.category || '',

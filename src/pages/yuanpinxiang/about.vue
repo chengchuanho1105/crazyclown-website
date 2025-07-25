@@ -8,13 +8,10 @@ import { onMounted } from 'vue'
 import DecorSection from '@/components/DecorSection.vue'
 
 // ---------- 工具函式 ----------
-import { useHybridData } from '@/composables/useHybridData'
+import { useSheetData } from '@/composables/useSheetData'
 
 // ---------- 資料來源 ----------
-import localFounderData from '@/data/pageData/yuanpinxiang/about/founderData.json' // 本地創辦人資料
-import localTimelineData from '@/data/pageData/yuanpinxiang/about/timelineData.json' // 本地時間軸資料
-import localCommitmentData from '@/data/pageData/yuanpinxiang/about/commitmentData.json' // 本地職人堅持資料
-import localCSRData from '@/data/pageData/yuanpinxiang/about/csrData.json' // 本地社會責任資料
+// 移除本地資料引入
 
 /** ========== About Founder Data 資料處裡 ========== */
 
@@ -41,9 +38,10 @@ const mapFounderData = (item: Record<string, string>): FounderData => {
 
 const {
   data: founderData,
+  loading: founderDataLoading,
+  error: founderDataError,
   load: loadFounderData
-} = useHybridData<FounderData>(
-  localFounderData as FounderData[],
+} = useSheetData<FounderData>(
   FOUNDERDATA_CSV_URL,
   mapFounderData
 )
@@ -77,9 +75,10 @@ const mapTimelineData = (item: Record<string, string>): TimelineData => {
 
 const {
   data: timelineData,
+  loading: timelineDataLoading,
+  error: timelineDataError,
   load: loadTimelineData
-} = useHybridData<TimelineData>(
-  localTimelineData as TimelineData[],
+} = useSheetData<TimelineData>(
   TIMELINEDATA_CSV_URL,
   mapTimelineData
 )
@@ -111,9 +110,10 @@ const mapCommitmentData = (item: Record<string, string>): CommitmentData => {
 
 const {
   data: commitmentData,
+  loading: commitmentDataLoading,
+  error: commitmentDataError,
   load: loadCommitmentData
-} = useHybridData<CommitmentData>(
-  localCommitmentData as CommitmentData[],
+} = useSheetData<CommitmentData>(
   COMMITMENTDATA_CSV_URL,
   mapCommitmentData
 )
@@ -145,9 +145,10 @@ const mapCSRData = (item: Record<string, string>): CSRData => {
 
 const {
   data: csrData,
+  loading: csrDataLoading,
+  error: csrDataError,
   load: loadCSRData
-} = useHybridData<CSRData>(
-  localCSRData as CSRData[],
+} = useSheetData<CSRData>(
   CSRDATA_CSV_URL,
   mapCSRData
 )

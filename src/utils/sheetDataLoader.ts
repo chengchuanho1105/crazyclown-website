@@ -1,9 +1,8 @@
-// 通用 Google Sheets CSV 讀取工具
-
-// 本地快取
-const cache = new Map<string, { data: string; timestamp: number; ttl: number }>()
+// 專門從 Google Sheets 取得資料的工具
 
 // 快取管理
+const cache = new Map<string, { data: string; timestamp: number; ttl: number }>()
+
 const getCachedData = (key: string): string | null => {
   const cached = cache.get(key)
   if (cached && Date.now() - cached.timestamp < cached.ttl) {
@@ -12,49 +11,51 @@ const getCachedData = (key: string): string | null => {
   return null
 }
 
-const setCachedData = (key: string, data: string, ttl: number = 3 * 60 * 1000) => {
+const setCachedData = (key: string, data: string, ttl: number = 5 * 60 * 1000) => {
   cache.set(key, { data, timestamp: Date.now(), ttl })
 }
 
-// 取得 Google Sheets CSV 原始內容（帶快取）
-export const fetchGoogleSheetCsv = async (
-  csvUrl: string,
+// 從 Google Sheets 取得 CSV 資料
+export const fetchSheetData = async (
+  sheetUrl: string,
   useCache: boolean = true,
 ): Promise<string> => {
   // 檢查快取
   if (useCache) {
-    const cached = getCachedData(csvUrl)
+    const cached = getCachedData(sheetUrl)
     if (cached) {
       return cached
     }
   }
 
-  const response = await fetch(csvUrl, {
+  const response = await fetch(sheetUrl, {
     method: 'GET',
     headers: { Accept: 'text/csv' },
-    // 添加快取控制
     cache: 'force-cache',
   })
 
-  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+  if (!response.ok) {
+    throw new Error(`無法載入 Google Sheets 資料: ${response.status}`)
+  }
 
   const data = await response.text()
 
   // 儲存到快取
   if (useCache) {
-    setCachedData(csvUrl, data)
+    setCachedData(sheetUrl, data)
   }
 
   return data
 }
 
-// 通用 CSV 解析，回傳 Record<string, string>[]
+// CSV 解析
 export const parseCsv = (csvText: string): Record<string, string>[] => {
   const lines = csvText.trim().split('\n')
   if (lines.length < 2) return []
 
-  // 清理欄位名稱，移除 \r 等特殊字符
+  // 清理欄位名稱
   const headers = lines[0].split(',').map((h) => h.replace(/^"|"$/g, '').replace(/\r/g, ''))
+
   return lines.slice(1).map((line) => {
     const values: string[] = []
     let current = '',
@@ -72,33 +73,32 @@ export const parseCsv = (csvText: string): Record<string, string>[] => {
 
     const obj: Record<string, string> = {}
     headers.forEach((h, i) => {
-      // 清理值中的 \r 字符
       obj[h] = (values[i] || '').replace(/^"|"$/g, '').replace(/\r/g, '')
     })
     return obj
   })
 }
 
-// 通用映射函式：將CSV數據映射成指定結構
-export const mapCsvData = <T>(
+// 資料映射函式
+export const mapSheetData = <T>(
   data: Record<string, string>[],
   mapper: (item: Record<string, string>) => T,
 ): T[] => {
   return data.map(mapper)
 }
 
-// 通用載入函式：處理CSV數據的載入、映射和後處理（帶快取）
-export const loadCsvData = async <T, R>(
-  csvUrl: string,
+// 主要的載入函數
+export const loadSheetData = async <T, R>(
+  sheetUrl: string,
   mapper: (item: Record<string, string>) => T,
   processor?: (mappedData: T[], rawData: Record<string, string>[]) => R,
   useCache: boolean = true,
 ): Promise<R> => {
-  const csv = await fetchGoogleSheetCsv(csvUrl, useCache)
+  const csv = await fetchSheetData(sheetUrl, useCache)
   const rawData = parseCsv(csv)
 
-  // 先映射數據
-  const mappedData = mapCsvData(rawData, mapper)
+  // 映射數據
+  const mappedData = mapSheetData(rawData, mapper)
 
   // 如果有後處理函式，則執行後處理
   if (processor) {
@@ -109,7 +109,22 @@ export const loadCsvData = async <T, R>(
   return mappedData as unknown as R
 }
 
-// 背景更新快取
-export const refreshCacheInBackground = async (csvUrl: string) => {
-  await fetchGoogleSheetCsv(csvUrl, false) // 不使用快取，強制更新
+// 清除快取
+export const clearCache = () => {
+  cache.clear()
+}
+
+// 取得快取狀態
+export const getCacheStatus = () => {
+  const entries = Array.from(cache.entries()).map(([key, value]) => ({
+    key,
+    age: Date.now() - value.timestamp,
+    ttl: value.ttl,
+    size: value.data.length,
+  }))
+
+  return {
+    totalEntries: entries.length,
+    entries,
+  }
 }
