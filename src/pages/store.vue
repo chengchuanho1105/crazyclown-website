@@ -246,32 +246,350 @@ onBeforeUnmount(() => {
             <i class="bi bi-discord mr-2"></i>Discord<i class="bi bi-box-arrow-up-right ml-1"></i></a> 聯絡購買。
         </div>
       </div>
-      <div class="bg-yellow-50 dark:bg-yellow-900 rounded-xl border-l-4 border-yellow-400 p-5 mb-6">
-        <h3 class="text-lg font-bold text-yellow-700 dark:text-yellow-200 mb-2 flex items-center gap-2">
-          <i class="bi bi-info-circle"></i> 注意事項
+
+      <!-- 交易流程 Section -->
+      <div
+        class="bg-gradient-to-br from-emerald-50/50 to-teal-100/50 dark:from-emerald-900/10 dark:to-teal-900/10 rounded-2xl shadow-lg p-6 mb-8 border border-emerald-200/50 dark:border-emerald-700/50">
+        <h3 class="text-xl font-bold text-emerald-700 dark:text-emerald-300 mb-6 flex items-center gap-2">
+          <div class="w-10 h-10 bg-emerald-100/70 dark:bg-emerald-800/70 rounded-full flex items-center justify-center">
+            <i class="bi bi-arrow-repeat text-emerald-600 dark:text-emerald-400"></i>
+          </div>
+          交易流程
         </h3>
-        <ul class="list-disc pl-6 text-yellow-800 dark:text-yellow-100 space-y-1">
-          <li>購買前請先於 Discord 聯絡確認庫存與即時價格。</li>
-          <li>付款方式以新台幣（TWD）為主，支援多種轉帳方式。</li>
-          <li>購買前請提供正確的 PUBG ID 以利紀錄。</li>
-          <li>商品會以 <span class='font-bold text-indigo-700 dark:text-indigo-200'>CDK（序號）</span> 方式發放，請於遊戲內自行兌換。</li>
-          <li>交易完成後，CDK 會於 24 小時內發送至指定聯絡方式。</li>
-          <li>如遇官方維護或特殊狀況，發送時間可能延遲，請耐心等候。</li>
-        </ul>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- 步驟 1 -->
+          <div
+            class="bg-white/50 dark:bg-white/5 rounded-xl p-4 border border-emerald-200/50 dark:border-emerald-700/50">
+            <div class="flex items-center gap-3 mb-3">
+              <div
+                class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                1</div>
+              <h4 class="font-semibold text-emerald-800 dark:text-emerald-200">聯絡確認</h4>
+            </div>
+            <p class="text-sm text-emerald-700 dark:text-emerald-300">透過 Discord 聯絡客服，確認庫存與即時價格</p>
+          </div>
+
+          <!-- 步驟 2 -->
+          <div
+            class="bg-white/50 dark:bg-white/5 rounded-xl p-4 border border-emerald-200/50 dark:border-emerald-700/50">
+            <div class="flex items-center gap-3 mb-3">
+              <div
+                class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                2</div>
+              <h4 class="font-semibold text-emerald-800 dark:text-emerald-200">提供資訊</h4>
+            </div>
+            <p class="text-sm text-emerald-700 dark:text-emerald-300">提供正確的 PUBG ID 與聯絡方式</p>
+          </div>
+
+          <!-- 步驟 3 -->
+          <div
+            class="bg-white/50 dark:bg-white/5 rounded-xl p-4 border border-emerald-200/50 dark:border-emerald-700/50">
+            <div class="flex items-center gap-3 mb-3">
+              <div
+                class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                3</div>
+              <h4 class="font-semibold text-emerald-800 dark:text-emerald-200">付款轉帳</h4>
+            </div>
+            <p class="text-sm text-emerald-700 dark:text-emerald-300">選擇付款方式完成轉帳，並提供證明截圖</p>
+          </div>
+
+          <!-- 步驟 4 -->
+          <div
+            class="bg-white/50 dark:bg-white/5 rounded-xl p-4 border border-emerald-200/50 dark:border-emerald-700/50">
+            <div class="flex items-center gap-3 mb-3">
+              <div
+                class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                4</div>
+              <h4 class="font-semibold text-emerald-800 dark:text-emerald-200">發送 CDK</h4>
+            </div>
+            <p class="text-sm text-emerald-700 dark:text-emerald-300">24 小時內發送 CDK 序號至指定聯絡方式</p>
+          </div>
+        </div>
       </div>
-      <div class="bg-blue-50 dark:bg-blue-900 rounded-xl border-l-4 border-blue-400 p-5">
-        <h3 class="text-lg font-bold text-blue-700 dark:text-blue-200 mb-2 flex items-center gap-2">
-          <i class="bi bi-shield-check"></i> 交易規則
+
+      <!-- 付款方式 Section -->
+      <div
+        class="bg-gradient-to-br from-blue-50/50 to-indigo-100/50 dark:from-blue-900/10 dark:to-indigo-900/10 rounded-2xl shadow-lg p-6 mb-8 border border-blue-200/50 dark:border-blue-700/50">
+        <h3 class="text-xl font-bold text-blue-700 dark:text-blue-300 mb-6 flex items-center gap-2">
+          <div class="w-10 h-10 bg-blue-100/70 dark:bg-blue-800/70 rounded-full flex items-center justify-center">
+            <i class="bi bi-credit-card text-blue-600 dark:text-blue-400"></i>
+          </div>
+          付款方式
         </h3>
-        <ul class="list-decimal pl-6 text-blue-800 dark:text-blue-100 space-y-1">
-          <li>請勿提供錯誤的聯絡資訊或遊戲帳號，否則損失需自行承擔。</li>
-          <li>付款後請主動提供轉帳證明截圖。</li>
-          <li>CDK 一經發送即視為交易完成，概不退/換貨。</li>
-          <li>CDK 請妥善保管並盡快兌換。</li>
-          <li>嚴禁洗錢、詐騙等非法用途，違者將永久拒絕服務。</li>
-          <li>如有任何疑慮，請隨時向客服洽詢。</li>
-          <li>本服務保留隨時調整價格與規則之權利。</li>
-        </ul>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- 銀行轉帳 -->
+          <div class="bg-white/50 dark:bg-white/5 rounded-xl p-5 border border-blue-200/50 dark:border-blue-700/50">
+            <h4 class="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-4 flex items-center gap-2">
+              <i class="bi bi-bank text-blue-600 dark:text-blue-400"></i> 銀行轉帳
+            </h4>
+            <div class="space-y-3">
+              <div class="flex flex-wrap gap-2">
+                <span
+                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">中信(822)</span>
+                <span
+                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">富邦(012)</span>
+                <span
+                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">台新(812)</span>
+                <span
+                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">玉山(808)</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">郵政(700)</span>
+                <span
+                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">國泰(013)</span>
+                <span
+                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">台銀(004)</span>
+                <span
+                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">一銀(007)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 電支轉帳 -->
+          <div class="bg-white/50 dark:bg-white/5 rounded-xl p-5 border border-green-200/50 dark:border-green-700/50">
+            <h4 class="text-lg font-semibold text-green-700 dark:text-green-300 mb-4 flex items-center gap-2">
+              <i class="bi bi-phone text-green-600 dark:text-green-400"></i> 電支轉帳
+            </h4>
+            <div class="flex flex-wrap gap-2">
+              <span
+                class="px-3 py-1 bg-green-100/70 dark:bg-green-800/70 text-green-800 dark:text-green-200 rounded-full text-sm font-medium">街口</span>
+              <span
+                class="px-3 py-1 bg-green-100/70 dark:bg-green-800/70 text-green-800 dark:text-green-200 rounded-full text-sm font-medium">iPass
+                Money</span>
+              <span
+                class="px-3 py-1 bg-green-100/70 dark:bg-green-800/70 text-green-800 dark:text-green-200 rounded-full text-sm font-medium">全支付</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 注意事項 Section -->
+      <div
+        class="bg-gradient-to-br from-amber-50/50 to-orange-100/50 dark:from-amber-900/10 dark:to-orange-900/10 rounded-2xl shadow-lg p-6 mb-8 border border-amber-200/50 dark:border-amber-700/50">
+        <h3 class="text-xl font-bold text-amber-700 dark:text-amber-300 mb-6 flex items-center gap-2">
+          <div class="w-10 h-10 bg-amber-100/70 dark:bg-amber-800/70 rounded-full flex items-center justify-center">
+            <i class="bi bi-exclamation-triangle text-amber-600 dark:text-amber-400"></i>
+          </div>
+          注意事項
+        </h3>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="space-y-3">
+            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
+              <i class="bi bi-shield-exclamation text-amber-600 dark:text-amber-400"></i>
+              <span class="text-amber-800 dark:text-amber-200">請勿提供錯誤的聯絡資訊或遊戲帳號，否則損失需自行承擔</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
+              <i class="bi bi-receipt text-amber-600 dark:text-amber-400"></i>
+              <span class="text-amber-800 dark:text-amber-200">付款後請主動提供轉帳證明截圖</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
+              <i class="bi bi-check-circle text-amber-600 dark:text-amber-400"></i>
+              <span class="text-amber-800 dark:text-amber-200">CDK 一經發送即視為交易完成，概不退/換貨</span>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
+              <i class="bi bi-safe text-amber-600 dark:text-amber-400"></i>
+              <span class="text-amber-800 dark:text-amber-200">CDK 請妥善保管並盡快兌換</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
+              <i class="bi bi-ban text-amber-600 dark:text-amber-400"></i>
+              <span class="text-amber-800 dark:text-amber-200">嚴禁洗錢、詐騙等非法用途，違者將永久拒絕服務</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
+              <i class="bi bi-currency-exchange text-amber-600 dark:text-amber-400"></i>
+              <span class="text-amber-800 dark:text-amber-200">付款方式以新台幣（TWD）為主，支援多種轉帳方式</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 交易規則 Section -->
+      <div
+        class="bg-gradient-to-br from-purple-50/50 to-pink-100/50 dark:from-purple-900/10 dark:to-pink-900/10 rounded-2xl shadow-lg p-6 mb-8 border border-purple-200/50 dark:border-purple-700/50">
+        <h3 class="text-xl font-bold text-purple-700 dark:text-purple-300 mb-6 flex items-center gap-2">
+          <div class="w-10 h-10 bg-purple-100/70 dark:bg-purple-800/70 rounded-full flex items-center justify-center">
+            <i class="bi bi-shield-check text-purple-600 dark:text-purple-400"></i>
+          </div>
+          交易規則
+        </h3>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="space-y-3">
+            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
+              <i class="bi bi-clock text-purple-600 dark:text-purple-400"></i>
+              <span class="text-purple-800 dark:text-purple-200">商品限單次購買，不可合併訂單</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
+              <i class="bi bi-key text-purple-600 dark:text-purple-400"></i>
+              <span class="text-purple-800 dark:text-purple-200">商品會以 CDK（序號）方式發放</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
+              <i class="bi bi-hourglass-split text-purple-600 dark:text-purple-400"></i>
+              <span class="text-purple-800 dark:text-purple-200">CDK 會於 24 小時內發送</span>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
+              <i class="bi bi-arrow-repeat text-purple-600 dark:text-purple-400"></i>
+              <span class="text-purple-800 dark:text-purple-200">品項對應遊戲內商品應一一對應</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
+              <i class="bi bi-exclamation-diamond text-purple-600 dark:text-purple-400"></i>
+              <span class="text-purple-800 dark:text-purple-200">合併訂單者，將進行交易內容調整</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
+              <i class="bi bi-discord text-purple-600 dark:text-purple-400"></i>
+              <span class="text-purple-800 dark:text-purple-200">購買前請先以 Discord 聯絡客服</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 服務條款 Section -->
+      <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl p-6 mb-8 border border-zinc-200 dark:border-zinc-700">
+        <h3 class="text-xl font-bold text-indigo-700 dark:text-indigo-300 mb-6 flex items-center gap-2">
+          <i class="bi bi-file-text"></i> 服務條款
+        </h3>
+
+        <div class="space-y-6 text-sm text-gray-700 dark:text-gray-300">
+          <!-- 一、服務條款 -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">一、服務條款</h4>
+
+            <!-- 服務提供 -->
+            <div class="mb-4">
+              <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-2">服務提供</h5>
+              <ol class="list-decimal pl-6 space-y-1 text-gray-600 dark:text-gray-400">
+                <li>本單位提供使用者遊戲儲值相關服務平台，對於遊戲商、平台商所提供之內容，本單位不負實質審查義務。</li>
+                <li>本單位擁有本服務網站內所有電磁記錄等資產權利。</li>
+                <li>請您了解並認識到，不論是公開發布或私下分享的所有資訊、數據、文件、軟體、音樂、聲音、照片、圖像、視頻、訊息或其他素材（以下簡稱"內容"），其責任完全由內容的提供者承擔。</li>
+                <li>在伺服器因超載導致無法正常記錄數據時，您理解並同意本單位可能需要重新啟動伺服器並將數據恢復至超載前的狀態。</li>
+                <li>為了維持服務品質，當需要更換或調整硬體設備時，您同意本單位有權將您的帳號及相關數據轉移到新的存儲位置，並期望您能配合完成必要的設定調整，以適應這些變更。</li>
+              </ol>
+            </div>
+
+            <!-- 會員資料 -->
+            <div class="mb-4">
+              <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-2">會員資料</h5>
+              <p class="mb-2 text-gray-600 dark:text-gray-400">
+                為了確保您能夠順利且安全地使用本公司所提供的服務，使用者在使用過程中，因使用者風控等級的不同，應提供並維持以下個人資料的正確性、最新性及完整性：</p>
+              <ol class="list-decimal pl-6 space-y-1 text-gray-600 dark:text-gray-400">
+                <li>包括下列資料，但視情況僅會索取部分或全部資料</li>
+                <li>電子郵件地址 (E-mail)</li>
+                <li>聯絡電話 (Contact Phone)</li>
+                <li>真實姓名 (Real Name)</li>
+                <li>戶籍地址 (Residence Address)</li>
+                <li>通訊地址 (Contact Address)</li>
+                <li>身分證字號 (ID Number)</li>
+                <li>銀行代碼 (Bank Code)</li>
+                <li>銀行名稱 (Bank Name)</li>
+                <li>銀行分行代碼 (Bank Branch Code)</li>
+                <li>銀行分行 (Bank Branch)</li>
+                <li>銀行帳號 (Bank Account)</li>
+              </ol>
+              <div class="mt-3 space-y-1 text-gray-600 dark:text-gray-400">
+                <p>• 使用者在提供任何商品訂單資訊、物品資訊或上傳照片等相關資料時，也應確保其為正確、最新及完整。</p>
+                <p>• 若使用者所提供的任何資料發生變動，應隨時進行更新。</p>
+                <p>• 提供錯誤、不實或不完整的資料，本單位有權依據情況暫停或終止使用者的使用權利，並根據本單位的判斷處理相關事宜。</p>
+                <p>• 若使用者以不正當的方式取得點數進行儲值或交易，本公司保留隨時終止使用者資格及使用各項服務的權利，包括但不限於停止或刪除會員在本服務網站的帳號。</p>
+                <p>• 本單位對於使用者資料的管理和使用，致力於保護使用者的隱私權與安全，並遵循相關法律法規及本單位的隱私政策。</p>
+              </div>
+            </div>
+
+            <!-- 商品購買與退款 -->
+            <div class="mb-4">
+              <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-2">商品購買與退款</h5>
+              <ol class="list-decimal pl-6 space-y-1 text-gray-600 dark:text-gray-400">
+                <li>本單位所提供的服務，商品數量、金額可能因各種情況異動而配合變動。</li>
+                <li>若產品資訊與遊戲內現況不符時，本公司有權協調使用者更改購買商品或進行退款。</li>
+                <li>商品限單次購買，不可合併訂單。品項對應遊戲內商品應一一對應。合併訂單者，將進行交易內容調整。</li>
+                <li>本單位專注於提供遊戲服務，涉及的商品均為虛擬產品，因此不適用於消費者保護法規定的7天鑑賞期。</li>
+                <li>使用者完成付款，即視為本公司已履行與使用者間的線上服務交易義務。</li>
+                <li>使用者在進行付款時，即表示已充分理解並同意本條款的所有內容，包括對於退款的特殊規定。</li>
+                <li>一旦交易確認，任何後續退款事宜將需要會員直接與相關遊戲商協商解決。本公司將不介入退款過程，亦不承擔相關責任。</li>
+                <li>退費流程須遵守政府反詐騙、洗錢防制等法規，如使用者有退款需求，需提交本單位提供的表單並依照指示進行。</li>
+                <li>購買本單位提供之服務時，視同已知悉上述退費規定。</li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- 二、免責條款 -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">二、免責條款</h4>
+
+            <!-- 使用規範 -->
+            <div class="mb-4">
+              <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-2">使用規範</h5>
+              <ol class="list-decimal pl-6 space-y-1 text-gray-600 dark:text-gray-400">
+                <li>使用者在交易時，需提供項應資料。</li>
+                <li>使用者應對所有以該使用者的資料進行的活動和事件負全責。</li>
+                <li>使用者應資料安全，不得洩漏或提供給第三方使用。</li>
+                <li>使用者若遇資料非法使用或安全疑慮時，應立即通知本單位。</li>
+                <li>使用者因不當行為（如翻牆、使用外掛等）導致帳號被封鎖，本公司不負擔保責任。</li>
+                <li>部分遊戲公司設有RMT之禁止規範，使用者應自行查證，本單位不負擔保責任。</li>
+                <li>非本單位問題導致的異常情況（如卡單），不負擔保責任。</li>
+              </ol>
+            </div>
+
+            <!-- 不可抗力 -->
+            <div class="mb-4">
+              <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-2">不可抗力</h5>
+              <ol class="list-decimal pl-6 space-y-1 text-gray-600 dark:text-gray-400">
+                <li>本單位服務可能因維護、更新或其他不可抗力因素導致暫時中斷或故障，本單位將盡力避免此類情況發生，但對於因此導致的任何不便或損失，本單位不承擔責任。</li>
+                <li>因駭客攻擊、電腦病毒、政府管制等不可抗力因素導致的資料洩漏、丟失等，本單位不負任何責任。</li>
+                <li>服務可能因軟硬體更換、升級、保養或不可抗力因素導致中斷或停止，本單位將不負責任。</li>
+              </ol>
+            </div>
+
+            <!-- 虛假資訊與欺詐行為 -->
+            <div class="mb-4">
+              <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-2">虛假資訊與欺詐行為</h5>
+              <p class="text-gray-600 dark:text-gray-400">使用者利用本公司名義刊登虛假資訊或進行欺詐行為，純屬該使用者個人行為，本公司不負任何責任。</p>
+            </div>
+          </div>
+
+          <!-- 三、增補條款 -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">三、增補條款</h4>
+
+            <!-- 隱私權政策與個人資料保護 -->
+            <div class="mb-4">
+              <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-2">隱私權政策與個人資料保護</h5>
+              <p class="text-gray-600 dark:text-gray-400">本單位重視使用者的隱私權保護，對於使用者使用本服務而留存之個人資料，悉依本單位「隱私權政策」受到保護與規範。</p>
+            </div>
+
+            <!-- 智慧財產權的尊重 -->
+            <div class="mb-4">
+              <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-2">智慧財產權的尊重</h5>
+              <ol class="list-decimal pl-6 space-y-1 text-gray-600 dark:text-gray-400">
+                <li>您同意尊重本服務網站所包含的所有內容及資料，包括但不限於文字、圖片、商標、版權及其他智慧財產權，均屬本公司或相關權利人所有。</li>
+                <li>未經本單位或權利人明確書面同意，任何人不得進行重製、複製、轉載、使用、引用、修改、改作、衍生、公開播放、散布、發行、展示發表、執行還原工程、 解編譯或反組譯。</li>
+                <li>違者，您應自負完全民、刑事法律責任並應對本公司負損害賠償責任（包括但不限於律師費及訴訟費用等）。</li>
+              </ol>
+            </div>
+
+            <!-- 法律適用與管轄 -->
+            <div class="mb-4">
+              <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-2">法律適用與管轄</h5>
+              <ol class="list-decimal pl-6 space-y-1 text-gray-600 dark:text-gray-400">
+                <li>本條款的解釋及適用，以及因本服務所生之任何爭議，均適用中華民國法律。</li>
+                <li>因使用本服務所生之爭議，雙方應優先透過協商解決，協商不成時，雙方同意以台灣雲林地方法院為第一審管轄法院。</li>
+                <li>本使用者公約及其附屬規範不應被解釋為創建與本單位之間的合資、代理關係、特許授權或任何形式的雇傭關係。</li>
+                <li>本規範若有任何一部無效，不影響其他部分之效力。</li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- 結語 -->
+          <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+            <p class="text-gray-700 dark:text-gray-300 text-center">
+              本使用者服務及免責條款旨在提供明確的服務規範與免責聲明，以保障使用者與本單位的權益。使用者於使用本公司服務時，應遵守上述條款，以確保雙方利益。
+            </p>
+          </div>
+        </div>
       </div>
     </DecorSection>
   </div>
