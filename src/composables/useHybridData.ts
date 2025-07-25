@@ -5,7 +5,6 @@ export function useHybridData<T>(
   localData: T[],
   sheetUrl: string,
   mapFn: (item: Record<string, string>) => T,
-  delay = 500,
 ) {
   const data = ref<T[]>(localData)
   const isUsingLocal = ref(true)
@@ -26,7 +25,7 @@ export function useHybridData<T>(
       } finally {
         loading.value = false
       }
-    }, delay)
+    })
   }
 
   return { data, isUsingLocal, loading, load }

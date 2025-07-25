@@ -12,7 +12,7 @@ const getCachedData = (key: string): string | null => {
   return null
 }
 
-const setCachedData = (key: string, data: string, ttl: number = 5 * 60 * 1000) => {
+const setCachedData = (key: string, data: string, ttl: number = 0.01 * 60 * 1000) => {
   cache.set(key, { data, timestamp: Date.now(), ttl })
 }
 
