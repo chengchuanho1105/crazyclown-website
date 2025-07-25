@@ -249,200 +249,172 @@ onBeforeUnmount(() => {
 
       <!-- 交易流程 Section -->
       <div
-        class="bg-gradient-to-br from-emerald-50/50 to-teal-100/50 dark:from-emerald-900/10 dark:to-teal-900/10 rounded-2xl shadow-lg p-6 mb-8 border border-emerald-200/50 dark:border-emerald-700/50">
-        <h3 class="text-xl font-bold text-emerald-700 dark:text-emerald-300 mb-6 flex items-center gap-2">
-          <div class="w-10 h-10 bg-emerald-100/70 dark:bg-emerald-800/70 rounded-full flex items-center justify-center">
-            <i class="bi bi-arrow-repeat text-emerald-600 dark:text-emerald-400"></i>
-          </div>
-          交易流程
-        </h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- 步驟 1 -->
+        class="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl p-8 mb-8 border border-zinc-200/50 dark:border-zinc-700/50">
+        <div class="flex items-center gap-4 mb-8">
           <div
-            class="bg-white/50 dark:bg-white/5 rounded-xl p-4 border border-emerald-200/50 dark:border-emerald-700/50">
-            <div class="flex items-center gap-3 mb-3">
-              <div
-                class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                1</div>
-              <h4 class="font-semibold text-emerald-800 dark:text-emerald-200">聯絡確認</h4>
+            class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg">
+            <i class="bi bi-arrow-repeat text-2xl text-white"></i>
+          </div>
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100">交易流程</h3>
+            <p class="text-gray-600 dark:text-gray-400">簡單四步驟，輕鬆完成交易</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- 步驟 1 -->
+          <div class="relative group">
+            <div
+              class="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300">
             </div>
-            <p class="text-sm text-emerald-700 dark:text-emerald-300">透過 Discord 聯絡客服，確認庫存與即時價格</p>
+            <div
+              class="relative bg-white dark:bg-zinc-800 rounded-2xl p-6 border border-zinc-200/50 dark:border-zinc-700/50">
+              <div class="flex items-center gap-4 mb-4">
+                <div
+                  class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-lg">
+                  1</div>
+                <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">聯絡確認</h4>
+              </div>
+              <p class="text-gray-600 dark:text-gray-400 leading-relaxed">透過 Discord 聯絡客服，確認庫存與即時價格</p>
+            </div>
           </div>
 
           <!-- 步驟 2 -->
-          <div
-            class="bg-white/50 dark:bg-white/5 rounded-xl p-4 border border-emerald-200/50 dark:border-emerald-700/50">
-            <div class="flex items-center gap-3 mb-3">
-              <div
-                class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                2</div>
-              <h4 class="font-semibold text-emerald-800 dark:text-emerald-200">提供資訊</h4>
+          <div class="relative group">
+            <div
+              class="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300">
             </div>
-            <p class="text-sm text-emerald-700 dark:text-emerald-300">提供正確的 PUBG ID 與聯絡方式</p>
+            <div
+              class="relative bg-white dark:bg-zinc-800 rounded-2xl p-6 border border-zinc-200/50 dark:border-zinc-700/50">
+              <div class="flex items-center gap-4 mb-4">
+                <div
+                  class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-lg">
+                  2</div>
+                <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">提供資訊</h4>
+              </div>
+              <p class="text-gray-600 dark:text-gray-400 leading-relaxed">提供正確的 PUBG ID 與聯絡方式</p>
+            </div>
           </div>
 
           <!-- 步驟 3 -->
-          <div
-            class="bg-white/50 dark:bg-white/5 rounded-xl p-4 border border-emerald-200/50 dark:border-emerald-700/50">
-            <div class="flex items-center gap-3 mb-3">
-              <div
-                class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                3</div>
-              <h4 class="font-semibold text-emerald-800 dark:text-emerald-200">付款轉帳</h4>
+          <div class="relative group">
+            <div
+              class="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300">
             </div>
-            <p class="text-sm text-emerald-700 dark:text-emerald-300">選擇付款方式完成轉帳，並提供證明截圖</p>
+            <div
+              class="relative bg-white dark:bg-zinc-800 rounded-2xl p-6 border border-zinc-200/50 dark:border-zinc-700/50">
+              <div class="flex items-center gap-4 mb-4">
+                <div
+                  class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-lg">
+                  3</div>
+                <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">付款轉帳</h4>
+              </div>
+              <p class="text-gray-600 dark:text-gray-400 leading-relaxed">選擇付款方式完成轉帳，並提供證明截圖</p>
+            </div>
           </div>
 
           <!-- 步驟 4 -->
-          <div
-            class="bg-white/50 dark:bg-white/5 rounded-xl p-4 border border-emerald-200/50 dark:border-emerald-700/50">
-            <div class="flex items-center gap-3 mb-3">
-              <div
-                class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                4</div>
-              <h4 class="font-semibold text-emerald-800 dark:text-emerald-200">發送 CDK</h4>
+          <div class="relative group">
+            <div
+              class="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300">
             </div>
-            <p class="text-sm text-emerald-700 dark:text-emerald-300">24 小時內發送 CDK 序號至指定聯絡方式</p>
+            <div
+              class="relative bg-white dark:bg-zinc-800 rounded-2xl p-6 border border-zinc-200/50 dark:border-zinc-700/50">
+              <div class="flex items-center gap-4 mb-4">
+                <div
+                  class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-lg">
+                  4</div>
+                <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">發送 CDK</h4>
+              </div>
+              <p class="text-gray-600 dark:text-gray-400 leading-relaxed">24 小時內發送 CDK 序號至指定聯絡方式</p>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- 付款方式 Section -->
       <div
-        class="bg-gradient-to-br from-blue-50/50 to-indigo-100/50 dark:from-blue-900/10 dark:to-indigo-900/10 rounded-2xl shadow-lg p-6 mb-8 border border-blue-200/50 dark:border-blue-700/50">
-        <h3 class="text-xl font-bold text-blue-700 dark:text-blue-300 mb-6 flex items-center gap-2">
-          <div class="w-10 h-10 bg-blue-100/70 dark:bg-blue-800/70 rounded-full flex items-center justify-center">
-            <i class="bi bi-credit-card text-blue-600 dark:text-blue-400"></i>
+        class="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl p-8 mb-8 border border-zinc-200/50 dark:border-zinc-700/50">
+        <div class="flex items-center gap-4 mb-8">
+          <div
+            class="w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg">
+            <i class="bi bi-credit-card text-2xl text-white"></i>
           </div>
-          付款方式
-        </h3>
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100">付款方式</h3>
+            <p class="text-gray-600 dark:text-gray-400">多種付款選擇，安全便利</p>
+          </div>
+        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <!-- 銀行轉帳 -->
-          <div class="bg-white/50 dark:bg-white/5 rounded-xl p-5 border border-blue-200/50 dark:border-blue-700/50">
-            <h4 class="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-4 flex items-center gap-2">
-              <i class="bi bi-bank text-blue-600 dark:text-blue-400"></i> 銀行轉帳
-            </h4>
-            <div class="space-y-3">
-              <div class="flex flex-wrap gap-2">
-                <span
-                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">中信(822)</span>
-                <span
-                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">富邦(012)</span>
-                <span
-                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">台新(812)</span>
-                <span
-                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">玉山(808)</span>
+          <div class="relative group">
+            <div
+              class="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300">
+            </div>
+            <div
+              class="relative bg-white dark:bg-zinc-800 rounded-2xl p-6 border border-zinc-200/50 dark:border-zinc-700/50">
+              <div class="flex items-center gap-4 mb-6">
+                <div
+                  class="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <i class="bi bi-bank text-xl text-white"></i>
+                </div>
+                <div>
+                  <h4 class="text-xl font-bold text-gray-900 dark:text-gray-100">銀行轉帳</h4>
+                  <p class="text-gray-600 dark:text-gray-400">最常用方式</p>
+                </div>
               </div>
-              <div class="flex flex-wrap gap-2">
-                <span
-                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">郵政(700)</span>
-                <span
-                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">國泰(013)</span>
-                <span
-                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">台銀(004)</span>
-                <span
-                  class="px-3 py-1 bg-blue-100/70 dark:bg-blue-800/70 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">一銀(007)</span>
+              <div class="space-y-4">
+                <div class="flex flex-wrap gap-3">
+                  <span
+                    class="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-800 dark:text-blue-200 rounded-xl text-sm font-semibold border border-blue-200/50 dark:border-blue-700/50">中信(822)</span>
+                  <span
+                    class="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-800 dark:text-blue-200 rounded-xl text-sm font-semibold border border-blue-200/50 dark:border-blue-700/50">富邦(012)</span>
+                  <span
+                    class="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-800 dark:text-blue-200 rounded-xl text-sm font-semibold border border-blue-200/50 dark:border-blue-700/50">台新(812)</span>
+                  <span
+                    class="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-800 dark:text-blue-200 rounded-xl text-sm font-semibold border border-blue-200/50 dark:border-blue-700/50">玉山(808)</span>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                  <span
+                    class="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-800 dark:text-blue-200 rounded-xl text-sm font-semibold border border-blue-200/50 dark:border-blue-700/50">郵政(700)</span>
+                  <span
+                    class="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-800 dark:text-blue-200 rounded-xl text-sm font-semibold border border-blue-200/50 dark:border-blue-700/50">國泰(013)</span>
+                  <span
+                    class="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-800 dark:text-blue-200 rounded-xl text-sm font-semibold border border-blue-200/50 dark:border-blue-700/50">台銀(004)</span>
+                  <span
+                    class="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-800 dark:text-blue-200 rounded-xl text-sm font-semibold border border-blue-200/50 dark:border-blue-700/50">一銀(007)</span>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- 電支轉帳 -->
-          <div class="bg-white/50 dark:bg-white/5 rounded-xl p-5 border border-green-200/50 dark:border-green-700/50">
-            <h4 class="text-lg font-semibold text-green-700 dark:text-green-300 mb-4 flex items-center gap-2">
-              <i class="bi bi-phone text-green-600 dark:text-green-400"></i> 電支轉帳
-            </h4>
-            <div class="flex flex-wrap gap-2">
-              <span
-                class="px-3 py-1 bg-green-100/70 dark:bg-green-800/70 text-green-800 dark:text-green-200 rounded-full text-sm font-medium">街口</span>
-              <span
-                class="px-3 py-1 bg-green-100/70 dark:bg-green-800/70 text-green-800 dark:text-green-200 rounded-full text-sm font-medium">iPass
-                Money</span>
-              <span
-                class="px-3 py-1 bg-green-100/70 dark:bg-green-800/70 text-green-800 dark:text-green-200 rounded-full text-sm font-medium">全支付</span>
+          <div class="relative group">
+            <div
+              class="absolute -inset-1 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300">
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 注意事項 Section -->
-      <div
-        class="bg-gradient-to-br from-amber-50/50 to-orange-100/50 dark:from-amber-900/10 dark:to-orange-900/10 rounded-2xl shadow-lg p-6 mb-8 border border-amber-200/50 dark:border-amber-700/50">
-        <h3 class="text-xl font-bold text-amber-700 dark:text-amber-300 mb-6 flex items-center gap-2">
-          <div class="w-10 h-10 bg-amber-100/70 dark:bg-amber-800/70 rounded-full flex items-center justify-center">
-            <i class="bi bi-exclamation-triangle text-amber-600 dark:text-amber-400"></i>
-          </div>
-          注意事項
-        </h3>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="space-y-3">
-            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
-              <i class="bi bi-shield-exclamation text-amber-600 dark:text-amber-400"></i>
-              <span class="text-amber-800 dark:text-amber-200">請勿提供錯誤的聯絡資訊或遊戲帳號，否則損失需自行承擔</span>
-            </div>
-            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
-              <i class="bi bi-receipt text-amber-600 dark:text-amber-400"></i>
-              <span class="text-amber-800 dark:text-amber-200">付款後請主動提供轉帳證明截圖</span>
-            </div>
-            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
-              <i class="bi bi-check-circle text-amber-600 dark:text-amber-400"></i>
-              <span class="text-amber-800 dark:text-amber-200">CDK 一經發送即視為交易完成，概不退/換貨</span>
-            </div>
-          </div>
-          <div class="space-y-3">
-            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
-              <i class="bi bi-safe text-amber-600 dark:text-amber-400"></i>
-              <span class="text-amber-800 dark:text-amber-200">CDK 請妥善保管並盡快兌換</span>
-            </div>
-            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
-              <i class="bi bi-ban text-amber-600 dark:text-amber-400"></i>
-              <span class="text-amber-800 dark:text-amber-200">嚴禁洗錢、詐騙等非法用途，違者將永久拒絕服務</span>
-            </div>
-            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
-              <i class="bi bi-currency-exchange text-amber-600 dark:text-amber-400"></i>
-              <span class="text-amber-800 dark:text-amber-200">付款方式以新台幣（TWD）為主，支援多種轉帳方式</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 交易規則 Section -->
-      <div
-        class="bg-gradient-to-br from-purple-50/50 to-pink-100/50 dark:from-purple-900/10 dark:to-pink-900/10 rounded-2xl shadow-lg p-6 mb-8 border border-purple-200/50 dark:border-purple-700/50">
-        <h3 class="text-xl font-bold text-purple-700 dark:text-purple-300 mb-6 flex items-center gap-2">
-          <div class="w-10 h-10 bg-purple-100/70 dark:bg-purple-800/70 rounded-full flex items-center justify-center">
-            <i class="bi bi-shield-check text-purple-600 dark:text-purple-400"></i>
-          </div>
-          交易規則
-        </h3>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="space-y-3">
-            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
-              <i class="bi bi-clock text-purple-600 dark:text-purple-400"></i>
-              <span class="text-purple-800 dark:text-purple-200">商品限單次購買，不可合併訂單</span>
-            </div>
-            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
-              <i class="bi bi-key text-purple-600 dark:text-purple-400"></i>
-              <span class="text-purple-800 dark:text-purple-200">商品會以 CDK（序號）方式發放</span>
-            </div>
-            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
-              <i class="bi bi-hourglass-split text-purple-600 dark:text-purple-400"></i>
-              <span class="text-purple-800 dark:text-purple-200">CDK 會於 24 小時內發送</span>
-            </div>
-          </div>
-          <div class="space-y-3">
-            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
-              <i class="bi bi-arrow-repeat text-purple-600 dark:text-purple-400"></i>
-              <span class="text-purple-800 dark:text-purple-200">品項對應遊戲內商品應一一對應</span>
-            </div>
-            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
-              <i class="bi bi-exclamation-diamond text-purple-600 dark:text-purple-400"></i>
-              <span class="text-purple-800 dark:text-purple-200">合併訂單者，將進行交易內容調整</span>
-            </div>
-            <div class="flex items-center gap-3 p-3 bg-white/30 dark:bg-white/5 rounded-lg">
-              <i class="bi bi-discord text-purple-600 dark:text-purple-400"></i>
-              <span class="text-purple-800 dark:text-purple-200">購買前請先以 Discord 聯絡客服</span>
+            <div
+              class="relative bg-white dark:bg-zinc-800 rounded-2xl p-6 border border-zinc-200/50 dark:border-zinc-700/50">
+              <div class="flex items-center gap-4 mb-6">
+                <div
+                  class="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <i class="bi bi-phone text-xl text-white"></i>
+                </div>
+                <div>
+                  <h4 class="text-xl font-bold text-gray-900 dark:text-gray-100">電支轉帳</h4>
+                  <p class="text-gray-600 dark:text-gray-400">數位時代</p>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-3">
+                <span
+                  class="px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 text-green-800 dark:text-green-200 rounded-xl text-sm font-semibold border border-green-200/50 dark:border-green-700/50">街口</span>
+                <span
+                  class="px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 text-green-800 dark:text-green-200 rounded-xl text-sm font-semibold border border-green-200/50 dark:border-green-700/50">iPass
+                  Money</span>
+                <span
+                  class="px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 text-green-800 dark:text-green-200 rounded-xl text-sm font-semibold border border-green-200/50 dark:border-green-700/50">全支付</span>
+              </div>
             </div>
           </div>
         </div>
