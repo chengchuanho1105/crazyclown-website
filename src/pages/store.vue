@@ -2,7 +2,7 @@
 defineOptions({ name: 'CrazyClown-Store' })
 
 // ---------- Vue 核心工具函式 ----------
-import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick, computed, watch } from 'vue'
 
 // ---------- 組件引入區（版面用） ----------
 import DecorSection from '@/components/DecorSection.vue';
@@ -85,7 +85,15 @@ const tabs = computed(() => {
   productListData.value.forEach(item => set.add(item.category))
   return Array.from(set)
 })
-const activeTab = ref(tabs.value[0] || '')
+
+// 監聽 tabs 變化，自動設定第一個分類為預設
+const activeTab = ref('')
+watch(tabs, (newTabs: string[]) => {
+  if (newTabs.length > 0 && !activeTab.value) {
+    activeTab.value = newTabs[0]
+  }
+}, { immediate: true })
+
 const filteredList = computed(() =>
   productListData.value.filter(item => item.category === activeTab.value)
 )
