@@ -157,7 +157,7 @@ function parseTags(tags: string): string[] {
 </script>
 
 <template>
-  <div class="max-w-5xl mx-auto my-8 p-6 bg-white dark:bg-zinc-800 rounded-lg shadow-lg">
+  <div class="max-w-5xl mx-auto my-8 p-4 md:p-6 bg-white dark:bg-zinc-800 rounded-lg shadow-lg">
     <div v-if="newsDataLoading" class="flex justify-center items-center py-20">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       <span class="ml-3 text-gray-600 dark:text-gray-300">載入中...</span>
