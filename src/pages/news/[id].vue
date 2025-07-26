@@ -195,7 +195,7 @@ function parseTags(tags: string): string[] {
     <div v-else-if="news">
       <div class="mb-6">
         <img v-if="news.image" :src="news.image" :alt="news.title" class="w-full rounded-lg mb-4" />
-        <h1 class="text-3xl font-bold mb-2">{{ news.title }}</h1>
+        <h1 class="text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">{{ news.title }}</h1>
         <div class="flex flex-wrap gap-2 mb-2">
           <span v-if="news.category" class="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">{{
             news.category }}</span>
@@ -218,12 +218,6 @@ function parseTags(tags: string): string[] {
 
       <!-- 顯示詳細文章內容 -->
       <div v-if="news.article" class="mt-8 prose max-w-none text-gray-700 dark:text-gray-300 leading-relaxed">
-        <!-- 調試：顯示原始資料 -->
-        <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded">
-          <h3 class="text-sm font-bold mb-2">原始 article 資料：</h3>
-          <pre class="text-xs overflow-auto">{{ news.article }}</pre>
-        </div>
-
         <div v-html="processedArticle"></div>
       </div>
     </div>
