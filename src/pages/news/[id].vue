@@ -27,6 +27,7 @@ const {
   title: string
   content: string
   article: string
+  processHtml: string
 }>('https://docs.google.com/spreadsheets/d/e/2PACX-1vR7y16Qi2dNWRFl7OVgU78wv0SIMi_lPFt0WbZ6-7OqBFo7z2pN7LHs2heesTI4W5TnHM3lTcsXJS8s/pub?output=csv', (item: Record<string, string>) => ({
   id: item.id || '',
   slot: item.slot || '',
@@ -37,7 +38,8 @@ const {
   tags: Array.isArray(item.tags) ? JSON.stringify(item.tags) : (item.tags || ''),
   title: item.title || '',
   content: item.content || '',
-  article: item.article || ''
+  article: item.article || '',
+  processHtml: item.processHtml || 'false'
 }))
 
 onMounted(() => {
@@ -85,12 +87,18 @@ watch(news, () => {
   // useHead 會自動更新，不需要額外處理
 }, { immediate: true })
 
-// 處理文章 HTML，統一添加 CSS 類別
+// 處理文章 HTML，根據 processHtml 欄位決定是否處理
 const processedArticle = computed(() => {
   if (!news.value?.article) {
     return ''
   }
 
+  // 如果 processHtml 為 false，直接返回原始 HTML
+  if (news.value.processHtml?.toLowerCase() === 'false') {
+    return news.value.article
+  }
+
+  // 如果 processHtml 為 true，才進行樣式處理
   let html = news.value.article
 
   // 為 h2 標籤添加樣式
