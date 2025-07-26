@@ -218,6 +218,12 @@ function parseTags(tags: string): string[] {
 
       <!-- 顯示詳細文章內容 -->
       <div v-if="news.article" class="mt-8 prose max-w-none text-gray-700 dark:text-gray-300 leading-relaxed">
+        <!-- 調試：顯示原始資料 -->
+        <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-800 rounded">
+          <h3 class="text-sm font-bold mb-2">原始 article 資料：</h3>
+          <pre class="text-xs overflow-auto">{{ news.article }}</pre>
+        </div>
+
         <div v-html="processedArticle"></div>
       </div>
     </div>
