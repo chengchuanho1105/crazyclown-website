@@ -1,0 +1,25 @@
+# 允許所有爬蟲訪問
+User-agent: *
+Allow: /
+
+# 禁止訪問管理頁面和 API
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_nuxt/
+Disallow: /node_modules/
+
+# 禁止訪問開發相關檔案
+Disallow: /*.js$
+Disallow: /*.css$
+Disallow: /*.map$
+
+# 允許訪問靜態資源
+Allow: /favicon/
+Allow: /uploads/
+Allow: /assets/
+
+# 提供 sitemap 位置
+Sitemap: https://crazyclown.online/sitemap.xml
+
+# 爬蟲延遲設定（可選）
+Crawl-delay: 1

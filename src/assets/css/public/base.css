@@ -1,0 +1,77 @@
+/* 隱藏瀏覽器滾動條 */
+html {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* 超連結樣式 */
+.prose a {
+  position: relative;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: 0 2px;
+}
+
+.prose a:hover {
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.prose a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  transition: width 0.2s ease;
+  border-radius: 1px;
+}
+
+.prose a:hover::after {
+  width: 100%;
+}
+
+/* 外部連結特殊效果 */
+.prose a[href^='http'] {
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    transparent 50%,
+    rgba(59, 130, 246, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-position: 0% 0%;
+  transition: background-position 0.3s ease;
+}
+
+.prose a[href^='http']:hover {
+  background-position: 100% 0%;
+}
+
+/* 內部連結特殊效果 */
+.prose a[href^='#'] {
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    transparent 50%,
+    rgba(34, 197, 94, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-position: 0% 0%;
+  transition: background-position 0.3s ease;
+}
+
+.prose a[href^='#']:hover {
+  background-position: 100% 0%;
+}

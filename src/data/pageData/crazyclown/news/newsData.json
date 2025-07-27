@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "slot": "news",
+    "category": "優惠活動",
+    "date": "2025/07/09",
+    "author": "銓",
+    "image": "https://i.meee.com.tw/ycQkpZL.png",
+    "tags": ["PUBG", "G-Coin", "套裝", "CDK", "優惠"],
+    "title": "商城特惠，歡迎選購｜G-Coin、各式套裝、武器、CDK",
+    "content": "商城特惠，歡迎選購｜G-Coin、各式套裝、武器、CDK",
+    "article": "商城特惠，歡迎選購｜G-Coin、各式套裝、武器、CDK"
+  },
+  {
+    "id": "2",
+    "slot": "featured",
+    "category": "優惠活動",
+    "date": "2025/07/09",
+    "author": "銓",
+    "image": "https://i.meee.com.tw/ycQkpZL.png",
+    "tags": ["PUBG", "G-Coin", "套裝", "CDK", "優惠"],
+    "title": "商城特惠，歡迎選購｜G-Coin、各式套裝、武器、CDK",
+    "content": "商城特惠，歡迎選購｜G-Coin、各式套裝、武器、CDK",
+    "article": "商城特惠，歡迎選購｜G-Coin、各式套裝、武器、CDK"
+  }
+]
