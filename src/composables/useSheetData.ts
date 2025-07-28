@@ -16,7 +16,6 @@ export function useSheetData<T>(sheetUrl: string, mapFn: (item: Record<string, s
       }
 
       const csvText = await response.text()
-      console.log('Raw CSV text length:', csvText.length) // 調試用
 
       // 使用更穩健的 CSV 解析，特別處理包含換行符的欄位
       const lines: string[] = []
@@ -44,8 +43,6 @@ export function useSheetData<T>(sheetUrl: string, mapFn: (item: Record<string, s
       if (currentLine.trim()) {
         lines.push(currentLine.trim())
       }
-
-      console.log('Parsed lines count:', lines.length) // 調試用
 
       if (lines.length === 0) {
         throw new Error('CSV 檔案為空')
@@ -78,7 +75,6 @@ export function useSheetData<T>(sheetUrl: string, mapFn: (item: Record<string, s
       }
 
       const headers = parseCsvLine(lines[0])
-      console.log('CSV headers:', headers) // 調試用
 
       const result: T[] = []
       for (let i = 1; i < lines.length; i++) {
@@ -90,19 +86,12 @@ export function useSheetData<T>(sheetUrl: string, mapFn: (item: Record<string, s
             item[header] = values[index] || ''
           })
 
-          console.log(`Parsed item ${i}:`, {
-            id: item.id,
-            title: item.title?.substring(0, 50) + '...',
-            htmlLength: item.html?.length || 0,
-          }) // 調試用
           result.push(mapFn(item))
         }
       }
 
-      console.log('Final result count:', result.length) // 調試用
       data.value = result
     } catch (err) {
-      console.error('Error fetching sheet data:', err)
       error.value = err instanceof Error ? err.message : '載入資料時發生錯誤'
     } finally {
       loading.value = false

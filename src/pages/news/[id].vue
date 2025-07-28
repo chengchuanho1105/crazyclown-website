@@ -1,4 +1,5 @@
 <script setup lang="ts">
+defineOptions({ name: 'CrazyClown-News' })
 import { useSheetData } from '@/composables/useSheetData'
 import { useHead } from '@unhead/vue'
 import { computed, onMounted, watch } from 'vue'
@@ -49,13 +50,26 @@ const {
       title: item.title || '',
       introduce: item.introduce || '',
       html: item.html || '',
-      addBaseStyle: item.addBaseStyle || '',
+      addBaseStyle: item.addStyle ?? item.addBaseStyle ?? '',
     }
   },
 )
 
 onMounted(() => {
   loadNewsData()
+  // 添加調試信息
+  setTimeout(() => {
+    console.log('所有新聞數據:', newsData.value)
+    newsData.value.forEach((item, index) => {
+      console.log(`新聞 ${index + 1}:`, {
+        id: item.id,
+        title: item.title,
+        addBaseStyle: item.addBaseStyle,
+        addBaseStyleType: typeof item.addBaseStyle,
+        addBaseStyleLowerCase: item.addBaseStyle?.toLowerCase(),
+      })
+    })
+  }, 2000)
 })
 
 // 找到對應新聞
@@ -109,12 +123,28 @@ const processedArticle = computed(() => {
     return ''
   }
 
-  // 如果 addBaseStyle 為 false，直接返回原始 HTML
-  if (news.value.addBaseStyle?.toLowerCase() === 'false') {
+  // 調試：打印 addBaseStyle 的值
+  console.log('addBaseStyle 原始值:', news.value.addBaseStyle)
+  console.log('addBaseStyle 類型:', typeof news.value.addBaseStyle)
+  console.log('addBaseStyle 轉小寫後:', news.value.addBaseStyle?.toLowerCase())
+  console.log('addBaseStyle 是否為空:', !news.value.addBaseStyle)
+  console.log('addBaseStyle 是否為 undefined:', news.value.addBaseStyle === undefined)
+  console.log('addBaseStyle 是否為 null:', news.value.addBaseStyle === null)
+
+  // 檢查 addBaseStyle 的值
+  const addBaseStyleValue = news.value.addBaseStyle?.toLowerCase()
+  console.log('addBaseStyle 處理後的值:', addBaseStyleValue)
+
+  // 如果 addBaseStyle 為 'false'，直接返回原始 HTML
+  if (addBaseStyleValue === 'false') {
+    console.log('addBaseStyle 為 false，直接返回原始 HTML')
     return news.value.html
   }
 
-  // 如果 addBaseStyle 為 true，才進行樣式處理
+  // 如果 addBaseStyle 為 'true' 或其他值，進行樣式處理
+  console.log('addBaseStyle 為 true 或其他值，進行樣式處理')
+  console.log('addBaseStyle 最終判斷結果:', addBaseStyleValue === 'false' ? 'false' : 'true/其他')
+  // 如果 addBaseStyle 為 true 或其他值，才進行樣式處理
   let html = news.value.html
 
   // 為 h2 標籤添加樣式
@@ -279,9 +309,3 @@ function parseTags(tags: string): string[] {
     <div v-else class="text-center text-gray-500 py-20">找不到此新聞</div>
   </div>
 </template>
-
-<script lang="ts">
-export default {
-  name: 'NewsDetail',
-}
-</script>
