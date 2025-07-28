@@ -1,8 +1,6 @@
 import type { BrandSEOConfig } from '../types'
 import { brandInfoConfig } from './crazyclown.info'
 
-import ogImage from 'https://crazyclown.online/media/og-img/crazyclown/og-img.png'
-
 export const brandSEOConfig: BrandSEOConfig = {
   defaultTitle: brandInfoConfig.shortName, // 預設標題
   defaultDescription: brandInfoConfig.slogan || '', // 預設描述
@@ -41,7 +39,7 @@ export const brandSEOConfig: BrandSEOConfig = {
 
   ogTitle: brandInfoConfig.shortName, // Open Graph標題
   ogDescription: brandInfoConfig.slogan || '', // Open Graph描述
-  ogImage: ogImage, // Open Graph圖片
+  ogImage: 'https://crazyclown.online/media/og-img/crazyclown/og-img.png', // Open Graph圖片
   ogType: 'website', // Open Graph類型
   ogUrl: brandInfoConfig.websiteUrl, // Open Graph網址
   ogSiteName: brandInfoConfig.shortName, // Open Graph網站名稱
@@ -53,7 +51,7 @@ export const brandSEOConfig: BrandSEOConfig = {
   twitterCard: 'summary_large_image', // Twitter卡片
   twitterTitle: brandInfoConfig.shortName, // Twitter標題
   twitterDescription: brandInfoConfig.slogan || '', // Twitter描述
-  twitterImage: ogImage, // Twitter圖片
+  twitterImage: 'https://crazyclown.online/media/og-img/crazyclown/og-img.png', // Twitter圖片
   twitterUrl: brandInfoConfig.websiteUrl, // Twitter網址
   twitterSite: brandInfoConfig.social?.twitter?.url, // Twitter網站
   twitterCreator: brandInfoConfig.social?.twitter?.name, // Twitter創作者
