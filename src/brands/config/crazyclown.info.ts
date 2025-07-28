@@ -10,8 +10,8 @@ export const brandInfoConfig: BrandInfoConfig = {
   shortName: 'Crazy Clown', // 品牌簡稱
   logo: logoLight, // 品牌LOGO
   logoDark: logoDark, // 品牌LOGO（暗色）
-  favicon: '/favicon/crazyclown/favicon-light.png', // 品牌FAVICON
-  faviconDark: '/favicon/crazyclown/favicon-dark.png', // 品牌FAVICON（暗色）
+  favicon: 'https://crazyclown.online/media/favicon/crazyclown/favicon-light.png', // 品牌FAVICON
+  faviconDark: 'https://crazyclown.online/media/favicon/crazyclown/favicon-dark.png', // 品牌FAVICON（暗色）
   primaryColor: '#000000', // 品牌主色
   secondaryColor: '#000000', // 品牌輔色
   accentColor: '#000000', // 品牌強調色

@@ -1,7 +1,7 @@
 import type { BrandSEOConfig } from '../types'
 import { brandInfoConfig } from './crazyclown.info'
 
-import ogImage from '@/assets/media/og-img/crazyclown/og-img.png'
+import ogImage from 'https://crazyclown.online/media/og-img/crazyclown/og-img.png'
 
 export const brandSEOConfig: BrandSEOConfig = {
   defaultTitle: brandInfoConfig.shortName, // 預設標題
