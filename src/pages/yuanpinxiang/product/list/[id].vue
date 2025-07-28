@@ -17,7 +17,7 @@ const showFullscreen = ref(false)
 const fullscreenImg = ref('')
 const tabImg = ref(0)
 
-type ProductDetail = { name?: string; des?: string;[key: string]: string | undefined }
+type ProductDetail = { name?: string; des?: string; [key: string]: string | undefined }
 const detail = computed(() => (product?.detail || {}) as ProductDetail)
 const images = computed(() => {
   if (!detail.value) return []
@@ -27,7 +27,7 @@ const images = computed(() => {
 function openFullscreen(img: string) {
   fullscreenImg.value = img
   showFullscreen.value = true
-  tabImg.value = images.value.findIndex(i => i === img)
+  tabImg.value = images.value.findIndex((i) => i === img)
 }
 function closeFullscreen() {
   showFullscreen.value = false
@@ -39,14 +39,38 @@ function closeFullscreen() {
 <template>
   <div v-if="product" class="max-w-6xl mx-auto px-4 py-10 space-y-16">
     <!-- 全螢幕大圖 Swiper -->
-    <div v-if="showFullscreen"
+    <div
+      v-if="showFullscreen"
       class="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center select-none"
-      style="inset:0;z-index:9999;position:fixed;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;"
-      @click.self="closeFullscreen">
-      <button class="absolute top-6 right-8 text-white text-3xl z-[10001]" @click="closeFullscreen">&times;</button>
-      <Swiper :modules="[Navigation, Thumbs]" :initial-slide="tabImg" navigation pagination keyboard
-        class="w-screen h-screen flex items-center justify-center" style="max-width:100vw;max-height:100vh;"
-        @slideChange="(swiper) => { tabImg = swiper.activeIndex; fullscreenImg = images[tabImg] }">
+      style="
+        inset: 0;
+        z-index: 9999;
+        position: fixed;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      "
+      @click.self="closeFullscreen"
+    >
+      <button class="absolute top-6 right-8 text-white text-3xl z-[10001]" @click="closeFullscreen">
+        &times;
+      </button>
+      <Swiper
+        :modules="[Navigation, Thumbs]"
+        :initial-slide="tabImg"
+        navigation
+        pagination
+        keyboard
+        class="w-screen h-screen flex items-center justify-center"
+        style="max-width: 100vw; max-height: 100vh"
+        @slideChange="
+          (swiper) => {
+            tabImg = swiper.activeIndex
+            fullscreenImg = images[tabImg]
+          }
+        "
+      >
         <SwiperSlide v-for="(img, i) in images" :key="i">
           <div class="w-full h-full flex items-center justify-center">
             <img :src="img" class="max-h-[90vh] max-w-[90vw] rounded-xl shadow-lg object-contain" />
@@ -58,20 +82,47 @@ function closeFullscreen() {
       <div class="flex flex-col md:flex-row gap-8">
         <div class="w-full md:w-1/2">
           <!-- 大圖 Swiper -->
-          <Swiper :modules="[Navigation, Thumbs]" :thumbs="{ swiper: thumbsSwiper }" navigation
-            class="mb-4 cursor-zoom-in" :slides-per-view="1" :space-between="10" :initial-slide="tabImg"
-            @slideChange="(swiper) => tabImg = swiper.activeIndex" @click="openFullscreen(images[tabImg] || images[0])">
+          <Swiper
+            :modules="[Navigation, Thumbs]"
+            :thumbs="{ swiper: thumbsSwiper }"
+            navigation
+            class="mb-4 cursor-zoom-in"
+            :slides-per-view="1"
+            :space-between="10"
+            :initial-slide="tabImg"
+            @slideChange="(swiper) => (tabImg = swiper.activeIndex)"
+            @click="openFullscreen(images[tabImg] || images[0])"
+          >
             <SwiperSlide v-for="(img, i) in images" :key="i">
-              <img :src="img" :alt="detail?.name || ''" class="w-full h-80 object-cover rounded-xl shadow" />
+              <img
+                :src="img"
+                :alt="detail?.name || ''"
+                class="w-full h-80 object-cover rounded-xl shadow"
+              />
             </SwiperSlide>
           </Swiper>
           <!-- 小圖列 Swiper -->
-          <Swiper :modules="[Navigation, Thumbs]" :watch-slides-progress="true"
-            :slides-per-view="Math.min(images.length, 6)" :space-between="8" navigation class="thumbs-swiper"
-            style="height: 80px;" @swiper="(swiper) => { thumbsSwiper = swiper as any }">
-            <SwiperSlide v-for="(img, i) in images" :key="i" style="width: 72px;">
-              <img :src="img" :alt="'副圖' + (i + 1)" class="w-16 h-16 object-cover rounded border cursor-pointer"
-                @click="tabImg = i" />
+          <Swiper
+            :modules="[Navigation, Thumbs]"
+            :watch-slides-progress="true"
+            :slides-per-view="Math.min(images.length, 6)"
+            :space-between="8"
+            navigation
+            class="thumbs-swiper"
+            style="height: 80px"
+            @swiper="
+              (swiper) => {
+                thumbsSwiper = swiper as any
+              }
+            "
+          >
+            <SwiperSlide v-for="(img, i) in images" :key="i" style="width: 72px">
+              <img
+                :src="img"
+                :alt="'副圖' + (i + 1)"
+                class="w-16 h-16 object-cover rounded border cursor-pointer"
+                @click="tabImg = i"
+              />
             </SwiperSlide>
           </Swiper>
         </div>
@@ -79,21 +130,28 @@ function closeFullscreen() {
           <div>
             <div class="flex gap-2 mb-2">
               <span
-                class="text-sm px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200 rounded-full">{{
-                  product.category }}</span>
-              <span v-if="product.hot"
-                class="px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold">熱銷</span>
-              <span v-if="product.new"
-                class="px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-bold">新品</span>
+                class="text-sm px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200 rounded-full"
+                >{{ product.category }}</span
+              >
+              <span
+                v-if="product.hot"
+                class="px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold"
+                >熱銷</span
+              >
+              <span
+                v-if="product.new"
+                class="px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-bold"
+                >新品</span
+              >
             </div>
-            <h2 class="text-2xl font-bold text-indigo-800 dark:text-indigo-100 mb-2">{{ detail?.name }}</h2>
+            <h2 class="text-2xl font-bold text-indigo-800 dark:text-indigo-100 mb-2">
+              {{ detail?.name }}
+            </h2>
             <!-- 商品資訊表格 -->
             <table>
               <tr class="text-lg text-gray-700 dark:text-gray-300">
                 <td class="w-[5rem] px-1 text-right align-top">
-                  <span class="font-bold">
-                    商品介紹
-                  </span>
+                  <span class="font-bold"> 商品介紹 </span>
                 </td>
                 <td class="px-1 text-left align-top">
                   <span class="">
@@ -103,9 +161,7 @@ function closeFullscreen() {
               </tr>
               <tr class="text-lg text-gray-700 dark:text-gray-300">
                 <td class="w-[5rem] px-1 text-right align-top">
-                  <span class="font-bold">
-                    保存方式
-                  </span>
+                  <span class="font-bold"> 保存方式 </span>
                 </td>
                 <td class="px-1 text-left align-top">
                   <span class="">
@@ -115,9 +171,7 @@ function closeFullscreen() {
               </tr>
               <tr class="text-lg text-gray-700 dark:text-gray-300">
                 <td class="w-[5rem] px-1 text-right align-top">
-                  <span class="font-bold">
-                    保存期限
-                  </span>
+                  <span class="font-bold"> 保存期限 </span>
                 </td>
                 <td class="px-1 text-left align-top">
                   <span class="">
@@ -141,8 +195,10 @@ function closeFullscreen() {
               立即購買
             </button>
             -->
-            <a href="/contact"
-              class="px-4 py-2 text-xl font-bold text-indigo-600 dark:text-indigo-300 border border-indigo-600 dark:border-indigo-300  rounded-full text-center hover:bg-indigo-600 hover:text-white transition">
+            <a
+              href="/contact"
+              class="px-4 py-2 text-xl font-bold text-indigo-600 dark:text-indigo-300 border border-indigo-600 dark:border-indigo-300 rounded-full text-center hover:bg-indigo-600 hover:text-white transition"
+            >
               購買請洽客服
             </a>
           </div>

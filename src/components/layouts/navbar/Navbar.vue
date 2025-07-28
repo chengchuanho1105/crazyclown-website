@@ -11,7 +11,8 @@ const mobileMenuRef = ref<InstanceType<typeof MobileMenu>>()
 
 <template>
   <nav
-    class="fixed top-0 z-50 w-full h-16 bg-white/50 dark:bg-black/50 backdrop-blur-lg transition-all duration-500 shadow-lg">
+    class="fixed top-0 z-50 w-full h-16 bg-white/50 dark:bg-black/50 backdrop-blur-lg transition-all duration-500 shadow-lg"
+  >
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         <Brand />

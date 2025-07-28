@@ -34,7 +34,8 @@ interface HomeCarouselData {
   videoType?: 'mp4' | 'webm' | unknown
 }
 
-const HOMECAROUSELDATA_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQl-nHGxTEuXLa7SO8bJrWoZLPI-7CacUzyYiJv6OtQIzRJbkZSqHm_pIqqOnZCcYdUi95AUB6B2xgb/pub?output=csv'
+const HOMECAROUSELDATA_CSV_URL =
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQl-nHGxTEuXLa7SO8bJrWoZLPI-7CacUzyYiJv6OtQIzRJbkZSqHm_pIqqOnZCcYdUi95AUB6B2xgb/pub?output=csv'
 
 const mapHomeCarouselData = (item: Record<string, string>): HomeCarouselData => ({
   title: item.title || '',
@@ -46,13 +47,10 @@ const mapHomeCarouselData = (item: Record<string, string>): HomeCarouselData => 
   videoType: item.videoType || 'mp4',
 })
 
-const {
-  data: homeCarouselData,
-  load: loadHomeCarouselData
-} = useHybridData<HomeCarouselData>(
+const { data: homeCarouselData, load: loadHomeCarouselData } = useHybridData<HomeCarouselData>(
   localHomeCarouselData as HomeCarouselData[],
   HOMECAROUSELDATA_CSV_URL,
-  mapHomeCarouselData
+  mapHomeCarouselData,
 )
 
 onMounted(() => {
@@ -67,13 +65,20 @@ onMounted(() => {
       <UnderConstructionBanner />
       <Banner>
         <template v-if="isHomePage">
-          <ImageCarousel :items="homeCarouselData" :auto-play="true" :interval="5000" :show-indicators="true"
-            :show-arrows="true" />
+          <ImageCarousel
+            :items="homeCarouselData"
+            :auto-play="true"
+            :interval="5000"
+            :show-indicators="true"
+            :show-arrows="true"
+          />
         </template>
         <template v-else>
           <div class="relative w-full h-full bg-black">
-            <img src="/src/assets/media/og-img/yuanpinxiang/og-img.png"
-              class="absolute inset-0 w-full h-full object-cover">
+            <img
+              src="/src/assets/media/og-img/yuanpinxiang/og-img.png"
+              class="absolute inset-0 w-full h-full object-cover"
+            />
             <div class="absolute inset-0 bg-black/40"></div>
             <div class="relative z-10 flex flex-col items-center justify-center h-full">
               <h1 class="text-4xl md:text-6xl font-extrabold text-white"></h1>

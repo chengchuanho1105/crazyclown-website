@@ -38,12 +38,11 @@ const scrollPastBanner = () => {
 </script>
 
 <template>
-  <section id="banner" :class="[
-    'relative w-full overflow-hidden',
-    containerClass
-  ]">
+  <section id="banner" :class="['relative w-full overflow-hidden', containerClass]">
     <!-- 預設背景 -->
-    <div class="absolute inset-0 bg-gradient-to-br from-sky-100 to-sky-200 dark:from-sky-900 dark:to-sky-800"></div>
+    <div
+      class="absolute inset-0 bg-gradient-to-br from-sky-100 to-sky-200 dark:from-sky-900 dark:to-sky-800"
+    ></div>
 
     <!-- 內容插槽 -->
     <div class="relative z-10 h-full w-full">
@@ -52,9 +51,13 @@ const scrollPastBanner = () => {
 
     <!-- 首頁向下提示 -->
     <Transition name="fade">
-      <div v-if="isHomePage"
+      <div
+        v-if="isHomePage"
         class="absolute left-1/2 bottom-8 -translate-x-1/2 flex flex-col items-center z-20 select-none cursor-pointer"
-        style="pointer-events: auto;" @click="scrollPastBanner" data-aos="fade-up">
+        style="pointer-events: auto"
+        @click="scrollPastBanner"
+        data-aos="fade-up"
+      >
         <span class="animate-bounce text-3xl text-sky-400 dark:text-sky-200">↓</span>
         <span class="mt-1 text-xs text-sky-500 dark:text-sky-200 tracking-wide">向下瀏覽</span>
       </div>

@@ -72,7 +72,7 @@ const updateHeight = () => {
     const style = getComputedStyle(gridEl)
     gapHeight = parseInt(style.rowGap || '0', 10)
   }
-  const collapsedHeight = singleVideoHeight > 0 ? (singleVideoHeight + gapHeight * 10) : 400
+  const collapsedHeight = singleVideoHeight > 0 ? singleVideoHeight + gapHeight * 10 : 400
   maxHeight.value = showAllVideos.value ? `${scrollHeight}px` : `${collapsedHeight}px`
 }
 
@@ -92,7 +92,7 @@ const updateArticleHeight = () => {
     const style = getComputedStyle(gridEl)
     gapHeight = parseInt(style.rowGap || '0', 10)
   }
-  const collapsedHeight = singleArticleHeight > 0 ? (singleArticleHeight + gapHeight * 10) : 400
+  const collapsedHeight = singleArticleHeight > 0 ? singleArticleHeight + gapHeight * 10 : 400
   articleMaxHeight.value = showAllArticles.value ? `${scrollHeight}px` : `${collapsedHeight}px`
 }
 
@@ -130,27 +130,30 @@ onUnmounted(() => {
 <template>
   <div class="max-w-7xl mx-auto p-8">
     <DecorSection ref="mediaSectionRef" main-title="媒體介紹" en-title="MEDIA INTRODUCTION">
-
-
-
       <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg overflow-hidden">
         <!-- 標籤頁導航 -->
         <div class="flex border-b border-gray-200 dark:border-gray-700">
-          <button @click="activeTab = 'videos'" :class="[
-            'flex-1 py-4 px-6 text-center font-medium transition-colors',
-            activeTab === 'videos'
-              ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-          ]">
+          <button
+            @click="activeTab = 'videos'"
+            :class="[
+              'flex-1 py-4 px-6 text-center font-medium transition-colors',
+              activeTab === 'videos'
+                ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+            ]"
+          >
             <i class="bi bi-play-circle-fill mr-2"></i>
             影音介紹
           </button>
-          <button @click="activeTab = 'articles'" :class="[
-            'flex-1 py-4 px-6 text-center font-medium transition-colors',
-            activeTab === 'articles'
-              ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-          ]">
+          <button
+            @click="activeTab = 'articles'"
+            :class="[
+              'flex-1 py-4 px-6 text-center font-medium transition-colors',
+              activeTab === 'articles'
+                ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+            ]"
+          >
             <i class="bi bi-journal-text mr-2"></i>
             文章介紹
           </button>
@@ -161,18 +164,33 @@ onUnmounted(() => {
           <!-- 影音介紹 -->
           <div v-if="activeTab === 'videos'" class="relative">
             <!-- 外層包覆區塊 -->
-            <div ref="wrapperRef" class="relative overflow-hidden transition-[max-height] duration-700 ease-in-out"
-              :style="{ maxHeight }">
+            <div
+              ref="wrapperRef"
+              class="relative overflow-hidden transition-[max-height] duration-700 ease-in-out"
+              :style="{ maxHeight }"
+            >
               <!-- 所有影片 -->
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div v-for="(video, idx) in videos" :key="video.id" :ref="idx === 0 ? setFirstCardRef : undefined"
-                  class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 transition-all duration-300">
+                <div
+                  v-for="(video, idx) in videos"
+                  :key="video.id"
+                  :ref="idx === 0 ? setFirstCardRef : undefined"
+                  class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 transition-all duration-300"
+                >
                   <div class="aspect-video bg-gray-200 dark:bg-gray-700 rounded-lg mb-3">
-                    <iframe :src="video.embedUrl" class="w-full h-full rounded-lg" frameborder="0"
-                      allowfullscreen></iframe>
+                    <iframe
+                      :src="video.embedUrl"
+                      class="w-full h-full rounded-lg"
+                      frameborder="0"
+                      allowfullscreen
+                    ></iframe>
                   </div>
-                  <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">{{ video.title }}</h4>
-                  <p class="text-gray-600 dark:text-gray-400 text-xs mb-2 line-clamp-2">{{ video.description }}</p>
+                  <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                    {{ video.title }}
+                  </h4>
+                  <p class="text-gray-600 dark:text-gray-400 text-xs mb-2 line-clamp-2">
+                    {{ video.description }}
+                  </p>
                   <div class="flex items-center gap-3 text-xs text-gray-500">
                     <span>{{ video.duration }}</span>
                     <span>{{ video.views }}</span>
@@ -180,25 +198,30 @@ onUnmounted(() => {
                 </div>
                 <!-- 沒有更多了提示卡片（影片） -->
                 <div
-                  class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 flex items-center justify-center text-gray-400 text-base font-semibold col-span-1 lg:col-span-2 select-none">
+                  class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 flex items-center justify-center text-gray-400 text-base font-semibold col-span-1 lg:col-span-2 select-none"
+                >
                   — 沒有更多了 —
                 </div>
               </div>
 
               <!-- 未展開時顯示的柔邊遮罩 -->
-              <div v-if="!showAllVideos"
-                class="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none">
-              </div>
+              <div
+                v-if="!showAllVideos"
+                class="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none"
+              ></div>
             </div>
 
             <!-- 控制按鈕 -->
             <div class="text-center mt-8">
-              <button v-if="videos.length >= 1"
-                class="inline-flex items-center gap-2 px-5 py-2 text-indigo-700 bg-indigo-100 rounded-md
-                             hover:bg-indigo-200 transition dark:text-indigo-300 dark:bg-indigo-900 dark:hover:bg-indigo-800"
-                @click="handleToggleVideos">
+              <button
+                v-if="videos.length >= 1"
+                class="inline-flex items-center gap-2 px-5 py-2 text-indigo-700 bg-indigo-100 rounded-md hover:bg-indigo-200 transition dark:text-indigo-300 dark:bg-indigo-900 dark:hover:bg-indigo-800"
+                @click="handleToggleVideos"
+              >
                 <span>{{ showAllVideos ? '收合內容' : '瀏覽全部' }}</span>
-                <i :class="showAllVideos ? 'bi bi-chevron-double-up' : 'bi bi-chevron-double-down'"></i>
+                <i
+                  :class="showAllVideos ? 'bi bi-chevron-double-up' : 'bi bi-chevron-double-down'"
+                ></i>
               </button>
             </div>
           </div>
@@ -206,19 +229,34 @@ onUnmounted(() => {
           <!-- 文章介紹 -->
           <div v-if="activeTab === 'articles'" class="relative">
             <!-- 外層包覆區塊 -->
-            <div ref="articleWrapperRef"
+            <div
+              ref="articleWrapperRef"
               class="relative overflow-hidden transition-[max-height] duration-700 ease-in-out"
-              :style="{ maxHeight: articleMaxHeight }">
+              :style="{ maxHeight: articleMaxHeight }"
+            >
               <!-- 所有文章 -->
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div v-for="(article, idx) in articles" :key="article.id"
+                <div
+                  v-for="(article, idx) in articles"
+                  :key="article.id"
                   :ref="idx === 0 ? setFirstArticleRef : undefined"
-                  class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 transition-all duration-300">
-                  <div class="aspect-video bg-gray-200 dark:bg-gray-700 rounded-lg mb-3 overflow-hidden">
-                    <img :src="article.image" :alt="article.title" class="w-full h-full object-cover">
+                  class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 transition-all duration-300"
+                >
+                  <div
+                    class="aspect-video bg-gray-200 dark:bg-gray-700 rounded-lg mb-3 overflow-hidden"
+                  >
+                    <img
+                      :src="article.image"
+                      :alt="article.title"
+                      class="w-full h-full object-cover"
+                    />
                   </div>
-                  <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">{{ article.title }}</h4>
-                  <p class="text-gray-600 dark:text-gray-400 text-xs mb-2 line-clamp-2">{{ article.excerpt }}</p>
+                  <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                    {{ article.title }}
+                  </h4>
+                  <p class="text-gray-600 dark:text-gray-400 text-xs mb-2 line-clamp-2">
+                    {{ article.excerpt }}
+                  </p>
                   <div class="flex items-center justify-between text-xs text-gray-500">
                     <span>{{ article.source }}</span>
                     <span>{{ article.readTime }}</span>
@@ -226,31 +264,35 @@ onUnmounted(() => {
                 </div>
                 <!-- 沒有更多了提示卡片（文章） -->
                 <div
-                  class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 flex items-center justify-center text-gray-400 text-base font-semibold col-span-1 lg:col-span-2 select-none">
+                  class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 flex items-center justify-center text-gray-400 text-base font-semibold col-span-1 lg:col-span-2 select-none"
+                >
                   — 沒有更多了 —
                 </div>
               </div>
 
               <!-- 未展開時顯示的柔邊遮罩 -->
-              <div v-if="!showAllArticles"
-                class="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none">
-              </div>
+              <div
+                v-if="!showAllArticles"
+                class="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none"
+              ></div>
             </div>
 
             <!-- 控制按鈕 -->
             <div class="text-center mt-8">
-              <button v-if="articles.length >= 1"
-                class="inline-flex items-center gap-2 px-5 py-2 text-indigo-700 bg-indigo-100 rounded-md
-                             hover:bg-indigo-200 transition dark:text-indigo-300 dark:bg-indigo-900 dark:hover:bg-indigo-800"
-                @click="handleToggleArticles">
+              <button
+                v-if="articles.length >= 1"
+                class="inline-flex items-center gap-2 px-5 py-2 text-indigo-700 bg-indigo-100 rounded-md hover:bg-indigo-200 transition dark:text-indigo-300 dark:bg-indigo-900 dark:hover:bg-indigo-800"
+                @click="handleToggleArticles"
+              >
                 <span>{{ showAllArticles ? '收合內容' : '瀏覽全部' }}</span>
-                <i :class="showAllArticles ? 'bi bi-chevron-double-up' : 'bi bi-chevron-double-down'"></i>
+                <i
+                  :class="showAllArticles ? 'bi bi-chevron-double-up' : 'bi bi-chevron-double-down'"
+                ></i>
               </button>
             </div>
           </div>
         </div>
       </div>
-
     </DecorSection>
   </div>
 </template>

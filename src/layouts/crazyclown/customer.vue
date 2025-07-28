@@ -17,7 +17,9 @@ import Footer from '@/components/layouts/Footer.vue'
       <Banner />
       <Breadcrumb />
       -->
-      <h1 class="text-4xl font-bold text-zinc-900 dark:text-zinc-100">Layout-CrazyClown-Customer</h1>
+      <h1 class="text-4xl font-bold text-zinc-900 dark:text-zinc-100">
+        Layout-CrazyClown-Customer
+      </h1>
     </header>
     <main>
       <RouterView />

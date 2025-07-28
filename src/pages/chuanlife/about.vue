@@ -2,28 +2,36 @@
 defineOptions({ name: 'ChuanLife-About' })
 
 // ---------- 組件引入區（版面用） ----------
-import DecorSection from '@/components/DecorSection.vue';
+import DecorSection from '@/components/DecorSection.vue'
 </script>
 
 <template>
   <div class="max-w-7xl mx-auto px-4 py-10">
     <DecorSection mainTitle="銓生活服務工作室簡介" enTitle="About Chuan Life">
       <div class="mb-8">
-        <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-200 mb-2 flex items-center gap-2">
+        <h2
+          class="text-2xl font-bold text-blue-700 dark:text-blue-200 mb-2 flex items-center gap-2"
+        >
           <i class="bi bi-stars"></i> 品牌故事
         </h2>
         <p class="text-lg text-zinc-700 dark:text-zinc-200 mb-2">
-          銓生活服務工作室成立於 2023 年，由一群熱愛技術、追求品質的專業人士共同創立。我們致力於提供優質的網站設計、貼圖代購、3C產品代購和服務，為您的生活提供便利與無限可能。
+          銓生活服務工作室成立於 2023
+          年，由一群熱愛技術、追求品質的專業人士共同創立。我們致力於提供優質的網站設計、貼圖代購、3C產品代購和服務，為您的生活提供便利與無限可能。
         </p>
         <p class="text-base text-zinc-600 dark:text-zinc-400 mb-2">
-          <span class="font-bold text-blue-600 dark:text-blue-300">創立理念：</span>「以專業技術為基礎，以客戶需求為導向，為您提供最優質的服務體驗！」
+          <span class="font-bold text-blue-600 dark:text-blue-300">創立理念：</span
+          >「以專業技術為基礎，以客戶需求為導向，為您提供最優質的服務體驗！」
         </p>
-        <p class="italic text-blue-700 dark:text-blue-200 mb-2">「專業服務，品質保證，為您的生活增添便利！」</p>
-        <hr class="my-4 border-zinc-200 dark:border-zinc-700">
+        <p class="italic text-blue-700 dark:text-blue-200 mb-2">
+          「專業服務，品質保證，為您的生活增添便利！」
+        </p>
+        <hr class="my-4 border-zinc-200 dark:border-zinc-700" />
       </div>
       <div class="mb-8 grid grid-cols-1 md:grid-cols-2 gap-8">
         <div class="bg-blue-50 dark:bg-blue-900 rounded-xl p-6 border-l-4 border-blue-400">
-          <h3 class="text-lg font-bold text-blue-700 dark:text-blue-200 mb-2 flex items-center gap-2">
+          <h3
+            class="text-lg font-bold text-blue-700 dark:text-blue-200 mb-2 flex items-center gap-2"
+          >
             <i class="bi bi-lightbulb"></i> 工作室理念
           </h3>
           <ul class="list-disc pl-6 text-blue-800 dark:text-blue-100 space-y-1">
@@ -36,7 +44,9 @@ import DecorSection from '@/components/DecorSection.vue';
           </ul>
         </div>
         <div class="bg-zinc-50 dark:bg-zinc-800 rounded-xl p-6 border-l-4 border-zinc-400">
-          <h3 class="text-lg font-bold text-zinc-700 dark:text-zinc-100 mb-2 flex items-center gap-2">
+          <h3
+            class="text-lg font-bold text-zinc-700 dark:text-zinc-100 mb-2 flex items-center gap-2"
+          >
             <i class="bi bi-stars"></i> 服務特色
           </h3>
           <ul class="space-y-2">
@@ -50,7 +60,9 @@ import DecorSection from '@/components/DecorSection.vue';
         </div>
       </div>
       <div class="mb-8 bg-green-50 dark:bg-green-900 rounded-xl p-6 border-l-4 border-green-400">
-        <h3 class="text-lg font-bold text-green-700 dark:text-green-200 mb-2 flex items-center gap-2">
+        <h3
+          class="text-lg font-bold text-green-700 dark:text-green-200 mb-2 flex items-center gap-2"
+        >
           <i class="bi bi-person-heart"></i> 我們的承諾
         </h3>
         <p class="text-green-800 dark:text-green-100 mb-2">
@@ -62,14 +74,22 @@ import DecorSection from '@/components/DecorSection.vue';
           <li>持續追蹤進度，適時調整策略</li>
           <li>提供完整的售後服務與支援</li>
         </ul>
-        <div class="text-green-700 dark:text-green-200 text-sm mb-2">※ 我們重視每位客戶的隱私，所有交易內容都將嚴格保密</div>
+        <div class="text-green-700 dark:text-green-200 text-sm mb-2">
+          ※ 我們重視每位客戶的隱私，所有交易內容都將嚴格保密
+        </div>
         <div class="flex flex-wrap gap-4 mt-2">
-          <a href="mailto:contact@chuan.life"
-            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-bold shadow hover:bg-blue-700 transition">
+          <a
+            href="mailto:contact@chuan.life"
+            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-bold shadow hover:bg-blue-700 transition"
+          >
             <i class="bi bi-envelope mr-2"></i> 聯絡 Email
           </a>
-          <a href="https://line.me/R/ti/p/0chuan" target="_blank" rel="noopener noreferrer"
-            class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg font-bold shadow hover:bg-green-700 transition">
+          <a
+            href="https://line.me/R/ti/p/0chuan"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg font-bold shadow hover:bg-green-700 transition"
+          >
             <i class="bi bi-line mr-2"></i> 加入 Line
           </a>
         </div>
@@ -77,7 +97,9 @@ import DecorSection from '@/components/DecorSection.vue';
 
       <!-- 服務項目詳細介紹 -->
       <div class="mb-8">
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+        <h3
+          class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2"
+        >
           <i class="bi bi-gear"></i> 服務項目詳介
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -85,7 +107,9 @@ import DecorSection from '@/components/DecorSection.vue';
             <div class="text-center mb-4">
               <i class="bi bi-code-slash text-3xl text-blue-600 dark:text-blue-400"></i>
             </div>
-            <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 text-center">網站設計</h4>
+            <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 text-center">
+              網站設計
+            </h4>
             <p class="text-gray-600 dark:text-gray-300 text-sm text-center mb-4">
               專業的網站設計與開發服務，從概念發想到上線維護，為您打造完美的網路形象。
             </p>
@@ -102,7 +126,9 @@ import DecorSection from '@/components/DecorSection.vue';
             <div class="text-center mb-4">
               <i class="bi bi-emoji-smile text-3xl text-green-600 dark:text-green-400"></i>
             </div>
-            <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 text-center">貼圖代購</h4>
+            <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 text-center">
+              貼圖代購
+            </h4>
             <p class="text-gray-600 dark:text-gray-300 text-sm text-center mb-4">
               專業的貼圖代購服務，讓您輕鬆擁有各種可愛、實用的貼圖，豐富您的通訊體驗。
             </p>
@@ -119,7 +145,9 @@ import DecorSection from '@/components/DecorSection.vue';
             <div class="text-center mb-4">
               <i class="bi bi-phone text-3xl text-yellow-600 dark:text-yellow-400"></i>
             </div>
-            <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 text-center">3C產品代購</h4>
+            <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3 text-center">
+              3C產品代購
+            </h4>
             <p class="text-gray-600 dark:text-gray-300 text-sm text-center mb-4">
               專業的3C產品代購服務，為您精選優質產品，提供完整的購買諮詢與售後服務。
             </p>

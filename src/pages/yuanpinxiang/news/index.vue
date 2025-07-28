@@ -2,9 +2,9 @@
 defineOptions({ name: 'ChuanLife-News' })
 
 // ---------- Vue 核心工具函式 ----------
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import type { Ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 // ---------- 組件引入區（版面用） ----------
 import DecorSection from '@/components/DecorSection.vue'
@@ -32,7 +32,8 @@ interface NewsData {
 }
 
 /** 2. 取得 News Data CSV 來源 */
-const NEWS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpK4IAJ0lQCD_pEHh4smflPpCiMbgsMqUfp24uQc-0Ru87ZN2izl7W-O9GbL97Ej6mPGb1eHfd37hx/pub?output=csv'
+const NEWS_CSV_URL =
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpK4IAJ0lQCD_pEHh4smflPpCiMbgsMqUfp24uQc-0Ru87ZN2izl7W-O9GbL97Ej6mPGb1eHfd37hx/pub?output=csv'
 
 /** 3. 定義 CSV 欄位轉換函式 */
 const mapNewsData = (item: Record<string, string>): NewsData => {
@@ -45,19 +46,11 @@ const mapNewsData = (item: Record<string, string>): NewsData => {
     image: item.image || '',
     tags: item.tags || '',
     title: item.title || '',
-    content: item.content || ''
+    content: item.content || '',
   }
 }
 
-const {
-  data: newsData,
-  loading: newsDataLoading,
-  error: newsDataError,
-  load: loadNewsData
-} = useSheetData<NewsData>(
-  NEWS_CSV_URL,
-  mapNewsData
-)
+const { data: newsData, load: loadNewsData } = useSheetData<NewsData>(NEWS_CSV_URL, mapNewsData)
 
 onMounted(() => {
   loadNewsData()
@@ -67,18 +60,27 @@ onMounted(() => {
 const PAGE_SIZE = 6
 
 // 過濾資料
-const regularNewsList = computed(() => newsData.value.filter(n => n.slot !== 'none' && n.slot !== 'featured'))
-const featuredNewsList = computed(() => newsData.value.filter(n => n.slot === 'featured'))
+const regularNewsList = computed(() =>
+  newsData.value.filter((n) => n.slot !== 'none' && n.slot !== 'featured'),
+)
+const featuredNewsList = computed(() => newsData.value.filter((n) => n.slot === 'featured'))
 
 // 最新消息分頁
 const regularPage = ref(1)
 const regularTotalPages = computed(() => Math.ceil(regularNewsList.value.length / PAGE_SIZE))
-const regularPaged = computed(() => regularNewsList.value.slice((regularPage.value - 1) * PAGE_SIZE, regularPage.value * PAGE_SIZE))
+const regularPaged = computed(() =>
+  regularNewsList.value.slice((regularPage.value - 1) * PAGE_SIZE, regularPage.value * PAGE_SIZE),
+)
 
 // 特色新聞分頁
 const featuredPage = ref(1)
 const featuredTotalPages = computed(() => Math.ceil(featuredNewsList.value.length / PAGE_SIZE))
-const featuredPaged = computed(() => featuredNewsList.value.slice((featuredPage.value - 1) * PAGE_SIZE, featuredPage.value * PAGE_SIZE))
+const featuredPaged = computed(() =>
+  featuredNewsList.value.slice(
+    (featuredPage.value - 1) * PAGE_SIZE,
+    featuredPage.value * PAGE_SIZE,
+  ),
+)
 
 // 同頁面跳轉新聞詳情
 const router = useRouter()
@@ -89,7 +91,12 @@ function openNewsDetail(news: NewsData) {
 // 日期格式化
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
-  return date.toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })
+  return date.toLocaleDateString('zh-TW', {
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+  })
 }
 
 const regularSectionRef = ref<InstanceType<typeof DecorSection> | null>(null)
@@ -112,7 +119,6 @@ function goToFeaturedPage(page: number) {
   scrollToSection(featuredSectionRef)
   featuredPage.value = page
 }
-
 </script>
 
 <template>
@@ -121,32 +127,44 @@ function goToFeaturedPage(page: number) {
     <DecorSection ref="regularSectionRef" main-title="最新消息" en-title="LATEST NEWS">
       <div v-if="regularPaged.length > 0" class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div v-for="news in regularPaged" :key="news.id"
+          <div
+            v-for="news in regularPaged"
+            :key="news.id"
             class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group"
-            @click="openNewsDetail(news)">
+            @click="openNewsDetail(news)"
+          >
             <div class="aspect-video bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <img :src="news.image" :alt="news.title"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+              <img
+                :src="news.image"
+                :alt="news.title"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
             </div>
             <div class="p-6">
               <div class="flex items-center gap-2 mb-3">
                 <span
-                  class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs font-medium rounded-full">
+                  class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs font-medium rounded-full"
+                >
                   {{ news.category }}
                 </span>
-                <span v-if="news.slot && news.slot !== 'none' && news.slot !== 'featured'"
-                  class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full">
+                <span
+                  v-if="news.slot && news.slot !== 'none' && news.slot !== 'featured'"
+                  class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full"
+                >
                   {{ news.slot }}
                 </span>
               </div>
               <h3
-                class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
+              >
                 {{ news.title }}
               </h3>
               <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
                 {{ news.content }}
               </p>
-              <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+              <div
+                class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
+              >
                 <span>{{ formatDate(news.date || '') }}</span>
                 <span>{{ news.author }}</span>
               </div>
@@ -155,22 +173,33 @@ function goToFeaturedPage(page: number) {
         </div>
         <!-- 分頁控制 -->
         <div v-if="regularTotalPages > 1" class="flex justify-center items-center gap-2 mt-6">
-          <button @click="goToRegularPage(regularPage - 1)" :disabled="regularPage === 1"
-            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700">
+          <button
+            @click="goToRegularPage(regularPage - 1)"
+            :disabled="regularPage === 1"
+            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+          >
             上一頁
           </button>
           <div class="flex gap-1">
-            <button v-for="page in regularTotalPages" :key="page" @click="goToRegularPage(page)" :class="[
-              'px-3 py-2 text-sm font-medium rounded-md',
-              regularPage === page
-                ? 'bg-indigo-600 text-white'
-                : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700'
-            ]">
+            <button
+              v-for="page in regularTotalPages"
+              :key="page"
+              @click="goToRegularPage(page)"
+              :class="[
+                'px-3 py-2 text-sm font-medium rounded-md',
+                regularPage === page
+                  ? 'bg-indigo-600 text-white'
+                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700',
+              ]"
+            >
               {{ page }}
             </button>
           </div>
-          <button @click="goToRegularPage(regularPage + 1)" :disabled="regularPage === regularTotalPages"
-            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700">
+          <button
+            @click="goToRegularPage(regularPage + 1)"
+            :disabled="regularPage === regularTotalPages"
+            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+          >
             下一頁
           </button>
         </div>
@@ -182,36 +211,50 @@ function goToFeaturedPage(page: number) {
     <DecorSection ref="featuredSectionRef" main-title="特色新聞" en-title="FEATURED NEWS">
       <div v-if="featuredPaged.length > 0" class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div v-for="news in featuredPaged" :key="news.id"
+          <div
+            v-for="news in featuredPaged"
+            :key="news.id"
             class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group"
-            @click="openNewsDetail(news)">
+            @click="openNewsDetail(news)"
+          >
             <div class="aspect-video bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <img :src="news.image" :alt="news.title"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+              <img
+                :src="news.image"
+                :alt="news.title"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
             </div>
             <div class="p-6">
               <div class="flex items-center gap-2 mb-3">
                 <span
-                  class="px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 text-xs font-medium rounded-full">
+                  class="px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 text-xs font-medium rounded-full"
+                >
                   {{ news.category }}
                 </span>
-                <span v-if="news.featured"
-                  class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded-full">
+                <span
+                  v-if="news.featured"
+                  class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded-full"
+                >
                   特色
                 </span>
-                <span v-if="news.slot && news.slot !== 'none'"
-                  class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full">
+                <span
+                  v-if="news.slot && news.slot !== 'none'"
+                  class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full"
+                >
                   {{ news.slot }}
                 </span>
               </div>
               <h3
-                class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
+              >
                 {{ news.title }}
               </h3>
               <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
                 {{ news.content }}
               </p>
-              <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+              <div
+                class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
+              >
                 <span>{{ formatDate(news.date || '') }}</span>
                 <span>{{ news.author }}</span>
               </div>
@@ -220,22 +263,33 @@ function goToFeaturedPage(page: number) {
         </div>
         <!-- 分頁控制 -->
         <div v-if="featuredTotalPages > 1" class="flex justify-center items-center gap-2 mt-6">
-          <button @click="goToFeaturedPage(featuredPage - 1)" :disabled="featuredPage === 1"
-            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700">
+          <button
+            @click="goToFeaturedPage(featuredPage - 1)"
+            :disabled="featuredPage === 1"
+            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+          >
             上一頁
           </button>
           <div class="flex gap-1">
-            <button v-for="page in featuredTotalPages" :key="page" @click="goToFeaturedPage(page)" :class="[
-              'px-3 py-2 text-sm font-medium rounded-md',
-              featuredPage === page
-                ? 'bg-indigo-600 text-white'
-                : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700'
-            ]">
+            <button
+              v-for="page in featuredTotalPages"
+              :key="page"
+              @click="goToFeaturedPage(page)"
+              :class="[
+                'px-3 py-2 text-sm font-medium rounded-md',
+                featuredPage === page
+                  ? 'bg-indigo-600 text-white'
+                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700',
+              ]"
+            >
               {{ page }}
             </button>
           </div>
-          <button @click="goToFeaturedPage(featuredPage + 1)" :disabled="featuredPage === featuredTotalPages"
-            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700">
+          <button
+            @click="goToFeaturedPage(featuredPage + 1)"
+            :disabled="featuredPage === featuredTotalPages"
+            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+          >
             下一頁
           </button>
         </div>

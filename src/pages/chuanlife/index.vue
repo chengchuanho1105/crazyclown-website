@@ -10,9 +10,9 @@ import { useCurrentBrand } from '@/composables/useCurrentBrand'
 const { brandInfo } = useCurrentBrand()
 
 type Partner = {
-  name: string,
-  url: string,
-  logo: string,
+  name: string
+  url: string
+  logo: string
 }
 
 const partners = [
@@ -27,23 +27,28 @@ const partners = [
     logo: 'https://i.meee.com.tw/17D0l36.png',
   },
 ] as Partner[]
-
 </script>
 
 <template>
   <div class="min-h-screen">
-
     <section id="home-partners">
       <div class="container mx-auto p-8">
-
         <section class="my-16">
           <h2 class="text-3xl font-semibold text-center mb-10 text-gray-800">我們的合作夥伴</h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            <a v-for="partner in partners" :key="partner.name" :href="partner.url" target="_blank"
+            <a
+              v-for="partner in partners"
+              :key="partner.name"
+              :href="partner.url"
+              target="_blank"
               rel="noopener noreferrer"
-              class="flex flex-col items-center p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 transform hover:scale-105">
-              <img :src="partner.logo" :alt="`${partner.name} Logo`"
-                class="h-40 w-auto mb-4 object-contain rounded-xl" />
+              class="flex flex-col items-center p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 transform hover:scale-105"
+            >
+              <img
+                :src="partner.logo"
+                :alt="`${partner.name} Logo`"
+                class="h-40 w-auto mb-4 object-contain rounded-xl"
+              />
               <p class="text-lg font-medium text-gray-700 text-center">{{ partner.name }}</p>
             </a>
           </div>
@@ -53,9 +58,7 @@ const partners = [
           </div>
         </section>
 
-        <p class="text-center text-gray-600 mt-16">
-          探索我們的服務，讓生活更美好。
-        </p>
+        <p class="text-center text-gray-600 mt-16">探索我們的服務，讓生活更美好。</p>
       </div>
     </section>
 
@@ -87,7 +90,8 @@ const partners = [
               </div>
             </div>
             <div
-              class="bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-800 rounded-2xl p-8">
+              class="bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-800 rounded-2xl p-8"
+            >
               <div class="text-center">
                 <i class="bi bi-lightning-fill text-6xl text-blue-600 dark:text-blue-400 mb-4"></i>
                 <h3 class="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-4">我們的承諾</h3>
@@ -114,7 +118,9 @@ const partners = [
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div class="bg-white dark:bg-gray-700 rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+          <div
+            class="bg-white dark:bg-gray-700 rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow"
+          >
             <div class="text-center mb-6">
               <i class="bi bi-code-slash text-4xl text-blue-600 dark:text-blue-400"></i>
             </div>
@@ -134,7 +140,9 @@ const partners = [
             </div>
           </div>
 
-          <div class="bg-white dark:bg-gray-700 rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+          <div
+            class="bg-white dark:bg-gray-700 rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow"
+          >
             <div class="text-center mb-6">
               <i class="bi bi-emoji-smile text-4xl text-green-600 dark:text-green-400"></i>
             </div>
@@ -154,7 +162,9 @@ const partners = [
             </div>
           </div>
 
-          <div class="bg-white dark:bg-gray-700 rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow">
+          <div
+            class="bg-white dark:bg-gray-700 rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow"
+          >
             <div class="text-center mb-6">
               <i class="bi bi-phone text-4xl text-yellow-600 dark:text-yellow-400"></i>
             </div>
@@ -184,15 +194,14 @@ const partners = [
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             為什麼選擇我們
           </h2>
-          <p class="text-xl text-gray-600 dark:text-gray-300">
-            專業、可靠、貼心的服務體驗
-          </p>
+          <p class="text-xl text-gray-600 dark:text-gray-300">專業、可靠、貼心的服務體驗</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div class="text-center">
             <div
-              class="bg-blue-100 dark:bg-blue-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+              class="bg-blue-100 dark:bg-blue-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4"
+            >
               <i class="bi bi-award text-2xl text-blue-600 dark:text-blue-400"></i>
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">專業品質</h3>
@@ -201,7 +210,8 @@ const partners = [
 
           <div class="text-center">
             <div
-              class="bg-green-100 dark:bg-green-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+              class="bg-green-100 dark:bg-green-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4"
+            >
               <i class="bi bi-clock text-2xl text-green-600 dark:text-green-400"></i>
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">快速服務</h3>
@@ -210,7 +220,8 @@ const partners = [
 
           <div class="text-center">
             <div
-              class="bg-yellow-100 dark:bg-yellow-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+              class="bg-yellow-100 dark:bg-yellow-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4"
+            >
               <i class="bi bi-heart text-2xl text-yellow-600 dark:text-yellow-400"></i>
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">貼心關懷</h3>
@@ -219,7 +230,8 @@ const partners = [
 
           <div class="text-center">
             <div
-              class="bg-purple-100 dark:bg-purple-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+              class="bg-purple-100 dark:bg-purple-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4"
+            >
               <i class="bi bi-shield-check text-2xl text-purple-600 dark:text-purple-400"></i>
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">安全可靠</h3>
@@ -236,16 +248,12 @@ const partners = [
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             聯絡我們
           </h2>
-          <p class="text-xl text-gray-600 dark:text-gray-300">
-            讓我們為您提供最優質的服務
-          </p>
+          <p class="text-xl text-gray-600 dark:text-gray-300">讓我們為您提供最優質的服務</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div>
-            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-              聯絡資訊
-            </h3>
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">聯絡資訊</h3>
             <div class="space-y-4">
               <div class="flex items-center">
                 <i class="bi bi-envelope text-blue-600 dark:text-blue-400 mr-3 text-xl"></i>
@@ -253,44 +261,55 @@ const partners = [
               </div>
               <div class="flex items-center">
                 <i class="bi bi-line text-green-600 dark:text-green-400 mr-3 text-xl"></i>
-                <span class="text-gray-700 dark:text-gray-200">Line: {{ brandInfo?.social?.line?.id }}</span>
+                <span class="text-gray-700 dark:text-gray-200"
+                  >Line: {{ brandInfo?.social?.line?.id }}</span
+                >
               </div>
             </div>
 
             <div class="mt-8">
               <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">服務時間</h4>
               <p class="text-gray-600 dark:text-gray-300">
-                週一至週五：09:00 - 18:00<br>
-                週六：10:00 - 16:00<br>
+                週一至週五：09:00 - 18:00<br />
+                週六：10:00 - 16:00<br />
                 週日：休息
               </p>
             </div>
           </div>
 
           <div class="bg-white dark:bg-gray-700 rounded-xl p-8">
-            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-              立即諮詢
-            </h3>
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">立即諮詢</h3>
             <p class="text-gray-600 dark:text-gray-300 mb-6">
               填寫以下表單，我們會盡快與您聯絡，為您提供專業的服務諮詢。
             </p>
             <div class="space-y-4">
-              <input type="text" placeholder="您的姓名"
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-600 dark:text-white">
-              <input type="email" placeholder="您的 Email"
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-600 dark:text-white">
+              <input
+                type="text"
+                placeholder="您的姓名"
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-600 dark:text-white"
+              />
+              <input
+                type="email"
+                placeholder="您的 Email"
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-600 dark:text-white"
+              />
               <select
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-600 dark:text-white">
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-600 dark:text-white"
+              >
                 <option value="">選擇服務項目</option>
                 <option value="website">網站設計</option>
                 <option value="sticker">貼圖代購</option>
                 <option value="3c">3C產品代購</option>
                 <option value="other">其他服務</option>
               </select>
-              <textarea placeholder="請描述您的需求" rows="4"
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-600 dark:text-white"></textarea>
+              <textarea
+                placeholder="請描述您的需求"
+                rows="4"
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-600 dark:text-white"
+              ></textarea>
               <button
-                class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              >
                 送出諮詢
               </button>
             </div>

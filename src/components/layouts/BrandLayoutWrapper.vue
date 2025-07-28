@@ -21,7 +21,7 @@ const layoutComponent = computed(() =>
         return await import(`@/layouts/public/${layout.value}.vue`)
       }
     },
-  })
+  }),
 )
 
 // 動態 loading 文字
@@ -34,18 +34,32 @@ const loadingText = ref('載入中...')
   </component>
   <template v-else>
     <div
-      class="brand-loading-wrapper flex flex-col min-h-screen items-center justify-center bg-blue-200 dark:bg-blue-800">
+      class="brand-loading-wrapper flex flex-col min-h-screen items-center justify-center bg-blue-200 dark:bg-blue-800"
+    >
       <div class="brand-loading-icon mb-7">
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
           <circle cx="32" cy="32" r="28" stroke="#ff6f00" stroke-width="6" opacity="0.2" />
-          <path d="M32 4a28 28 0 1 1-19.8 47.8" stroke="#ff6f00" stroke-width="6" stroke-linecap="round">
-            <animateTransform attributeName="transform" type="rotate" from="0 32 32" to="360 32 32" dur="1s"
-              repeatCount="indefinite" />
+          <path
+            d="M32 4a28 28 0 1 1-19.8 47.8"
+            stroke="#ff6f00"
+            stroke-width="6"
+            stroke-linecap="round"
+          >
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              from="0 32 32"
+              to="360 32 32"
+              dur="1s"
+              repeatCount="indefinite"
+            />
           </path>
         </svg>
       </div>
-      <div class="brand-loading-text flex gap-2 text-2xl font-bold text-orange-600 dark:text-orange-400">
-        <span v-for="(char, i) in loadingText" :key="i" :style="{ animationDelay: (i * 0.1) + 's' }">
+      <div
+        class="brand-loading-text flex gap-2 text-2xl font-bold text-orange-600 dark:text-orange-400"
+      >
+        <span v-for="(char, i) in loadingText" :key="i" :style="{ animationDelay: i * 0.1 + 's' }">
           {{ char }}
         </span>
       </div>
@@ -69,7 +83,7 @@ const loadingText = ref('載入中...')
 }
 
 .brand-loading-icon {
-  animation: popIn 0.6s cubic-bezier(.68, -0.55, .27, 1.55);
+  animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
 
 @keyframes popIn {
@@ -100,7 +114,6 @@ const loadingText = ref('載入中...')
 }
 
 @keyframes bounce {
-
   0%,
   100% {
     transform: translateY(0);
