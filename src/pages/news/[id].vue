@@ -331,7 +331,7 @@ function parseTags(tags: string): string[] {
 
       <!-- 顯示詳細文章內容 -->
       <div v-if="news.html" class="mt-8 text-gray-700 dark:text-gray-300 leading-relaxed">
-        <div v-html="processedArticle" class="space-y-8"></div>
+        <div v-html="processedArticle" class="prose space-y-8"></div>
       </div>
     </div>
     <div v-else class="text-center text-gray-500 py-20">找不到此新聞</div>
