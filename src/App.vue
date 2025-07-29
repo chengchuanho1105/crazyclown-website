@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import BrandLayoutWrapper from '@/components/layouts/BrandLayoutWrapper.vue'
+import FixedAdBlock from '@/components/common/FixedAdBlock.vue'
 import FloatingButtons from '@/components/common/FloatingButtons.vue'
-import AdModal from '@/components/AdModal.vue'
+import BrandLayoutWrapper from '@/components/layouts/BrandLayoutWrapper.vue'
 </script>
 
 <template>
   <BrandLayoutWrapper />
   <FloatingButtons />
-  <AdModal />
+  <!-- <AdModal /> -->
+  <FixedAdBlock />
 </template>
 
 <style scoped></style>

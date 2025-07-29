@@ -3,46 +3,80 @@ defineOptions({ name: 'Test-Page' })
 
 import { computed, ref } from 'vue'
 
+// 測試 parseTags 函數
+function parseTags(tags: string): string[] {
+  if (typeof tags !== 'string') return []
+
+  // 首先嘗試直接解析 JSON
+  try {
+    return JSON.parse(tags)
+  } catch {
+    // 如果失敗，嘗試將單引號替換為雙引號後再解析
+    try {
+      const fixed = tags.replace(/'/g, '"')
+      return JSON.parse(fixed)
+    } catch {
+      // 如果還是失敗，則按逗號分割，但需要處理引號內的情況
+      const result: string[] = []
+      let current = ''
+      let inQuotes = false
+
+      for (let i = 0; i < tags.length; i++) {
+        const char = tags[i]
+
+        if (char === '"') {
+          inQuotes = !inQuotes
+        } else if (char === ',' && !inQuotes) {
+          // 只有在引號外時才分割
+          const trimmed = current.trim().replace(/^['"]|['"]$/g, '')
+          if (trimmed) {
+            result.push(trimmed)
+          }
+          current = ''
+        } else {
+          current += char
+        }
+      }
+
+      // 添加最後一個標籤
+      const trimmed = current.trim().replace(/^['"]|['"]$/g, '')
+      if (trimmed) {
+        result.push(trimmed)
+      }
+
+      return result
+    }
+  }
+}
+
 // 測試數據
-const testData = ref([
-  { id: '1', title: '測試1', addBaseStyle: 'true', html: '<h2>標題</h2><p>內容</p>' },
-  { id: '2', title: '測試2', addBaseStyle: 'false', html: '<h2>標題</h2><p>內容</p>' },
-  { id: '3', title: '測試3', addBaseStyle: '', html: '<h2>標題</h2><p>內容</p>' },
-  { id: '4', title: '測試4', addBaseStyle: 'TRUE', html: '<h2>標題</h2><p>內容</p>' },
-  { id: '5', title: '測試5', addBaseStyle: 'FALSE', html: '<h2>標題</h2><p>內容</p>' },
-])
+const testTags = [
+  '"PUBG, Discord, 台港澳, 社群, 活動, 聯名, aespa"',
+  '"PUBG,G-Coin,套裝,CDK,優惠"',
+  '"PUBG","Bugatti","聯名合作","燃擎破寂","超跑登場"',
+  'PUBG, Discord, 台港澳, 社群, 活動, 聯名, aespa',
+  'PUBG,G-Coin,套裝,CDK,優惠',
+]
+
+const testResults = testTags.map((tag) => ({
+  original: tag,
+  parsed: parseTags(tag),
+}))
 
 const selectedId = ref('1')
 
-const selectedItem = computed(() => testData.value.find((item) => item.id === selectedId.value))
+const selectedItem = computed(() => testResults.find((item) => item.original === selectedId.value))
 
 const processedArticle = computed(() => {
-  if (!selectedItem.value?.html) {
+  if (!selectedItem.value?.parsed) {
     return ''
   }
 
-  console.log('=== 測試 addBaseStyle 處理邏輯 ===')
-  console.log('addBaseStyle 原始值:', selectedItem.value.addBaseStyle)
-  console.log('addBaseStyle 類型:', typeof selectedItem.value.addBaseStyle)
-  console.log('addBaseStyle 轉小寫後:', selectedItem.value.addBaseStyle?.toLowerCase())
+  console.log('=== 測試 parseTags 處理邏輯 ===')
+  console.log('原始 tags:', selectedItem.value.original)
+  console.log('解析後 tags:', selectedItem.value.parsed)
 
-  const addBaseStyleValue = selectedItem.value.addBaseStyle?.toLowerCase()
-  console.log('addBaseStyle 處理後的值:', addBaseStyleValue)
-
-  if (addBaseStyleValue === 'false') {
-    console.log('addBaseStyle 為 false，直接返回原始 HTML')
-    return selectedItem.value.html
-  }
-
-  console.log('addBaseStyle 為 true 或其他值，進行樣式處理')
-
-  let html = selectedItem.value.html
-  html = html.replace(/<h2>/g, '<h2 class="text-2xl font-bold mb-2 mt-16">')
-  html = html.replace(/<\/h2>/g, '</h2>')
-  html = html.replace(/<p>/g, '<p class="mb-4">')
-  html = html.replace(/<\/p>/g, '</p>')
-
-  return html
+  return selectedItem.value.parsed.join(', ')
 })
 </script>
 
@@ -53,22 +87,22 @@ const processedArticle = computed(() => {
     <div class="mb-6">
       <label class="block text-sm font-medium mb-2">選擇測試數據：</label>
       <select v-model="selectedId" class="border rounded px-3 py-2">
-        <option v-for="item in testData" :key="item.id" :value="item.id">
-          {{ item.title }} (addBaseStyle: {{ item.addBaseStyle }})
+        <option v-for="item in testResults" :key="item.original" :value="item.original">
+          {{ item.original }}
         </option>
       </select>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="border rounded p-4">
-        <h3 class="font-bold mb-2">原始 HTML：</h3>
+        <h3 class="font-bold mb-2">原始 Tags：</h3>
         <div class="bg-gray-100 p-3 rounded text-sm">
-          {{ selectedItem?.html }}
+          {{ selectedItem?.original }}
         </div>
       </div>
 
       <div class="border rounded p-4">
-        <h3 class="font-bold mb-2">處理後 HTML：</h3>
+        <h3 class="font-bold mb-2">解析後 Tags：</h3>
         <div class="bg-gray-100 p-3 rounded text-sm">
           {{ processedArticle }}
         </div>
@@ -76,17 +110,11 @@ const processedArticle = computed(() => {
     </div>
 
     <div class="mt-6 border rounded p-4">
-      <h3 class="font-bold mb-2">渲染結果：</h3>
-      <div class="border rounded p-4" v-html="processedArticle"></div>
-    </div>
-
-    <div class="mt-6 border rounded p-4">
       <h3 class="font-bold mb-2">調試信息：</h3>
       <div class="text-sm">
-        <p>addBaseStyle 原始值: {{ selectedItem?.addBaseStyle }}</p>
-        <p>addBaseStyle 類型: {{ typeof selectedItem?.addBaseStyle }}</p>
-        <p>addBaseStyle 轉小寫後: {{ selectedItem?.addBaseStyle?.toLowerCase() }}</p>
-        <p>是否為 false: {{ selectedItem?.addBaseStyle?.toLowerCase() === 'false' }}</p>
+        <p>原始 tags: {{ selectedItem?.original }}</p>
+        <p>解析後 tags: {{ selectedItem?.parsed }}</p>
+        <p>解析後 tags 數量: {{ selectedItem?.parsed?.length }}</p>
       </div>
     </div>
   </div>

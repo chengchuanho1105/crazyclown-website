@@ -198,17 +198,45 @@ const processedArticle = computed(() => {
 
 function parseTags(tags: string): string[] {
   if (typeof tags !== 'string') return []
+
+  // 首先嘗試直接解析 JSON
   try {
     return JSON.parse(tags)
   } catch {
+    // 如果失敗，嘗試將單引號替換為雙引號後再解析
     try {
       const fixed = tags.replace(/'/g, '"')
       return JSON.parse(fixed)
     } catch {
-      return tags
-        .split(',')
-        .map((t) => t.trim().replace(/^['"]|['"]$/g, ''))
-        .filter(Boolean)
+      // 如果還是失敗，則按逗號分割，但需要處理引號內的情況
+      const result: string[] = []
+      let current = ''
+      let inQuotes = false
+
+      for (let i = 0; i < tags.length; i++) {
+        const char = tags[i]
+
+        if (char === '"') {
+          inQuotes = !inQuotes
+        } else if (char === ',' && !inQuotes) {
+          // 只有在引號外時才分割
+          const trimmed = current.trim().replace(/^['"]|['"]$/g, '')
+          if (trimmed) {
+            result.push(trimmed)
+          }
+          current = ''
+        } else {
+          current += char
+        }
+      }
+
+      // 添加最後一個標籤
+      const trimmed = current.trim().replace(/^['"]|['"]$/g, '')
+      if (trimmed) {
+        result.push(trimmed)
+      }
+
+      return result
     }
   }
 }

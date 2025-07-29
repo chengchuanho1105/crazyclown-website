@@ -59,19 +59,27 @@ const { isHomePage } = useIsHomePage()
 
                   <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 sm:mt-6">
                     <router-link
-                      class="inline-block py-3 rounded-lg shadow-sm font-medium text-center border border-blue-200 text-blue-700 dark:text-blue-300 hover:bg-blue-50 hover:text-blue-900 transition-colors"
-                      :to="{ name: 'join' }"
-                      data-aos="fade-up"
-                    >
-                      入隊申請
-                    </router-link>
-
-                    <router-link
                       class="inline-block py-3 rounded-lg shadow-sm font-medium text-center border border-yellow-200 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-50 hover:text-yellow-900 transition-colors"
                       :to="{ name: 'store' }"
                       data-aos="fade-up"
                     >
                       特惠商店
+                    </router-link>
+
+                    <router-link
+                      class="inline-block py-3 rounded-lg shadow-sm font-medium text-center border border-indigo-200 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 hover:text-indigo-900 transition-colors"
+                      :to="{ name: 'news' }"
+                      data-aos="fade-up"
+                    >
+                      最新消息
+                    </router-link>
+
+                    <router-link
+                      class="inline-block py-3 rounded-lg shadow-sm font-medium text-center border border-blue-200 text-blue-700 dark:text-blue-300 hover:bg-blue-50 hover:text-blue-900 transition-colors"
+                      :to="{ name: 'join' }"
+                      data-aos="fade-up"
+                    >
+                      入隊申請
                     </router-link>
 
                     <a
