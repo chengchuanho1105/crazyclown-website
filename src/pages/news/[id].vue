@@ -199,46 +199,17 @@ const processedArticle = computed(() => {
 function parseTags(tags: string): string[] {
   if (typeof tags !== 'string') return []
 
-  // 首先嘗試直接解析 JSON
-  try {
-    return JSON.parse(tags)
-  } catch {
-    // 如果失敗，嘗試將單引號替換為雙引號後再解析
-    try {
-      const fixed = tags.replace(/'/g, '"')
-      return JSON.parse(fixed)
-    } catch {
-      // 如果還是失敗，則按逗號分割，但需要處理引號內的情況
-      const result: string[] = []
-      let current = ''
-      let inQuotes = false
-
-      for (let i = 0; i < tags.length; i++) {
-        const char = tags[i]
-
-        if (char === '"') {
-          inQuotes = !inQuotes
-        } else if (char === ',' && !inQuotes) {
-          // 只有在引號外時才分割
-          const trimmed = current.trim().replace(/^['"]|['"]$/g, '')
-          if (trimmed) {
-            result.push(trimmed)
-          }
-          current = ''
-        } else {
-          current += char
-        }
-      }
-
-      // 添加最後一個標籤
-      const trimmed = current.trim().replace(/^['"]|['"]$/g, '')
-      if (trimmed) {
-        result.push(trimmed)
-      }
-
-      return result
-    }
+  // 移除開頭和結尾的引號
+  let cleanTags = tags.trim()
+  if (cleanTags.startsWith('"') && cleanTags.endsWith('"')) {
+    cleanTags = cleanTags.slice(1, -1)
   }
+
+  // 按逗號分割並清理每個標籤
+  return cleanTags
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter((tag) => tag.length > 0)
 }
 </script>
 
