@@ -12,7 +12,7 @@ defineProps<{
     <!-- 中文大標 -->
     <h2
       class="text-2xl font-bold relative z-10 text-indigo-900 dark:text-indigo-100"
-      data-aos="fade-up-left"
+      data-aos="fade-up"
       v-html="mainTitle"
     ></h2>
     <!-- 英文大標疊底裝飾 -->
