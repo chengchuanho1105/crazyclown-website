@@ -2,7 +2,7 @@
 defineOptions({ name: 'CrazyClown-Store' })
 
 // ---------- Vue 核心工具函式 ----------
-import { ref, onMounted, onBeforeUnmount, nextTick, computed, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 // ---------- 組件引入區（版面用） ----------
 import DecorSection from '@/components/DecorSection.vue'
@@ -308,21 +308,6 @@ onBeforeUnmount(() => {
             </tbody>
           </table>
         </div>
-        <hr class="my-4 border-zinc-200 dark:border-zinc-700" />
-        <div
-          class="mt-2 text-blue-700 dark:text-blue-300 text-base font-medium flex items-center gap-2"
-        >
-          請透過
-          <a
-            href="https://discord.gg/3TEHPZhYUK"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="font-bold"
-          >
-            <i class="bi bi-discord mr-2"></i>Discord<i class="bi bi-box-arrow-up-right ml-1"></i
-          ></a>
-          聯絡購買。
-        </div>
       </div>
 
       <!-- 交易流程 Section -->
@@ -356,10 +341,16 @@ onBeforeUnmount(() => {
                 >
                   1
                 </div>
-                <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">聯絡確認</h4>
+                <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">建立訂單</h4>
               </div>
               <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-                透過 Discord 聯絡客服，確認庫存與即時價格
+                請透過 Discord 「
+                <a
+                  href="https://discord.com/channels/490129931808931840/1400058236152971274"
+                  target="_blank"
+                  class="font-bold text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 underline"
+                  >🛒⇜商城下單系統</a
+                >」頻道建立訂單
               </p>
             </div>
           </div>
@@ -378,10 +369,10 @@ onBeforeUnmount(() => {
                 >
                   2
                 </div>
-                <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">提供資訊</h4>
+                <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">提供/確認資訊</h4>
               </div>
               <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-                提供正確的 PUBG ID 與聯絡方式
+                提供正確資料，並提供/確認訂單資訊
               </p>
             </div>
           </div>
