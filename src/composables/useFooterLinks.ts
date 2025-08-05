@@ -84,7 +84,7 @@ export function useFooterLinks() {
 
   const footerLinks = computed(() => {
     if (!brandConfig.value?.routes) return []
-    re rn processRoutes(brandConfig.value.routes)
+    return processRoutes(brandConfig.value.routes)
   })
 
   return {

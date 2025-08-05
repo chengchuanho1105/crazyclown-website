@@ -134,7 +134,7 @@ export const handleError = (message: string, code?: string) => {
 }
 
 // API 錯誤處理
-export const handleApiError = (error: any) => {
+export const handleApiError = (error: unknown) => {
   const errorMessage = error.message || 'API 請求失敗'
   const errorCode = error.code || 'API_ERROR'
 

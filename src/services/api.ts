@@ -1,7 +1,7 @@
 import { config, getApiUrl, getEnvironmentConfig } from '@/config/environment'
 
 // API 響應類型
-interface ApiResponse<T = any> {
+interface ApiResponse<T = unknown> {
   data: T
   message: string
   success: boolean
@@ -30,7 +30,7 @@ class ApiClient {
   }
 
   // 創建請求配置
-  private createRequestConfig(method: string, data?: any): RequestInit {
+  private createRequestConfig(method: string, data?: unknown): RequestInit {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     }
@@ -95,7 +95,7 @@ class ApiClient {
       clearTimeout(timeoutId)
       return await this.handleResponse<T>(response)
     } catch (error) {
-      if (attempt < this.retryAttempts && error.name !== 'AbortError') {
+      if (attempt < this.retryAttempts && (error as Error).name !== 'AbortError') {
         console.warn(`API request failed, retrying... (${attempt}/${this.retryAttempts})`)
         await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
         return this.retryRequest<T>(url, config, attempt + 1)
@@ -108,7 +108,7 @@ class ApiClient {
   async request<T>(
     endpoint: string,
     method: string = 'GET',
-    data?: any
+    data?: unknown
   ): Promise<ApiResponse<T>> {
     const url = getApiUrl(endpoint)
     const config = this.createRequestConfig(method, data)
@@ -122,12 +122,12 @@ class ApiClient {
   }
 
   // POST 請求
-  async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async post<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, 'POST', data)
   }
 
   // PUT 請求
-  async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async put<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, 'PUT', data)
   }
 
@@ -137,7 +137,7 @@ class ApiClient {
   }
 
   // PATCH 請求
-  async patch<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async patch<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, 'PATCH', data)
   }
 }
@@ -148,16 +148,16 @@ export const api = new ApiClient()
 // 交易相關 API
 export const transactionApi = {
   // 獲取交易列表
-  getTransactions: (params?: any) => api.get('/transactions', params),
+  getTransactions: (params?: unknown) => api.get('/transactions'),
 
   // 獲取單筆交易
   getTransaction: (id: string) => api.get(`/transactions/${id}`),
 
   // 創建交易
-  createTransaction: (data: any) => api.post('/transactions', data),
+  createTransaction: (data: unknown) => api.post('/transactions', data),
 
   // 更新交易
-  updateTransaction: (id: string, data: any) => api.put(`/transactions/${id}`, data),
+  updateTransaction: (id: string, data: unknown) => api.put(`/transactions/${id}`, data),
 
   // 刪除交易
   deleteTransaction: (id: string) => api.delete(`/transactions/${id}`),
@@ -166,16 +166,16 @@ export const transactionApi = {
 // 客戶相關 API
 export const customerApi = {
   // 獲取客戶列表
-  getCustomers: (params?: any) => api.get('/customers', params),
+  getCustomers: (params?: unknown) => api.get('/customers'),
 
   // 獲取客戶詳情
   getCustomer: (id: string) => api.get(`/customers/${id}`),
 
   // 創建客戶
-  createCustomer: (data: any) => api.post('/customers', data),
+  createCustomer: (data: unknown) => api.post('/customers', data),
 
   // 更新客戶
-  updateCustomer: (id: string, data: any) => api.put(`/customers/${id}`, data),
+  updateCustomer: (id: string, data: unknown) => api.put(`/customers/${id}`, data),
 
   // 刪除客戶
   deleteCustomer: (id: string) => api.delete(`/customers/${id}`),
