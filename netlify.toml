@@ -1,0 +1,52 @@
+[build]
+  # 建置命令
+  command = "npm run build"
+  # 發布目錄
+  publish = "dist"
+  # 環境變數
+  [build.environment]
+    NODE_VERSION = "18"
+
+# 重定向規則
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# 標頭設定
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# 快取設定
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# 環境變數
+[context.production.environment]
+  VITE_API_URL = "https://your-api-domain.com"
+  VITE_APP_ENV = "production"
+
+[context.deploy-preview.environment]
+  VITE_API_URL = "https://staging-api-domain.com"
+  VITE_APP_ENV = "staging"
+
+[context.branch-deploy.environment]
+  VITE_API_URL = "https://dev-api-domain.com"
+  VITE_APP_ENV = "development" 
