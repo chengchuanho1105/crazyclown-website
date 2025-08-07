@@ -16,6 +16,7 @@
     "postbuild": "node scripts/generate-sitemap.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.53.0",
     "@tailwindcss/typography": "^0.5.16",
     "@types/swiper": "^5.4.3",
     "@unhead/vue": "^2.0.11",

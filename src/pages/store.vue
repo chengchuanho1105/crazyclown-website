@@ -456,7 +456,6 @@ onBeforeUnmount(() => {
                 </div>
                 <div>
                   <h4 class="text-xl font-bold text-gray-900 dark:text-gray-100">銀行轉帳</h4>
-                  <p class="text-gray-600 dark:text-gray-400">最常用方式</p>
                 </div>
               </div>
               <div class="space-y-4">
@@ -516,21 +515,28 @@ onBeforeUnmount(() => {
                 </div>
                 <div>
                   <h4 class="text-xl font-bold text-gray-900 dark:text-gray-100">電支轉帳</h4>
-                  <p class="text-gray-600 dark:text-gray-400">數位時代</p>
                 </div>
               </div>
               <div class="flex flex-wrap gap-3">
                 <span
                   class="px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 text-green-800 dark:text-green-200 rounded-xl text-sm font-semibold border border-green-200/50 dark:border-green-700/50"
-                  >街口</span
+                  >全盈支付(388)</span
                 >
                 <span
                   class="px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 text-green-800 dark:text-green-200 rounded-xl text-sm font-semibold border border-green-200/50 dark:border-green-700/50"
-                  >iPass Money</span
+                  >全支付(389)</span
                 >
                 <span
                   class="px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 text-green-800 dark:text-green-200 rounded-xl text-sm font-semibold border border-green-200/50 dark:border-green-700/50"
-                  >全支付</span
+                  >iPass Money(391)</span
+                >
+                <span
+                  class="px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 text-green-800 dark:text-green-200 rounded-xl text-sm font-semibold border border-green-200/50 dark:border-green-700/50"
+                  >街口支付(396)</span
+                >
+                <span
+                  class="px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 text-green-800 dark:text-green-200 rounded-xl text-sm font-semibold border border-green-200/50 dark:border-green-700/50"
+                  >歐付寶(397)</span
                 >
               </div>
             </div>
