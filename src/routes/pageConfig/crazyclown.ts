@@ -56,7 +56,7 @@ export const pageConfig: PageConfig = {
       name: `${brandName}-Store`,
       component: () => import(`@/pages/${brandName}/store.vue`),
       meta: {
-        title: `特惠商店 | ${brandDisplayName}`,
+        title: `戰隊特惠 | ${brandDisplayName}`,
         description: 'G-Coin 是 Crazy_Clown 戰隊的獨家貨幣，可以購買戰隊獨享優惠。',
         layout: 'default',
         requiresAuth: false,
