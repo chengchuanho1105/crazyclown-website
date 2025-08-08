@@ -366,9 +366,7 @@ function goToFeaturedPage(page: number) {
                 >
                   {{ news.title }}
                 </h3>
-                <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
-                  {{ news.introduction }}
-                </p>
+                <div class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3" v-html="news.introduction"></div>
                 <div
                   class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
                 >
