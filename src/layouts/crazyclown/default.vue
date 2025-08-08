@@ -63,7 +63,7 @@ const { isHomePage } = useIsHomePage()
                       :to="{ name: 'store' }"
                       data-aos="fade-up"
                     >
-                      特惠商店
+                      🛒 戰隊特惠
                     </router-link>
 
                     <router-link
@@ -71,7 +71,7 @@ const { isHomePage } = useIsHomePage()
                       :to="{ name: 'news' }"
                       data-aos="fade-up"
                     >
-                      最新消息
+                      🔥 最新消息
                     </router-link>
 
                     <router-link
@@ -79,7 +79,7 @@ const { isHomePage } = useIsHomePage()
                       :to="{ name: 'join' }"
                       data-aos="fade-up"
                     >
-                      入隊申請
+                      ✒️ 入隊申請
                     </router-link>
 
                     <a
@@ -87,7 +87,7 @@ const { isHomePage } = useIsHomePage()
                       href=" https://discord.gg/3TEHPZhYUK"
                       data-aos="fade-up"
                     >
-                      Discord 社群
+                      <i class="bi bi-discord"></i> Discord 社群
                     </a>
                   </div>
                 </div>
