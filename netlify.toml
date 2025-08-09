@@ -13,6 +13,18 @@
   to = "/index.html"
   status = 200
 
+[[redirects]]
+  from = "/dc"
+  to = "https://discord.gg/3TEHPZhYUK"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/xiaoheihe"
+  to = "https://chat.xiaoheihe.cn/if6vxm4o"
+  status = 301
+  force = true
+
 # 標頭設定
 [[headers]]
   for = "/*"

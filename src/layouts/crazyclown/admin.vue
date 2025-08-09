@@ -16,6 +16,8 @@ const menuItems = [
   { name: '儀表板', icon: 'bi-speedometer2', path: '/admin' },
   { name: '庫存管理', icon: 'bi-box', path: '/admin/inventory' },
   { name: '預訂管理', icon: 'bi-calendar-plus', path: '/admin/reservation' },
+  { name: '用戶管理', icon: 'bi-people', path: '/admin/customers' },
+  { name: 'Supabase 測試', icon: 'bi-database', path: '/admin/supabase-test' },
 ]
 </script>
 

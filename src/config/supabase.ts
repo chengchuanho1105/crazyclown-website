@@ -1,304 +1,119 @@
 import { createClient } from '@supabase/supabase-js'
 
-// 環境變數類型定義
-interface SupabaseConfig {
-  url: string
-  anonKey: string
-}
+// Supabase 配置
+const supabaseUrl = 'https://eikrqunzxniunnprxlji.supabase.co'
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpa3JxdW56eG5pdW5ucHJ4bGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzOTc3MDIsImV4cCI6MjA2OTk3MzcwMn0.tvzC1AEZc5fuakDom7izip0bIKYjHyzJIJNx1rhf3V8'
 
-// 從環境變數獲取 Supabase 配置
-const getSupabaseConfig = (): SupabaseConfig => {
-  const url = import.meta.env.VITE_SUPABASE_URL
-  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// 建立 Supabase 客戶端
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-  if (!url || !anonKey) {
-    throw new Error('Supabase 環境變數未設定。請檢查 VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY')
-  }
-
-  return { url, anonKey }
-}
-
-// 創建 Supabase 客戶端
-const config = getSupabaseConfig()
-export const supabase = createClient(config.url, config.anonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  }
-})
-
-// 資料庫表格名稱常數
+// 資料庫表格名稱
 export const TABLES = {
-  // 客戶相關
-  CUSTOMERS: 'customers',
-
-  // 商品系列相關
-  PRODUCT_SERIES: 'product_series',
-
-  // 庫存相關
-  INVENTORY_ITEMS: 'inventory_items',
-
-  // 預訂相關
-  RESERVATIONS: 'reservations',
-
-  // 交易相關
-  TRANSACTIONS: 'transactions',
-
-  // 活動記錄
-  ACTIVITY_LOGS: 'activity_logs'
+  INVENTORY_ITEMS: 'inventory_item',
+  TRANSACTIONS: 'transaction',
+  CUSTOMERS: 'customer',
+  PRODUCTS: 'product',
+  PRODUCT_CATEGORIES: 'product_category',
+  PAYMENT_METHODS: 'payment_method',
+  OUR_BANK_DATA: 'our_bank_data'
 } as const
 
-// 資料庫操作類型
-export type Database = {
-  public: {
-    Tables: {
-      [TABLES.CUSTOMERS]: {
-        Row: {
-          id: string
-          name: string
-          phone: string
-          id_number: string | null
-          contact_method: string | null
-          contact_method_id: string | null
-          contact_method_account: string | null
-          contact_method_nickname: string | null
-          address: string | null
-          pubg_nickname: string | null
-          pubg_account_id: string | null
-          steam_id: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          phone: string
-          id_number?: string
-          contact_method?: string
-          contact_method_id?: string
-          contact_method_account?: string
-          contact_method_nickname?: string
-          address?: string
-          pubg_nickname?: string
-          pubg_account_id?: string
-          steam_id?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          phone?: string
-          id_number?: string
-          contact_method?: string
-          contact_method_id?: string
-          contact_method_account?: string
-          contact_method_nickname?: string
-          address?: string
-          pubg_nickname?: string
-          pubg_account_id?: string
-          steam_id?: string
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      [TABLES.PRODUCT_SERIES]: {
-        Row: {
-          id: string
-          name: string
-          description: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          description?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          description?: string
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      [TABLES.INVENTORY_ITEMS]: {
-        Row: {
-          id: string
-          status: '未售' | '預訂' | '已售' | '自用' | '福利' | '淘寶已退刷' | '被盜' | '補償'
-          cd_key: string
-          series_id: string | null
-          product_name: string
-          suggested_price: number
-          order_number: string | null
-          purchase_time: string
-          store: string | null
-          purchase_amount_cny: number | null
-          purchase_amount_twd: number | null
-          payment_method: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          status?: '未售' | '預訂' | '已售' | '自用' | '福利' | '淘寶已退刷' | '被盜' | '補償'
-          cd_key: string
-          series_id?: string
-          product_name: string
-          suggested_price: number
-          order_number?: string
-          purchase_time?: string
-          store?: string
-          purchase_amount_cny?: number
-          purchase_amount_twd?: number
-          payment_method?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          status?: '未售' | '預訂' | '已售' | '自用' | '福利' | '淘寶已退刷' | '被盜' | '補償'
-          cd_key?: string
-          series_id?: string
-          product_name?: string
-          suggested_price?: number
-          order_number?: string
-          purchase_time?: string
-          store?: string
-          purchase_amount_cny?: number
-          purchase_amount_twd?: number
-          payment_method?: string
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      [TABLES.RESERVATIONS]: {
-        Row: {
-          id: string
-          inventory_item_id: string
-          customer_id: string
-          reservation_time: string
-          expected_price: number
-          notes: string | null
-          status: 'pending' | 'confirmed' | 'cancelled'
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          inventory_item_id: string
-          customer_id: string
-          reservation_time: string
-          expected_price: number
-          notes?: string
-          status?: 'pending' | 'confirmed' | 'cancelled'
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          inventory_item_id?: string
-          customer_id?: string
-          reservation_time?: string
-          expected_price?: number
-          notes?: string
-          status?: 'pending' | 'confirmed' | 'cancelled'
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      [TABLES.TRANSACTIONS]: {
-        Row: {
-          id: string
-          inventory_item_id: string
-          customer_id: string
-          transaction_type: '進貨' | '銷售' | '退款' | '轉帳'
-          amount: number
-          payment_method: string | null
-          transaction_date: string
-          notes: string | null
-          my_payment_method: string | null
-          my_bank_code: string | null
-          my_account_number: string | null
-          customer_bank_code: string | null
-          customer_account_number: string | null
-          customer_account_name: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          inventory_item_id: string
-          customer_id: string
-          transaction_type: '進貨' | '銷售' | '退款' | '轉帳'
-          amount: number
-          payment_method?: string
-          transaction_date?: string
-          notes?: string
-          my_payment_method?: string
-          my_bank_code?: string
-          my_account_number?: string
-          customer_bank_code?: string
-          customer_account_number?: string
-          customer_account_name?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          inventory_item_id?: string
-          customer_id?: string
-          transaction_type?: '進貨' | '銷售' | '退款' | '轉帳'
-          amount?: number
-          payment_method?: string
-          transaction_date?: string
-          notes?: string
-          my_payment_method?: string
-          my_bank_code?: string
-          my_account_number?: string
-          customer_bank_code?: string
-          customer_account_number?: string
-          customer_account_name?: string
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      [TABLES.ACTIVITY_LOGS]: {
-        Row: {
-          id: string
-          type: string
-          title: string
-          description: string | null
-          amount: number | null
-          related_item_id: string | null
-          related_customer_id: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          type: string
-          title: string
-          description?: string
-          amount?: number
-          related_item_id?: string
-          related_customer_id?: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          type?: string
-          title?: string
-          description?: string
-          amount?: number
-          related_item_id?: string
-          related_customer_id?: string
-          created_at?: string
-        }
-      }
-    }
-  }
+// 資料庫類型定義
+export interface InventoryItem {
+  id: string
+  status: '未售' | '預訂中' | '已售' | '自用' | '福利' | '被盜' | '淘退' | '補償'
+  product_category_id: string
+  product_id: string
+  cd_key: string
+  purchase_time: string
+  purchase_store: string
+  purchase_payment_method: string
+  purchase_amount_cny: number
+  purchase_amount_twd: number
+  suggested_price: number
+  created_at: string
+  updated_at: string
+  purchase_order_number: string
+}
+
+export interface Transaction {
+  id: string
+  customer_id: string | null
+  inventory_item_id: string
+  actual_price: number
+  amount_received: number
+  amount_difference: number
+  our_payment_method: string
+  our_bank_data: string
+  customer_payment_method: string
+  customer_bank_code: string
+  customer_bank_account: string
+  customer_account_name: string
+  created_at: string
+  updated_at: string
+  transactions_time: string
+}
+
+export interface Customer {
+  id: string
+  name: string
+  phone: string
+  id_number: string
+  contact_method: string
+  contact_method_id: string
+  contact_method_account: string
+  contact_method_nickname: string
+  address: string
+  pubg_nickname: string
+  pubg_account_id: string
+  steam_id: string
+  created_at: string
+  updated_at: string
+  nickname: string
+}
+
+export interface Product {
+  id: string
+  product_category_id: string
+  product_name: string
+  created_at: string
+  updated_at: string
+  series: string
+  in_game_price_gcoin: number | null
+  in_game_price_usd: number | null
+}
+
+export interface ProductCategory {
+  id: string
+  category_name: string
+  created_at: string
+  updated_at: string
+}
+
+export interface PaymentMethod {
+  id: string
+  payment_method: string
+  created_at: string
+  updated_at: string
+}
+
+export interface OurBankData {
+  id: string
+  bank_code: string
+  account_number: string
+  account_holder: string
+  account_branche: string
+  created_at: string
+  updated_at: string
+  bank_branche_coed: string | null
+  bank_name: string
+  bank_branche_name: string | null
+}
+
+// 擴展的庫存項目類型（包含關聯資料）
+export interface InventoryItemWithDetails extends InventoryItem {
+  product?: Product
+  product_category?: ProductCategory
+  transaction?: Transaction
+  customer?: Customer
 }

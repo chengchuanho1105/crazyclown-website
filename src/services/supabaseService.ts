@@ -1,265 +1,593 @@
-import { supabase, TABLES, type Database } from '@/config/supabase'
-import type { PostgrestError } from '@supabase/supabase-js'
+import { supabase, TABLES, type InventoryItem, type Transaction, type Customer, type Product, type ProductCategory, type PaymentMethod, type OurBankData, type InventoryItemWithDetails } from '@/config/supabase'
 
-// 通用響應類型
-interface SupabaseResponse<T> {
+// 錯誤處理類型
+export interface SupabaseError {
+  message: string
+  details?: string
+  hint?: string
+  code?: string
+}
+
+// 通用回應類型
+export interface ApiResponse<T> {
   data: T | null
-  error: PostgrestError | null
+  error: SupabaseError | null
 }
 
-// 通用查詢選項
-interface QueryOptions {
-  select?: string
-  filters?: Record<string, any>
-  orderBy?: { column: string; ascending?: boolean }
-  limit?: number
-  offset?: number
-}
+// 庫存項目服務
+export class InventoryService {
+  // 獲取所有庫存項目
+  static async getAllInventoryItems(): Promise<ApiResponse<InventoryItem[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.INVENTORY_ITEMS)
+        .select('*')
+        .order('created_at', { ascending: false })
 
-// 基礎服務類別
-class BaseService<T> {
-  protected tableName: string
+      if (error) throw error
 
-  constructor(tableName: string) {
-    this.tableName = tableName
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取庫存資料失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
   }
 
-  // 獲取所有記錄
-  async getAll(options?: QueryOptions): Promise<SupabaseResponse<T[]>> {
-    let query = supabase.from(this.tableName).select(options?.select || '*')
+  // 獲取庫存項目（包含關聯資料）
+  static async getInventoryItemsWithDetails(): Promise<ApiResponse<InventoryItemWithDetails[]>> {
+    try {
+      // 獲取所有庫存項目
+      const { data: inventoryItems, error: inventoryError } = await supabase
+        .from(TABLES.INVENTORY_ITEMS)
+        .select('*')
+        .order('created_at', { ascending: false })
 
-    // 應用過濾器
-    if (options?.filters) {
-      Object.entries(options.filters).forEach(([key, value]) => {
-        query = query.eq(key, value)
+      if (inventoryError) throw inventoryError
+
+      if (!inventoryItems || inventoryItems.length === 0) {
+        return { data: [], error: null }
+      }
+
+      // 獲取所有相關的商品ID和分類ID
+      const productIds = [...new Set(inventoryItems.map(item => item.product_id).filter(Boolean))]
+      const categoryIds = [...new Set(inventoryItems.map(item => item.product_category_id).filter(Boolean))]
+
+      // 批量獲取商品資訊
+      let products = []
+      if (productIds.length > 0) {
+        const { data: productsData, error: productsError } = await supabase
+          .from(TABLES.PRODUCTS)
+          .select('*')
+          .in('id', productIds)
+
+        if (!productsError && productsData) {
+          products = productsData
+        }
+      }
+
+      // 批量獲取商品分類資訊
+      let categories = []
+      if (categoryIds.length > 0) {
+        const { data: categoriesData, error: categoriesError } = await supabase
+          .from(TABLES.PRODUCT_CATEGORIES)
+          .select('*')
+          .in('id', categoryIds)
+
+        if (!categoriesError && categoriesData) {
+          categories = categoriesData
+        }
+      }
+
+      // 組合資料
+      const result = inventoryItems.map(item => {
+        const product = products.find(p => p.id === item.product_id)
+        const category = categories.find(c => c.id === item.product_category_id)
+
+        return {
+          ...item,
+          product: product || undefined,
+          product_category: category || undefined
+        }
       })
+
+      return { data: result, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取庫存詳細資料失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
     }
+  }
 
-    // 應用排序
-    if (options?.orderBy) {
-      query = query.order(options.orderBy.column, {
-        ascending: options.orderBy.ascending ?? true
-      })
+
+
+  // 獲取單個庫存項目的完整詳細資料
+  static async getInventoryItemWithFullDetails(id: string): Promise<ApiResponse<InventoryItemWithDetails & {
+    transaction?: Transaction & {
+      customer?: Customer
     }
+  }>> {
+    try {
+      // 首先獲取庫存項目
+      const { data: inventoryData, error: inventoryError } = await supabase
+        .from(TABLES.INVENTORY_ITEMS)
+        .select('*')
+        .eq('id', id)
+        .single()
 
-    // 應用分頁
-    if (options?.limit) {
-      query = query.limit(options.limit)
+      if (inventoryError) throw inventoryError
+
+      if (!inventoryData) {
+        throw new Error('找不到指定的庫存項目')
+      }
+
+      // 手動獲取相關的商品資訊
+      let productData = null
+      if (inventoryData.product_id) {
+        const { data: product, error: productError } = await supabase
+          .from(TABLES.PRODUCTS)
+          .select('*')
+          .eq('id', inventoryData.product_id)
+          .single()
+
+        if (!productError && product) {
+          productData = product
+        }
+      }
+
+      // 手動獲取相關的商品分類資訊
+      let categoryData = null
+      if (inventoryData.product_category_id) {
+        const { data: category, error: categoryError } = await supabase
+          .from(TABLES.PRODUCT_CATEGORIES)
+          .select('*')
+          .eq('id', inventoryData.product_category_id)
+          .single()
+
+        if (!categoryError && category) {
+          categoryData = category
+        }
+      }
+
+            // 嘗試獲取相關的交易資訊
+      let { data: transactionData, error: transactionError } = await supabase
+        .from(TABLES.TRANSACTIONS)
+        .select('*')
+        .eq('inventory_item_id', id)
+        .single()
+
+      // 如果找到交易，嘗試獲取客戶資訊
+      let customerData = null
+      if (!transactionError && transactionData && transactionData.customer_id) {
+        const { data: customer, error: customerError } = await supabase
+          .from(TABLES.CUSTOMERS)
+          .select('*')
+          .eq('id', transactionData.customer_id)
+          .single()
+
+        if (!customerError && customer) {
+          customerData = customer
+        }
+      }
+
+      // 組合所有資料
+      const result = {
+        ...inventoryData,
+        product: productData || undefined,
+        product_category: categoryData || undefined,
+        transaction: transactionData ? {
+          ...transactionData,
+          customer: customerData || undefined
+        } : undefined
+      }
+
+      return { data: result, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取庫存完整詳細資料失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
     }
+  }
 
-    if (options?.offset) {
-      query = query.range(options.offset, (options.offset + (options.limit || 10)) - 1)
+  // 根據狀態篩選庫存項目
+  static async getInventoryItemsByStatus(status: string): Promise<ApiResponse<InventoryItem[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.INVENTORY_ITEMS)
+        .select('*')
+        .eq('status', status)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '篩選庫存資料失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
     }
-
-    return await query
   }
 
-  // 根據 ID 獲取單筆記錄
-  async getById(id: string): Promise<SupabaseResponse<T>> {
-    return await supabase
-      .from(this.tableName)
-      .select('*')
-      .eq('id', id)
-      .single()
+  // 新增庫存項目
+  static async createInventoryItem(item: Omit<InventoryItem, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<InventoryItem>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.INVENTORY_ITEMS)
+        .insert([item])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '新增庫存項目失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
   }
 
-  // 創建新記錄
-  async create(data: Partial<T>): Promise<SupabaseResponse<T>> {
-    return await supabase
-      .from(this.tableName)
-      .insert(data)
-      .select()
-      .single()
+  // 更新庫存項目
+  static async updateInventoryItem(id: string, updates: Partial<InventoryItem>): Promise<ApiResponse<InventoryItem>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.INVENTORY_ITEMS)
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '更新庫存項目失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
   }
 
-  // 更新記錄
-  async update(id: string, data: Partial<T>): Promise<SupabaseResponse<T>> {
-    return await supabase
-      .from(this.tableName)
-      .update(data)
-      .eq('id', id)
-      .select()
-      .single()
-  }
+  // 刪除庫存項目
+  static async deleteInventoryItem(id: string): Promise<ApiResponse<boolean>> {
+    try {
+      const { error } = await supabase
+        .from(TABLES.INVENTORY_ITEMS)
+        .delete()
+        .eq('id', id)
 
-  // 刪除記錄
-  async delete(id: string): Promise<SupabaseResponse<T>> {
-    return await supabase
-      .from(this.tableName)
-      .delete()
-      .eq('id', id)
-      .select()
-      .single()
-  }
+      if (error) throw error
 
-  // 批量操作
-  async batchCreate(data: Partial<T>[]): Promise<SupabaseResponse<T[]>> {
-    return await supabase
-      .from(this.tableName)
-      .insert(data)
-      .select()
-  }
-
-  async batchUpdate(ids: string[], data: Partial<T>): Promise<SupabaseResponse<T[]>> {
-    return await supabase
-      .from(this.tableName)
-      .update(data)
-      .in('id', ids)
-      .select()
-  }
-
-  async batchDelete(ids: string[]): Promise<SupabaseResponse<T[]>> {
-    return await supabase
-      .from(this.tableName)
-      .delete()
-      .in('id', ids)
-      .select()
+      return { data: true, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '刪除庫存項目失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
   }
 }
 
 // 交易服務
-export class TransactionService extends BaseService<Database['public']['Tables']['transactions']['Row']> {
-  constructor() {
-    super(TABLES.TRANSACTIONS)
-  }
+export class TransactionService {
+  // 獲取所有交易記錄
+  static async getAllTransactions(): Promise<ApiResponse<Transaction[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.TRANSACTIONS)
+        .select('*')
+        .order('created_at', { ascending: false })
 
-  // 獲取交易統計
-  async getTransactionStats() {
-    const { data, error } = await supabase
-      .from(this.tableName)
-      .select('status, total_amount, created_at')
+      if (error) throw error
 
-    if (error) return { data: null, error }
-
-    const stats = {
-      total: data.length,
-      completed: data.filter(t => t.status === 'completed').length,
-      pending: data.filter(t => t.status === 'pending').length,
-      cancelled: data.filter(t => t.status === 'cancelled').length,
-      totalRevenue: data
-        .filter(t => t.status === 'completed')
-        .reduce((sum, t) => sum + t.total_amount, 0)
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取交易記錄失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
     }
-
-    return { data: stats, error: null }
   }
 
-  // 獲取月營收統計
-  async getMonthlyRevenue(year: number, month: number) {
-    const startDate = new Date(year, month - 1, 1).toISOString()
-    const endDate = new Date(year, month, 0).toISOString()
+  // 新增交易記錄
+  static async createTransaction(transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<Transaction>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.TRANSACTIONS)
+        .insert([transaction])
+        .select()
+        .single()
 
-    const { data, error } = await supabase
-      .from(this.tableName)
-      .select('total_amount, created_at')
-      .eq('status', 'completed')
-      .gte('created_at', startDate)
-      .lte('created_at', endDate)
+      if (error) throw error
 
-    if (error) return { data: null, error }
-
-    const totalRevenue = data.reduce((sum, t) => sum + t.total_amount, 0)
-    return { data: { totalRevenue, transactionCount: data.length }, error: null }
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '新增交易記錄失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
   }
 }
 
 // 客戶服務
-export class CustomerService extends BaseService<Database['public']['Tables']['customers']['Row']> {
-  constructor() {
-    super(TABLES.CUSTOMERS)
+export class CustomerService {
+  // 獲取所有客戶
+  static async getAllCustomers(): Promise<ApiResponse<Customer[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.CUSTOMERS)
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取客戶資料失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
   }
 
-  // 根據電子郵件查找客戶
-  async getByEmail(email: string) {
-    return await supabase
-      .from(this.tableName)
-      .select('*')
-      .eq('email', email)
-      .single()
-  }
+  // 新增客戶
+  static async createCustomer(customer: Omit<Customer, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<Customer>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.CUSTOMERS)
+        .insert([customer])
+        .select()
+        .single()
 
-  // 根據電話號碼查找客戶
-  async getByPhone(phone: string) {
-    return await supabase
-      .from(this.tableName)
-      .select('*')
-      .eq('phone', phone)
-      .single()
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '新增客戶失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
   }
 }
 
 // 商品服務
-export class ProductService extends BaseService<Database['public']['Tables']['products']['Row']> {
-  constructor() {
-    super(TABLES.PRODUCTS)
-  }
+export class ProductService {
+  // 獲取所有商品
+  static async getAllProducts(): Promise<ApiResponse<Product[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.PRODUCTS)
+        .select('*')
+        .order('created_at', { ascending: false })
 
-  // 根據類別獲取商品
-  async getByCategory(categoryId: string) {
-    return await supabase
-      .from(this.tableName)
-      .select('*')
-      .eq('category_id', categoryId)
-  }
+      if (error) throw error
 
-  // 更新庫存
-  async updateStock(id: string, quantity: number) {
-    const { data: product } = await this.getById(id)
-    if (!product) {
-      return { data: null, error: { message: '商品不存在', code: 'NOT_FOUND' } as PostgrestError }
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取商品資料失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
     }
-
-    const newStock = product.stock + quantity
-    if (newStock < 0) {
-      return { data: null, error: { message: '庫存不足', code: 'INSUFFICIENT_STOCK' } as PostgrestError }
-    }
-
-    return await this.update(id, { stock: newStock })
   }
 }
 
-// 預訂服務
-export class ReservationService extends BaseService<Database['public']['Tables']['reservations']['Row']> {
-  constructor() {
-    super(TABLES.RESERVATIONS)
-  }
+// 商品分類服務
+export class ProductCategoryService {
+  // 獲取所有商品分類
+  static async getAllProductCategories(): Promise<ApiResponse<ProductCategory[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.PRODUCT_CATEGORIES)
+        .select('*')
+        .order('created_at', { ascending: false })
 
-  // 獲取特定日期的預訂
-  async getByDate(date: string) {
-    return await supabase
-      .from(this.tableName)
-      .select('*')
-      .eq('reservation_date', date)
-      .order('reservation_time')
-  }
+      if (error) throw error
 
-  // 獲取特定時間範圍的預訂
-  async getByDateRange(startDate: string, endDate: string) {
-    return await supabase
-      .from(this.tableName)
-      .select('*')
-      .gte('reservation_date', startDate)
-      .lte('reservation_date', endDate)
-      .order('reservation_date')
-      .order('reservation_time')
-  }
-
-  // 更新預訂狀態
-  async updateStatus(id: string, status: 'pending' | 'confirmed' | 'cancelled') {
-    return await this.update(id, { status })
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取商品分類失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
   }
 }
 
-// 創建服務實例
-export const transactionService = new TransactionService()
-export const customerService = new CustomerService()
-export const productService = new ProductService()
-export const reservationService = new ReservationService()
+// 付款方式服務
+export class PaymentMethodService {
+  // 獲取所有付款方式
+  static async getAllPaymentMethods(): Promise<ApiResponse<PaymentMethod[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.PAYMENT_METHODS)
+        .select('*')
+        .order('created_at', { ascending: false })
 
-// 匯出所有服務
-export const supabaseServices = {
-  transactions: transactionService,
-  customers: customerService,
-  products: productService,
-  reservations: reservationService
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取付款方式失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+}
+
+// 銀行資料服務
+export class OurBankDataService {
+  // 獲取所有銀行資料
+  static async getAllBankData(): Promise<ApiResponse<OurBankData[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.OUR_BANK_DATA)
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取銀行資料失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+}
+
+// 統計服務
+export class StatisticsService {
+  // 獲取庫存統計
+  static async getInventoryStatistics(): Promise<ApiResponse<{
+    total: number
+    available: number
+    sold: number
+    reserved: number
+    personal: number
+    welfare: number
+    stolen: number
+    refunded: number
+    compensation: number
+  }>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.INVENTORY_ITEMS)
+        .select('status')
+
+      if (error) throw error
+
+      const stats = {
+        total: data.length,
+        available: data.filter(item => item.status === '未售').length,
+        sold: data.filter(item => item.status === '已售').length,
+        reserved: data.filter(item => item.status === '預訂中').length,
+        personal: data.filter(item => item.status === '自用').length,
+        welfare: data.filter(item => item.status === '福利').length,
+        stolen: data.filter(item => item.status === '被盜').length,
+        refunded: data.filter(item => item.status === '淘退').length,
+        compensation: data.filter(item => item.status === '補償').length
+      }
+
+      return { data: stats, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取統計資料失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 獲取營收統計
+  static async getRevenueStatistics(): Promise<ApiResponse<{
+    totalRevenue: number
+    monthlyRevenue: number
+    totalTransactions: number
+  }>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.TRANSACTIONS)
+        .select('amount_received, created_at')
+
+      if (error) throw error
+
+      const now = new Date()
+      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+
+      const totalRevenue = data.reduce((sum, transaction) => sum + (transaction.amount_received || 0), 0)
+      const monthlyRevenue = data
+        .filter(transaction => new Date(transaction.created_at) >= thisMonth)
+        .reduce((sum, transaction) => sum + (transaction.amount_received || 0), 0)
+
+      const stats = {
+        totalRevenue,
+        monthlyRevenue,
+        totalTransactions: data.length
+      }
+
+      return { data: stats, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取營收統計失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
 }

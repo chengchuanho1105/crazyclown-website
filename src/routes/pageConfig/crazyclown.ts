@@ -189,6 +189,40 @@ export const pageConfig: PageConfig = {
       },
     },
     {
+      path: '/admin/supabase-test',
+      name: `${brandName}-SupabaseTest`,
+      component: () => import(`@/pages/admin/supabase-test.vue`),
+      meta: {
+        title: `Supabase 測試 | ${brandDisplayName}`,
+        description: '',
+        layout: 'admin',
+        requiresAuth: true,
+        roles: ['admin'],
+        seo: {
+          sitemap: false,
+          sitemapXml: false,
+          robots: false,
+        },
+      },
+    },
+    {
+      path: '/admin/customers',
+      name: `${brandName}-Customers`,
+      component: () => import(`@/pages/admin/customers.vue`),
+      meta: {
+        title: `用戶管理 | ${brandDisplayName}`,
+        description: '',
+        layout: 'admin',
+        requiresAuth: true,
+        roles: ['admin'],
+        seo: {
+          sitemap: false,
+          sitemapXml: false,
+          robots: false,
+        },
+      },
+    },
+    {
       path: '/customer',
       name: `${brandName}-Customer`,
       component: () => import(`@/pages/${brandName}/customer/index.vue`),

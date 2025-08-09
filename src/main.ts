@@ -1,9 +1,5 @@
 import '@/assets/css/public/main.css'
 
-import AOS from 'aos'
-import 'aos/dist/aos.css'
-AOS.init({ duration: 500, once: false, offset: 50 })
-
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { createHead } from '@unhead/vue/client'
@@ -13,11 +9,18 @@ import { setupPageSeo } from '@/routes/hook/setSeo'
 import App from './App.vue'
 import router from './router'
 
+// 初始化 Supabase
+import { useSupabaseInit } from './composables/useSupabase'
+
 const app = createApp(App)
 const head = createHead()
 
 app.use(createPinia())
 app.use(router)
+
+// 初始化 Supabase 資料
+const { initializeData } = useSupabaseInit()
+initializeData()
 
 setupFavicon(router)
 setupPageTitleDescription(router)

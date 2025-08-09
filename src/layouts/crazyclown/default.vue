@@ -7,6 +7,7 @@ import { RouterView } from 'vue-router'
 
 import Banner from '@/components/layouts/Banner.vue'
 import Breadcrumb from '@/components/layouts/Breadcrumb.vue'
+import FloatingButtons from '@/components/common/FloatingButtons.vue'
 import Footer from '@/components/layouts/Footer.vue'
 import Navbar from '@/components/layouts/navbar/Navbar.vue'
 
@@ -110,6 +111,7 @@ const { isHomePage } = useIsHomePage()
         </template>
       </Banner>
       <Breadcrumb :style="'default'" />
+      <FloatingButtons />
     </header>
     <main>
       <RouterView />

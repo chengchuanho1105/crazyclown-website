@@ -1,346 +1,408 @@
-import { ref, computed, type Ref } from 'vue'
-import { supabaseServices, type SupabaseResponse } from '@/services/supabaseService'
-import type { PostgrestError } from '@supabase/supabase-js'
+import { ref, computed, onMounted } from 'vue'
+import {
+  InventoryService,
+  TransactionService,
+  CustomerService,
+  ProductService,
+  ProductCategoryService,
+  PaymentMethodService,
+  OurBankDataService,
+  StatisticsService,
+  type ApiResponse
+} from '@/services/supabaseService'
+import type {
+  InventoryItem,
+  Transaction,
+  Customer,
+  Product,
+  ProductCategory,
+  PaymentMethod,
+  OurBankData,
+  InventoryItemWithDetails
+} from '@/config/supabase'
 
-// 通用狀態管理
-interface UseSupabaseState<T> {
-  data: Ref<T | null>
-  loading: Ref<boolean>
-  error: Ref<PostgrestError | null>
-}
+// 全域狀態管理
+const inventoryItems = ref<InventoryItem[]>([])
+const transactions = ref<Transaction[]>([])
+const customers = ref<Customer[]>([])
+const products = ref<Product[]>([])
+const productCategories = ref<ProductCategory[]>([])
+const paymentMethods = ref<PaymentMethod[]>([])
+const ourBankData = ref<OurBankData[]>([])
 
-// 創建響應式狀態
-function createState<T>(): UseSupabaseState<T> {
-  return {
-    data: ref(null) as Ref<T | null>,
-    loading: ref(false),
-    error: ref(null) as Ref<PostgrestError | null>
-  }
-}
+// 載入狀態
+const loading = ref({
+  inventory: false,
+  transactions: false,
+  customers: false,
+  products: false,
+  categories: false,
+  paymentMethods: false,
+  bankData: false
+})
 
-// 通用 Supabase composable
-export function useSupabase<T>() {
-  const state = createState<T>()
+// 錯誤狀態
+const errors = ref({
+  inventory: null as string | null,
+  transactions: null as string | null,
+  customers: null as string | null,
+  products: null as string | null,
+  categories: null as string | null,
+  paymentMethods: null as string | null,
+  bankData: null as string | null
+})
 
-  // 設置資料
-  const setData = (data: T | null) => {
-    state.data.value = data
-  }
+// 庫存管理
+export function useInventory() {
+  const fetchInventory = async () => {
+    loading.value.inventory = true
+    errors.value.inventory = null
 
-  // 設置錯誤
-  const setError = (error: PostgrestError | null) => {
-    state.error.value = error
-  }
+    const response = await InventoryService.getAllInventoryItems()
 
-  // 設置載入狀態
-  const setLoading = (loading: boolean) => {
-    state.loading.value = loading
-  }
-
-  // 處理 Supabase 響應
-  const handleResponse = (response: SupabaseResponse<T>) => {
     if (response.error) {
-      setError(response.error)
-      setData(null)
-    } else {
-      setData(response.data)
-      setError(null)
+      errors.value.inventory = response.error.message
+    } else if (response.data) {
+      inventoryItems.value = response.data
     }
+
+    loading.value.inventory = false
   }
 
-  // 執行異步操作
-  const execute = async (operation: () => Promise<SupabaseResponse<T>>) => {
-    setLoading(true)
-    setError(null)
+  const fetchInventoryWithDetails = async (): Promise<InventoryItemWithDetails[]> => {
+    const response = await InventoryService.getInventoryItemsWithDetails()
 
-    try {
-      const response = await operation()
-      handleResponse(response)
-    } catch (error) {
-      setError(error as PostgrestError)
-      setData(null)
-    } finally {
-      setLoading(false)
+    if (response.error) {
+      throw new Error(response.error.message)
     }
+
+    return response.data || []
   }
+
+  const createInventoryItem = async (item: Omit<InventoryItem, 'id' | 'created_at' | 'updated_at'>) => {
+    const response = await InventoryService.createInventoryItem(item)
+
+    if (response.error) {
+      throw new Error(response.error.message)
+    }
+
+    // 重新載入庫存資料
+    await fetchInventory()
+
+    return response.data
+  }
+
+  const updateInventoryItem = async (id: string, updates: Partial<InventoryItem>) => {
+    const response = await InventoryService.updateInventoryItem(id, updates)
+
+    if (response.error) {
+      throw new Error(response.error.message)
+    }
+
+    // 更新本地資料
+    const index = inventoryItems.value.findIndex(item => item.id === id)
+    if (index !== -1 && response.data) {
+      inventoryItems.value[index] = response.data
+    }
+
+    return response.data
+  }
+
+  const deleteInventoryItem = async (id: string) => {
+    const response = await InventoryService.deleteInventoryItem(id)
+
+    if (response.error) {
+      throw new Error(response.error.message)
+    }
+
+    // 從本地資料中移除
+    inventoryItems.value = inventoryItems.value.filter(item => item.id !== id)
+
+    return response.data
+  }
+
+  // 計算屬性
+  const availableItems = computed(() =>
+    inventoryItems.value.filter(item => item.status === '未售')
+  )
+
+  const soldItems = computed(() =>
+    inventoryItems.value.filter(item => item.status === '已售')
+  )
+
+  const personalItems = computed(() =>
+    inventoryItems.value.filter(item => item.status === '自用')
+  )
+
+  const welfareItems = computed(() =>
+    inventoryItems.value.filter(item => item.status === '福利')
+  )
 
   return {
-    ...state,
-    setData,
-    setError,
-    setLoading,
-    execute
+    inventoryItems: computed(() => inventoryItems.value),
+    availableItems,
+    soldItems,
+    personalItems,
+    welfareItems,
+    loading: computed(() => loading.value.inventory),
+    error: computed(() => errors.value.inventory),
+    fetchInventory,
+    fetchInventoryWithDetails,
+    createInventoryItem,
+    updateInventoryItem,
+    deleteInventoryItem
   }
 }
 
-// 交易相關 composable
+// 交易管理
 export function useTransactions() {
-  const { data: transactions, loading, error, execute } = useSupabase<any[]>()
+  const fetchTransactions = async () => {
+    loading.value.transactions = true
+    errors.value.transactions = null
 
-  // 獲取所有交易
-  const fetchTransactions = () => {
-    return execute(() => supabaseServices.transactions.getAll())
+    const response = await TransactionService.getAllTransactions()
+
+    if (response.error) {
+      errors.value.transactions = response.error.message
+    } else if (response.data) {
+      transactions.value = response.data
+    }
+
+    loading.value.transactions = false
   }
 
-  // 獲取交易統計
-  const fetchTransactionStats = () => {
-    return execute(() => supabaseServices.transactions.getTransactionStats())
-  }
+  const createTransaction = async (transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => {
+    const response = await TransactionService.createTransaction(transaction)
 
-  // 獲取月營收
-  const fetchMonthlyRevenue = (year: number, month: number) => {
-    return execute(() => supabaseServices.transactions.getMonthlyRevenue(year, month))
-  }
+    if (response.error) {
+      throw new Error(response.error.message)
+    }
 
-  // 創建交易
-  const createTransaction = (transactionData: any) => {
-    return execute(() => supabaseServices.transactions.create(transactionData))
-  }
+    // 重新載入交易資料
+    await fetchTransactions()
 
-  // 更新交易
-  const updateTransaction = (id: string, data: any) => {
-    return execute(() => supabaseServices.transactions.update(id, data))
-  }
-
-  // 刪除交易
-  const deleteTransaction = (id: string) => {
-    return execute(() => supabaseServices.transactions.delete(id))
+    return response.data
   }
 
   return {
-    transactions,
-    loading,
-    error,
+    transactions: computed(() => transactions.value),
+    loading: computed(() => loading.value.transactions),
+    error: computed(() => errors.value.transactions),
     fetchTransactions,
-    fetchTransactionStats,
-    fetchMonthlyRevenue,
-    createTransaction,
-    updateTransaction,
-    deleteTransaction
+    createTransaction
   }
 }
 
-// 客戶相關 composable
+// 客戶管理
 export function useCustomers() {
-  const { data: customers, loading, error, execute } = useSupabase<any[]>()
+  const fetchCustomers = async () => {
+    loading.value.customers = true
+    errors.value.customers = null
 
-  // 獲取所有客戶
-  const fetchCustomers = () => {
-    return execute(() => supabaseServices.customers.getAll())
+    const response = await CustomerService.getAllCustomers()
+
+    if (response.error) {
+      errors.value.customers = response.error.message
+    } else if (response.data) {
+      customers.value = response.data
+    }
+
+    loading.value.customers = false
   }
 
-  // 根據 ID 獲取客戶
-  const fetchCustomerById = (id: string) => {
-    return execute(() => supabaseServices.customers.getById(id))
-  }
+  const createCustomer = async (customer: Omit<Customer, 'id' | 'created_at' | 'updated_at'>) => {
+    const response = await CustomerService.createCustomer(customer)
 
-  // 根據電子郵件查找客戶
-  const fetchCustomerByEmail = (email: string) => {
-    return execute(() => supabaseServices.customers.getByEmail(email))
-  }
+    if (response.error) {
+      throw new Error(response.error.message)
+    }
 
-  // 創建客戶
-  const createCustomer = (customerData: any) => {
-    return execute(() => supabaseServices.customers.create(customerData))
-  }
+    // 重新載入客戶資料
+    await fetchCustomers()
 
-  // 更新客戶
-  const updateCustomer = (id: string, data: any) => {
-    return execute(() => supabaseServices.customers.update(id, data))
-  }
-
-  // 刪除客戶
-  const deleteCustomer = (id: string) => {
-    return execute(() => supabaseServices.customers.delete(id))
+    return response.data
   }
 
   return {
-    customers,
-    loading,
-    error,
+    customers: computed(() => customers.value),
+    loading: computed(() => loading.value.customers),
+    error: computed(() => errors.value.customers),
     fetchCustomers,
-    fetchCustomerById,
-    fetchCustomerByEmail,
-    createCustomer,
-    updateCustomer,
-    deleteCustomer
+    createCustomer
   }
 }
 
-// 商品相關 composable
+// 商品管理
 export function useProducts() {
-  const { data: products, loading, error, execute } = useSupabase<any[]>()
+  const fetchProducts = async () => {
+    loading.value.products = true
+    errors.value.products = null
 
-  // 獲取所有商品
-  const fetchProducts = () => {
-    return execute(() => supabaseServices.products.getAll())
-  }
+    const response = await ProductService.getAllProducts()
 
-  // 根據類別獲取商品
-  const fetchProductsByCategory = (categoryId: string) => {
-    return execute(() => supabaseServices.products.getByCategory(categoryId))
-  }
+    if (response.error) {
+      errors.value.products = response.error.message
+    } else if (response.data) {
+      products.value = response.data
+    }
 
-  // 創建商品
-  const createProduct = (productData: any) => {
-    return execute(() => supabaseServices.products.create(productData))
-  }
-
-  // 更新商品
-  const updateProduct = (id: string, data: any) => {
-    return execute(() => supabaseServices.products.update(id, data))
-  }
-
-  // 更新庫存
-  const updateProductStock = (id: string, quantity: number) => {
-    return execute(() => supabaseServices.products.updateStock(id, quantity))
-  }
-
-  // 刪除商品
-  const deleteProduct = (id: string) => {
-    return execute(() => supabaseServices.products.delete(id))
+    loading.value.products = false
   }
 
   return {
-    products,
-    loading,
-    error,
-    fetchProducts,
-    fetchProductsByCategory,
-    createProduct,
-    updateProduct,
-    updateProductStock,
-    deleteProduct
+    products: computed(() => products.value),
+    loading: computed(() => loading.value.products),
+    error: computed(() => errors.value.products),
+    fetchProducts
   }
 }
 
-// 預訂相關 composable
-export function useReservations() {
-  const { data: reservations, loading, error, execute } = useSupabase<any[]>()
+// 商品分類管理
+export function useProductCategories() {
+  const fetchCategories = async () => {
+    loading.value.categories = true
+    errors.value.categories = null
 
-  // 獲取所有預訂
-  const fetchReservations = () => {
-    return execute(() => supabaseServices.reservations.getAll())
-  }
+    const response = await ProductCategoryService.getAllProductCategories()
 
-  // 根據日期獲取預訂
-  const fetchReservationsByDate = (date: string) => {
-    return execute(() => supabaseServices.reservations.getByDate(date))
-  }
+    if (response.error) {
+      errors.value.categories = response.error.message
+    } else if (response.data) {
+      productCategories.value = response.data
+    }
 
-  // 根據日期範圍獲取預訂
-  const fetchReservationsByDateRange = (startDate: string, endDate: string) => {
-    return execute(() => supabaseServices.reservations.getByDateRange(startDate, endDate))
-  }
-
-  // 創建預訂
-  const createReservation = (reservationData: any) => {
-    return execute(() => supabaseServices.reservations.create(reservationData))
-  }
-
-  // 更新預訂
-  const updateReservation = (id: string, data: any) => {
-    return execute(() => supabaseServices.reservations.update(id, data))
-  }
-
-  // 更新預訂狀態
-  const updateReservationStatus = (id: string, status: 'pending' | 'confirmed' | 'cancelled') => {
-    return execute(() => supabaseServices.reservations.updateStatus(id, status))
-  }
-
-  // 刪除預訂
-  const deleteReservation = (id: string) => {
-    return execute(() => supabaseServices.reservations.delete(id))
+    loading.value.categories = false
   }
 
   return {
-    reservations,
-    loading,
-    error,
-    fetchReservations,
-    fetchReservationsByDate,
-    fetchReservationsByDateRange,
-    createReservation,
-    updateReservation,
-    updateReservationStatus,
-    deleteReservation
+    productCategories: computed(() => productCategories.value),
+    loading: computed(() => loading.value.categories),
+    error: computed(() => errors.value.categories),
+    fetchCategories
   }
 }
 
-// 認證相關 composable
-export function useAuth() {
-  const { data: user, loading, error, execute } = useSupabase<any>()
+// 付款方式管理
+export function usePaymentMethods() {
+  const fetchPaymentMethods = async () => {
+    loading.value.paymentMethods = true
+    errors.value.paymentMethods = null
 
-  // 獲取當前用戶
-  const getCurrentUser = async () => {
-    const { data: { user }, error } = await supabase.auth.getUser()
-    if (error) {
-      setError(error)
-      setData(null)
-    } else {
-      setData(user)
-      setError(null)
+    const response = await PaymentMethodService.getAllPaymentMethods()
+
+    if (response.error) {
+      errors.value.paymentMethods = response.error.message
+    } else if (response.data) {
+      paymentMethods.value = response.data
     }
-    setLoading(false)
-  }
 
-  // 登入
-  const signIn = async (email: string, password: string) => {
-    setLoading(true)
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    })
-
-    if (error) {
-      setError(error)
-      setData(null)
-    } else {
-      setData(data.user)
-      setError(null)
-    }
-    setLoading(false)
-  }
-
-  // 登出
-  const signOut = async () => {
-    setLoading(true)
-    const { error } = await supabase.auth.signOut()
-
-    if (error) {
-      setError(error)
-    } else {
-      setData(null)
-      setError(null)
-    }
-    setLoading(false)
-  }
-
-  // 註冊
-  const signUp = async (email: string, password: string) => {
-    setLoading(true)
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password
-    })
-
-    if (error) {
-      setError(error)
-      setData(null)
-    } else {
-      setData(data.user)
-      setError(null)
-    }
-    setLoading(false)
+    loading.value.paymentMethods = false
   }
 
   return {
-    user,
-    loading,
-    error,
-    getCurrentUser,
-    signIn,
-    signOut,
-    signUp
+    paymentMethods: computed(() => paymentMethods.value),
+    loading: computed(() => loading.value.paymentMethods),
+    error: computed(() => errors.value.paymentMethods),
+    fetchPaymentMethods
+  }
+}
+
+// 銀行資料管理
+export function useBankData() {
+  const fetchBankData = async () => {
+    loading.value.bankData = true
+    errors.value.bankData = null
+
+    const response = await OurBankDataService.getAllBankData()
+
+    if (response.error) {
+      errors.value.bankData = response.error.message
+    } else if (response.data) {
+      ourBankData.value = response.data
+    }
+
+    loading.value.bankData = false
+  }
+
+  return {
+    ourBankData: computed(() => ourBankData.value),
+    loading: computed(() => loading.value.bankData),
+    error: computed(() => errors.value.bankData),
+    fetchBankData
+  }
+}
+
+// 統計資料
+export function useStatistics() {
+  const inventoryStats = ref({
+    total: 0,
+    available: 0,
+    sold: 0,
+    reserved: 0,
+    personal: 0,
+    welfare: 0,
+    stolen: 0,
+    refunded: 0,
+    compensation: 0
+  })
+
+  const revenueStats = ref({
+    totalRevenue: 0,
+    monthlyRevenue: 0,
+    totalTransactions: 0
+  })
+
+  const fetchInventoryStatistics = async () => {
+    const response = await StatisticsService.getInventoryStatistics()
+
+    if (response.error) {
+      throw new Error(response.error.message)
+    }
+
+    if (response.data) {
+      inventoryStats.value = response.data
+    }
+  }
+
+  const fetchRevenueStatistics = async () => {
+    const response = await StatisticsService.getRevenueStatistics()
+
+    if (response.error) {
+      throw new Error(response.error.message)
+    }
+
+    if (response.data) {
+      revenueStats.value = response.data
+    }
+  }
+
+  return {
+    inventoryStats: computed(() => inventoryStats.value),
+    revenueStats: computed(() => revenueStats.value),
+    fetchInventoryStatistics,
+    fetchRevenueStatistics
+  }
+}
+
+// 全域初始化
+export function useSupabaseInit() {
+  const initializeData = async () => {
+    try {
+      await Promise.all([
+        useInventory().fetchInventory(),
+        useTransactions().fetchTransactions(),
+        useCustomers().fetchCustomers(),
+        useProducts().fetchProducts(),
+        useProductCategories().fetchCategories(),
+        usePaymentMethods().fetchPaymentMethods(),
+        useBankData().fetchBankData()
+      ])
+    } catch (error) {
+      console.error('初始化 Supabase 資料失敗:', error)
+    }
+  }
+
+  return {
+    initializeData
   }
 }

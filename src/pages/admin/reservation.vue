@@ -2,26 +2,23 @@
 defineOptions({ name: 'ReservationManagement' })
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useInventory, useProducts, useProductCategories, useCustomers } from '@/composables/useSupabase'
+import type { InventoryItem, Customer } from '@/config/supabase'
 
 const route = useRoute()
 const router = useRouter()
+
+// 使用 Supabase Composables
+const { inventoryItems, loading: inventoryLoading, fetchInventory, updateInventoryItem } = useInventory()
+const { products, loading: productsLoading, fetchProducts } = useProducts()
+const { productCategories, loading: categoriesLoading, fetchCategories } = useProductCategories()
+const { customers, loading: customersLoading, fetchCustomers, createCustomer } = useCustomers()
 
 // 預訂資料結構
 interface Reservation {
   id: string
   inventoryItemId: string
-  customerName: string
-  customerPhone: string
-  customerIdNumber: string
-  contactMethod: string
-  contactMethodId: string
-  contactMethodAccount: string
-  contactMethodNickname: string
-  address: string
-  pubgNickname: string
-  steamId: string
-  pubgAccountId: string
-  reservationTime: string
+  customerId: string
   expectedPrice: number
   notes: string
   status: 'pending' | 'confirmed' | 'cancelled'
@@ -29,35 +26,20 @@ interface Reservation {
   updatedAt: string
 }
 
-// 庫存項目資料結構
-interface InventoryItem {
-  id: string
-  cdKey: string
-  series: string
-  productName: string
-  suggestedPrice: number
-  status: string
-}
-
-// 模擬庫存資料
-const inventoryItems = ref<InventoryItem[]>([
-  {
-    id: 'INV-001',
-    cdKey: 'S06831-F6KN-E7DK-YNSWQ',
-    series: 'G-Coin',
-    productName: '11,200 G-Coin',
-    suggestedPrice: 2749,
-    status: '未售'
-  },
-  {
-    id: 'INV-003',
-    cdKey: 'S06865-XQHH-J4B9-PD7UG',
-    series: 'G-Coin',
-    productName: '1,050 G-Coin',
-    suggestedPrice: 289,
-    status: '未售'
-  }
-])
+// 可預訂的庫存項目
+const availableInventoryItems = computed(() => {
+  return inventoryItems.value.filter(item => item.status === '未售').map(item => {
+    const product = products.value.find(p => p.id === item.product_id)
+    return {
+      id: item.id,
+      cdKey: item.cd_key,
+      series: product?.series || '',
+      productName: product?.product_name || '',
+      suggestedPrice: item.suggested_price,
+      status: item.status
+    }
+  })
+})
 
 // 預訂表單
 const reservationForm = ref({
@@ -77,6 +59,10 @@ const reservationForm = ref({
   notes: ''
 })
 
+// 載入狀態
+const isLoading = ref(false)
+const error = ref<string | null>(null)
+
 // 表單驗證
 const formErrors = ref<Record<string, string>>({})
 
@@ -86,11 +72,25 @@ const selectedItem = computed(() => {
 })
 
 // 初始化
-onMounted(() => {
-  // 如果有 URL 參數，自動選擇商品
-  const itemId = route.query.itemId as string
-  if (itemId) {
-    reservationForm.value.inventoryItemId = itemId
+onMounted(async () => {
+  try {
+    console.log('開始載入預訂管理資料...')
+    await Promise.all([
+      fetchInventory(),
+      fetchProducts(),
+      fetchCategories(),
+      fetchCustomers()
+    ])
+    console.log('預訂管理資料載入完成')
+
+    // 如果有 URL 參數，自動選擇商品
+    const itemId = route.query.itemId as string
+    if (itemId) {
+      reservationForm.value.inventoryItemId = itemId
+    }
+  } catch (err) {
+    console.error('載入預訂管理資料失敗:', err)
+    error.value = err instanceof Error ? err.message : '載入資料失敗'
   }
 })
 
@@ -122,44 +122,48 @@ const validateForm = () => {
 }
 
 // 創建預訂
-const createReservation = () => {
+const createReservation = async () => {
   if (!validateForm()) {
     return
   }
 
-  const reservation: Reservation = {
-    id: `RES-${Date.now()}`,
-    inventoryItemId: reservationForm.value.inventoryItemId,
-    customerName: reservationForm.value.customerName,
-    customerPhone: reservationForm.value.customerPhone,
-    customerIdNumber: reservationForm.value.customerIdNumber,
-    contactMethod: reservationForm.value.contactMethod,
-    contactMethodId: reservationForm.value.contactMethodId,
-    contactMethodAccount: reservationForm.value.contactMethodAccount,
-    contactMethodNickname: reservationForm.value.contactMethodNickname,
-    address: reservationForm.value.address,
-    pubgNickname: reservationForm.value.pubgNickname,
-    steamId: reservationForm.value.steamId,
-    pubgAccountId: reservationForm.value.pubgAccountId,
-    expectedPrice: reservationForm.value.expectedPrice,
-    notes: reservationForm.value.notes,
-    reservationTime: new Date().toISOString(),
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+  isLoading.value = true
+  error.value = null
+
+  try {
+    // 先創建客戶
+    const customerData = {
+      name: reservationForm.value.customerName,
+      phone: reservationForm.value.customerPhone,
+      id_number: reservationForm.value.customerIdNumber,
+      contact_method: reservationForm.value.contactMethod,
+      contact_method_id: reservationForm.value.contactMethodId,
+      contact_method_account: reservationForm.value.contactMethodAccount,
+      contact_method_nickname: reservationForm.value.contactMethodNickname,
+      address: reservationForm.value.address,
+      pubg_nickname: reservationForm.value.pubgNickname,
+      steam_id: reservationForm.value.steamId,
+      pubg_account_id: reservationForm.value.pubgAccountId,
+      nickname: reservationForm.value.customerName
+    }
+
+    const customer = await createCustomer(customerData)
+
+    // 更新庫存狀態為預訂中
+    await updateInventoryItem(reservationForm.value.inventoryItemId, {
+      status: '福利' // 暫時使用福利狀態來表示預訂
+    })
+
+    console.log('預訂創建成功:', { customer, inventoryItemId: reservationForm.value.inventoryItemId })
+
+    // 跳轉到庫存管理頁面
+    router.push('/admin/inventory')
+  } catch (err) {
+    console.error('創建預訂失敗:', err)
+    error.value = err instanceof Error ? err.message : '創建預訂失敗'
+  } finally {
+    isLoading.value = false
   }
-
-  // 這裡應該調用 API 創建預訂
-  console.log('創建預訂:', reservation)
-
-  // 更新庫存狀態
-  const itemIndex = inventoryItems.value.findIndex(item => item.id === reservation.inventoryItemId)
-  if (itemIndex !== -1) {
-    inventoryItems.value[itemIndex].status = '預訂中'
-  }
-
-  // 跳轉到庫存管理頁面
-  router.push('/admin/inventory')
 }
 
 // 重置表單
