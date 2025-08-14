@@ -349,6 +349,31 @@ export class TransactionService {
       }
     }
   }
+
+  // 更新交易記錄
+  static async updateTransaction(id: string, updates: Partial<Transaction>): Promise<ApiResponse<Transaction>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.TRANSACTIONS)
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '更新交易記錄失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
 }
 
 // 客戶服務

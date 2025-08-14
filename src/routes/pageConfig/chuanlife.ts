@@ -95,7 +95,7 @@ export const pageConfig: PageConfig = {
         {
           path: ':id',
           name: `${brandName}-News-Detail`,
-          component: () => import(`@/pages/${brandName}/news/[id].vue`),
+          component: () => import(`@/pages/news/[id].vue`),
           meta: {
             title: `最新消息詳情 | ${brandDisplayName}`,
             description: '',

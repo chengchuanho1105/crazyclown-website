@@ -3,6 +3,7 @@ defineOptions({ name: 'AdminDashboard' })
 import { computed, onMounted } from 'vue'
 import { useInventory, useStatistics, useTransactions, useCustomers, useProductCategories } from '@/composables/useSupabase'
 
+
 // 使用 Supabase Composables
 const { inventoryItems, loading: inventoryLoading, fetchInventory } = useInventory()
 const { transactions, loading: transactionsLoading, fetchTransactions } = useTransactions()
@@ -46,8 +47,8 @@ const categoryDistribution = computed(() => {
   const categoryCounts: { [key: string]: number } = {}
 
   inventoryItems.value.forEach(item => {
-    const category = productCategories.value.find(cat => cat.id === item.product_category_id)
-    const categoryName = category?.category_name || '其他'
+    // 由於 InventoryItem 沒有 product_category_id，我們暫時使用 '其他' 分類
+    const categoryName = '其他'
     categoryCounts[categoryName] = (categoryCounts[categoryName] || 0) + 1
   })
 
@@ -63,9 +64,6 @@ const categoryDistribution = computed(() => {
 const quickActions = [
   { name: '庫存管理', icon: 'bi-box', path: '/admin/inventory', color: 'bg-green-500' },
   { name: '客戶管理', icon: 'bi-people', path: '/admin/customers', color: 'bg-blue-500' },
-  { name: '交易管理', icon: 'bi-cart', path: '/admin/transactions', color: 'bg-purple-500' },
-  { name: '預訂管理', icon: 'bi-calendar-check', path: '/admin/reservation', color: 'bg-orange-500' },
-  { name: '資料測試', icon: 'bi-database', path: '/admin/supabase-test', color: 'bg-indigo-500' }
 ]
 
 // 計算營收成長

@@ -65,7 +65,6 @@ const {
 
 onMounted(() => {
   loadNewsData()
-  console.log('News page mounted, loading data...')
 })
 
 // 分頁設定
@@ -94,33 +93,6 @@ const featuredPaged = computed(() =>
     (featuredPage.value - 1) * PAGE_SIZE,
     featuredPage.value * PAGE_SIZE,
   ),
-)
-
-// 添加調試資訊 - 移到 computed 定義之後
-watch(
-  newsData,
-  (newData) => {
-    console.log('News data loaded:', newData.length, 'items')
-    console.log('Regular news:', regularNewsList.value.length)
-    console.log('Featured news:', featuredNewsList.value.length)
-
-    // 顯示前幾個項目的詳細資訊
-    if (newData.length > 0) {
-      console.log('First news item:', newData[0])
-    }
-  },
-  { immediate: true },
-)
-
-// 監聽錯誤狀態
-watch(
-  newsDataError,
-  (error) => {
-    if (error) {
-      console.error('News data error:', error)
-    }
-  },
-  { immediate: true },
 )
 
 // 同頁面跳轉新聞詳情
@@ -166,35 +138,6 @@ function goToFeaturedPage(page: number) {
 
 <template>
   <div class="max-w-7xl mx-auto p-4 md:p-8 space-y-12">
-    <!--
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div
-        class="flex flex-col h-full group rounded-xl shadow-lg hover:shadow-xl transition-shadow bg-white dark:bg-zinc-800 overflow-hidden cursor-pointer">
-        <img src="https://i.meee.com.tw/SEDqQby.jpg" alt=""
-          class="mb-2 aspect-video object-cover group-hover:scale-105 transition-transform duration-300 ">
-        <div class="p-4 flex flex-col h-full">
-          <div class="flex mb-2 gap-2 ">
-            <span
-              class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900 text-xs font-medium text-green-800 dark:text-green-200">
-              標籤
-            </span>
-            <span
-              class="px-2 py-1 rounded-full bg-sky-100 dark:bg-sky-900 text-xs font-medium text-sky-800 dark:text-sky-200">
-              標籤
-            </span>
-          </div>
-          <h3
-            class="mb-2 text-xl font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2 ">
-            標題</h3>
-          <p class="mb-2 text-base text-zinc-500 dark:text-zinc-400 line-clamp-3">內容</p>
-          <div class="mt-auto flex justify-between text-sm text-zinc-500 dark:text-zinc-400">
-            <span class="">作者</span>
-            <span class="">2025-07-23</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    -->
 
     <!-- 載入狀態 -->
     <div v-if="newsDataLoading" class="flex justify-center items-center py-20">

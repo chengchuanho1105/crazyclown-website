@@ -59,7 +59,6 @@ onMounted(() => {
   loadNewsData()
   // 添加調試信息
   setTimeout(() => {
-    console.log('所有新聞數據:', newsData.value)
     newsData.value.forEach((item, index) => {
       console.log(`新聞 ${index + 1}:`, {
         id: item.id,
@@ -123,27 +122,13 @@ const processedArticle = computed(() => {
     return ''
   }
 
-  // 調試：打印 addBaseStyle 的值
-  console.log('addBaseStyle 原始值:', news.value.addBaseStyle)
-  console.log('addBaseStyle 類型:', typeof news.value.addBaseStyle)
-  console.log('addBaseStyle 轉小寫後:', news.value.addBaseStyle?.toLowerCase())
-  console.log('addBaseStyle 是否為空:', !news.value.addBaseStyle)
-  console.log('addBaseStyle 是否為 undefined:', news.value.addBaseStyle === undefined)
-  console.log('addBaseStyle 是否為 null:', news.value.addBaseStyle === null)
-
   // 檢查 addBaseStyle 的值
   const addBaseStyleValue = news.value.addBaseStyle?.toLowerCase()
-  console.log('addBaseStyle 處理後的值:', addBaseStyleValue)
 
   // 如果 addBaseStyle 為 'false'，直接返回原始 HTML
   if (addBaseStyleValue === 'false') {
-    console.log('addBaseStyle 為 false，直接返回原始 HTML')
     return news.value.html
   }
-
-  // 如果 addBaseStyle 為 'true' 或其他值，進行樣式處理
-  console.log('addBaseStyle 為 true 或其他值，進行樣式處理')
-  console.log('addBaseStyle 最終判斷結果:', addBaseStyleValue === 'false' ? 'false' : 'true/其他')
   // 如果 addBaseStyle 為 true 或其他值，才進行樣式處理
   let html = news.value.html
 

@@ -2,7 +2,9 @@
 defineOptions({ name: 'Layout-CrazyClown-Default' })
 
 // ---------- Vue 核心工具函式 ----------
+import { computed } from 'vue'
 import { useIsHomePage } from '@/composables/useIsHomePage'
+import { useCurrentRoute } from '@/composables/useCurrentRouth'
 import { RouterView } from 'vue-router'
 
 import Banner from '@/components/layouts/Banner.vue'
@@ -11,8 +13,9 @@ import FloatingButtons from '@/components/common/FloatingButtons.vue'
 import Footer from '@/components/layouts/Footer.vue'
 import Navbar from '@/components/layouts/navbar/Navbar.vue'
 
-// 判斷是否為首頁
-const { isHomePage } = useIsHomePage()
+const { path } = useCurrentRoute()
+const isHomePage = computed(() => path.value === '/' || path.value === '')
+
 </script>
 
 <template>

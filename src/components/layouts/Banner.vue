@@ -1,29 +1,23 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { useCurrentBrand } from '@/composables/useCurrentBrand'
-import { MAIN_BRAND } from '@/brands'
-import { isHomePage as isHomePageUtil } from '@/utils/pathUtils'
+import { useCurrentRoute } from '@/composables/useCurrentRouth'
 
 defineOptions({ name: 'Layout-Banner' })
 
-const route = useRoute()
-const { brandKey } = useCurrentBrand()
+const { isHomePage } = useCurrentRoute()
 
-// 判斷是否為首頁
-const isHomePage = computed(() => {
-  // 主品牌首頁路徑為 '/'
-  // 其他品牌首頁路徑為 '/{brandKey}'
-  const homePath = brandKey.value === MAIN_BRAND ? '/' : `/${brandKey.value}`
-  return isHomePageUtil(route.path, homePath)
-})
-
-// 根據是否為首頁決定容器高度
+// 根據頁面類型決定容器高度和顯示方式
 const containerClass = computed(() => {
-  return isHomePage.value
-    ? 'h-screen' // 首頁占滿畫面
-    : 'h-[30svh]' // 其他頁面占25%
+
+  if (isHomePage.value) {
+    return 'h-screen' // 首頁占滿畫面
+  }
+
+  return 'h-[30svh]' // 其他頁面占30%
 })
+
+// 是否顯示向下提示（只在首頁顯示）
+const showScrollHint = computed(() => isHomePage.value)
 
 const scrollPastBanner = () => {
   const section = document.querySelector('.relative.w-full.overflow-hidden') as HTMLElement
@@ -52,7 +46,7 @@ const scrollPastBanner = () => {
     <!-- 首頁向下提示 -->
     <Transition name="fade">
       <div
-        v-if="isHomePage"
+        v-if="showScrollHint"
         class="absolute left-1/2 bottom-8 -translate-x-1/2 flex flex-col items-center z-20 select-none cursor-pointer"
         style="pointer-events: auto"
         @click="scrollPastBanner"

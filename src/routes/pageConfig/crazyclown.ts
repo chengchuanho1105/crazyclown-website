@@ -10,7 +10,7 @@ export const pageConfig: PageConfig = {
     {
       path: '/',
       name: `${brandName}-Home`,
-      component: () => import(`@/pages/${brandName}/index.vue`),
+      component: () => import(`@/pages/index.vue`),
       meta: {
         title: `首頁 | ${brandDisplayName}`,
         description:
@@ -32,7 +32,7 @@ export const pageConfig: PageConfig = {
     {
       path: '/about',
       name: `${brandName}-About`,
-      component: () => import(`@/pages/${brandName}/about.vue`),
+      component: () => import(`@/pages/about.vue`),
       meta: {
         title: `關於我們 | ${brandDisplayName}`,
         description:
@@ -54,7 +54,7 @@ export const pageConfig: PageConfig = {
     {
       path: '/store',
       name: `${brandName}-Store`,
-      component: () => import(`@/pages/${brandName}/store.vue`),
+      component: () => import(`@/pages/store.vue`),
       meta: {
         title: `戰隊特惠 | ${brandDisplayName}`,
         description: 'G-Coin 是 Crazy_Clown 戰隊的獨家貨幣，可以購買戰隊獨享優惠。',
@@ -75,7 +75,7 @@ export const pageConfig: PageConfig = {
     {
       path: '/news',
       name: `${brandName}-News`,
-      component: () => import(`@/pages/${brandName}/news/index.vue`),
+      component: () => import(`@/pages/news/index.vue`),
       meta: {
         title: `最新消息 | ${brandDisplayName}`,
         description: '',
@@ -96,7 +96,7 @@ export const pageConfig: PageConfig = {
         {
           path: ':id',
           name: `${brandName}-News-Detail`,
-          component: () => import(`@/pages/${brandName}/news/[id].vue`),
+          component: () => import(`@/pages/news/[id].vue`),
           meta: {
             title: `最新消息詳情 | ${brandDisplayName}`,
             description: '',
@@ -118,7 +118,7 @@ export const pageConfig: PageConfig = {
     {
       path: '/join',
       name: `${brandName}-Join`,
-      component: () => import(`@/pages/${brandName}/join.vue`),
+      component: () => import(`@/pages/join.vue`),
       meta: {
         title: `加入我們 | ${brandDisplayName}`,
         description:
@@ -134,6 +134,50 @@ export const pageConfig: PageConfig = {
         ui: {
           navbar: true,
           navbarOrder: 5,
+        },
+      },
+    },
+    {
+      path: '/login',
+      name: `${brandName}-Login`,
+      component: () => import(`@/pages/login.vue`),
+      meta: {
+        title: `顧客登入 | ${brandDisplayName}`,
+        description:
+          '登入顧客中心',
+        layout: 'blank',
+        requiresAuth: false,
+        roles: ['user', 'guest'],
+        seo: {
+          sitemap: true,
+          sitemapXml: true,
+          robots: true,
+        },
+        ui: {
+          navbar: false,
+          navbarOrder: 0,
+        },
+      },
+    },
+    {
+      path: '/admin/login',
+      name: `${brandName}-Admin-Login`,
+      component: () => import(`@/pages/admin/login.vue`),
+      meta: {
+        title: `管理員登入 | ${brandDisplayName}`,
+        description:
+          '登入管理員中心',
+        layout: 'blank',
+        requiresAuth: false,
+        roles: ['admin', 'guest'],
+        seo: {
+          sitemap: false,
+          sitemapXml: false,
+          robots: false,
+        },
+        ui: {
+          navbar: false,
+          navbarOrder: 0,
         },
       },
     },
@@ -171,40 +215,8 @@ export const pageConfig: PageConfig = {
         },
       },
     },
-    {
-      path: '/admin/reservation',
-      name: `${brandName}-Reservation`,
-      component: () => import(`@/pages/admin/reservation.vue`),
-      meta: {
-        title: `預訂管理 | ${brandDisplayName}`,
-        description: '',
-        layout: 'admin',
-        requiresAuth: true,
-        roles: ['admin'],
-        seo: {
-          sitemap: false,
-          sitemapXml: false,
-          robots: false,
-        },
-      },
-    },
-    {
-      path: '/admin/supabase-test',
-      name: `${brandName}-SupabaseTest`,
-      component: () => import(`@/pages/admin/supabase-test.vue`),
-      meta: {
-        title: `Supabase 測試 | ${brandDisplayName}`,
-        description: '',
-        layout: 'admin',
-        requiresAuth: true,
-        roles: ['admin'],
-        seo: {
-          sitemap: false,
-          sitemapXml: false,
-          robots: false,
-        },
-      },
-    },
+
+
     {
       path: '/admin/customers',
       name: `${brandName}-Customers`,
@@ -225,7 +237,7 @@ export const pageConfig: PageConfig = {
     {
       path: '/customer',
       name: `${brandName}-Customer`,
-      component: () => import(`@/pages/${brandName}/customer/index.vue`),
+      component: () => import(`@/pages/customer/index.vue`),
       meta: {
         title: `用戶中心 | ${brandDisplayName}`,
         description: '',

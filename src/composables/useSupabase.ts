@@ -52,21 +52,46 @@ const errors = ref({
   bankData: null as string | null
 })
 
+// 資料是否已初始化
+const initialized = ref({
+  inventory: false,
+  transactions: false,
+  customers: false,
+  products: false,
+  categories: false,
+  paymentMethods: false,
+  bankData: false
+})
+
 // 庫存管理
 export function useInventory() {
   const fetchInventory = async () => {
+    // 如果已經載入過，直接返回
+    if (initialized.value.inventory && inventoryItems.value.length > 0) {
+      return inventoryItems.value
+    }
+
     loading.value.inventory = true
     errors.value.inventory = null
 
-    const response = await InventoryService.getAllInventoryItems()
+    try {
+      const response = await InventoryService.getAllInventoryItems()
 
-    if (response.error) {
-      errors.value.inventory = response.error.message
-    } else if (response.data) {
-      inventoryItems.value = response.data
+      if (response.error) {
+        errors.value.inventory = response.error.message
+        throw new Error(response.error.message)
+      } else if (response.data) {
+        inventoryItems.value = response.data
+        initialized.value.inventory = true
+      }
+
+      return inventoryItems.value
+    } catch (error) {
+      errors.value.inventory = error instanceof Error ? error.message : '載入庫存失敗'
+      throw error
+    } finally {
+      loading.value.inventory = false
     }
-
-    loading.value.inventory = false
   }
 
   const fetchInventoryWithDetails = async (): Promise<InventoryItemWithDetails[]> => {
@@ -146,6 +171,7 @@ export function useInventory() {
     welfareItems,
     loading: computed(() => loading.value.inventory),
     error: computed(() => errors.value.inventory),
+    isInitialized: computed(() => initialized.value.inventory),
     fetchInventory,
     fetchInventoryWithDetails,
     createInventoryItem,
@@ -157,18 +183,32 @@ export function useInventory() {
 // 交易管理
 export function useTransactions() {
   const fetchTransactions = async () => {
+    // 如果已經載入過，直接返回
+    if (initialized.value.transactions && transactions.value.length > 0) {
+      return transactions.value
+    }
+
     loading.value.transactions = true
     errors.value.transactions = null
 
-    const response = await TransactionService.getAllTransactions()
+    try {
+      const response = await TransactionService.getAllTransactions()
 
-    if (response.error) {
-      errors.value.transactions = response.error.message
-    } else if (response.data) {
-      transactions.value = response.data
+      if (response.error) {
+        errors.value.transactions = response.error.message
+        throw new Error(response.error.message)
+      } else if (response.data) {
+        transactions.value = response.data
+        initialized.value.transactions = true
+      }
+
+      return transactions.value
+    } catch (error) {
+      errors.value.transactions = error instanceof Error ? error.message : '載入交易失敗'
+      throw error
+    } finally {
+      loading.value.transactions = false
     }
-
-    loading.value.transactions = false
   }
 
   const createTransaction = async (transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => {
@@ -184,30 +224,59 @@ export function useTransactions() {
     return response.data
   }
 
+  const updateTransaction = async (id: string, updates: Partial<Transaction>) => {
+    const response = await TransactionService.updateTransaction(id, updates)
+
+    if (response.error) {
+      throw new Error(response.error.message)
+    }
+
+    // 重新載入交易資料
+    await fetchTransactions()
+
+    return response.data
+  }
+
   return {
     transactions: computed(() => transactions.value),
     loading: computed(() => loading.value.transactions),
     error: computed(() => errors.value.transactions),
+    isInitialized: computed(() => initialized.value.transactions),
     fetchTransactions,
-    createTransaction
+    createTransaction,
+    updateTransaction
   }
 }
 
 // 客戶管理
 export function useCustomers() {
   const fetchCustomers = async () => {
+    // 如果已經載入過，直接返回
+    if (initialized.value.customers && customers.value.length > 0) {
+      return customers.value
+    }
+
     loading.value.customers = true
     errors.value.customers = null
 
-    const response = await CustomerService.getAllCustomers()
+    try {
+      const response = await CustomerService.getAllCustomers()
 
-    if (response.error) {
-      errors.value.customers = response.error.message
-    } else if (response.data) {
-      customers.value = response.data
+      if (response.error) {
+        errors.value.customers = response.error.message
+        throw new Error(response.error.message)
+      } else if (response.data) {
+        customers.value = response.data
+        initialized.value.customers = true
+      }
+
+      return customers.value
+    } catch (error) {
+      errors.value.customers = error instanceof Error ? error.message : '載入客戶失敗'
+      throw error
+    } finally {
+      loading.value.customers = false
     }
-
-    loading.value.customers = false
   }
 
   const createCustomer = async (customer: Omit<Customer, 'id' | 'created_at' | 'updated_at'>) => {
@@ -227,6 +296,7 @@ export function useCustomers() {
     customers: computed(() => customers.value),
     loading: computed(() => loading.value.customers),
     error: computed(() => errors.value.customers),
+    isInitialized: computed(() => initialized.value.customers),
     fetchCustomers,
     createCustomer
   }
@@ -235,24 +305,43 @@ export function useCustomers() {
 // 商品管理
 export function useProducts() {
   const fetchProducts = async () => {
+    // 如果已經載入過，直接返回
+    if (initialized.value.products && products.value.length > 0) {
+      return products.value
+    }
+
     loading.value.products = true
     errors.value.products = null
 
-    const response = await ProductService.getAllProducts()
+    try {
+      const response = await ProductService.getAllProducts()
 
-    if (response.error) {
-      errors.value.products = response.error.message
-    } else if (response.data) {
-      products.value = response.data
+      if (response.error) {
+        errors.value.products = response.error.message
+        console.error('商品載入錯誤:', response.error)
+        throw new Error(response.error.message)
+      } else if (response.data) {
+        products.value = response.data
+        initialized.value.products = true
+        console.log('商品載入成功，資料:', response.data)
+      } else {
+        console.warn('商品載入回應為空')
+      }
+
+      return products.value
+    } catch (error) {
+      errors.value.products = error instanceof Error ? error.message : '載入商品失敗'
+      throw error
+    } finally {
+      loading.value.products = false
     }
-
-    loading.value.products = false
   }
 
   return {
     products: computed(() => products.value),
     loading: computed(() => loading.value.products),
     error: computed(() => errors.value.products),
+    isInitialized: computed(() => initialized.value.products),
     fetchProducts
   }
 }
@@ -260,24 +349,39 @@ export function useProducts() {
 // 商品分類管理
 export function useProductCategories() {
   const fetchCategories = async () => {
+    // 如果已經載入過，直接返回
+    if (initialized.value.categories && productCategories.value.length > 0) {
+      return productCategories.value
+    }
+
     loading.value.categories = true
     errors.value.categories = null
 
-    const response = await ProductCategoryService.getAllProductCategories()
+    try {
+      const response = await ProductCategoryService.getAllProductCategories()
 
-    if (response.error) {
-      errors.value.categories = response.error.message
-    } else if (response.data) {
-      productCategories.value = response.data
+      if (response.error) {
+        errors.value.categories = response.error.message
+        throw new Error(response.error.message)
+      } else if (response.data) {
+        productCategories.value = response.data
+        initialized.value.categories = true
+      }
+
+      return productCategories.value
+    } catch (error) {
+      errors.value.categories = error instanceof Error ? error.message : '載入分類失敗'
+      throw error
+    } finally {
+      loading.value.categories = false
     }
-
-    loading.value.categories = false
   }
 
   return {
     productCategories: computed(() => productCategories.value),
     loading: computed(() => loading.value.categories),
     error: computed(() => errors.value.categories),
+    isInitialized: computed(() => initialized.value.categories),
     fetchCategories
   }
 }
@@ -285,24 +389,39 @@ export function useProductCategories() {
 // 付款方式管理
 export function usePaymentMethods() {
   const fetchPaymentMethods = async () => {
+    // 如果已經載入過，直接返回
+    if (initialized.value.paymentMethods && paymentMethods.value.length > 0) {
+      return paymentMethods.value
+    }
+
     loading.value.paymentMethods = true
     errors.value.paymentMethods = null
 
-    const response = await PaymentMethodService.getAllPaymentMethods()
+    try {
+      const response = await PaymentMethodService.getAllPaymentMethods()
 
-    if (response.error) {
-      errors.value.paymentMethods = response.error.message
-    } else if (response.data) {
-      paymentMethods.value = response.data
+      if (response.error) {
+        errors.value.paymentMethods = response.error.message
+        throw new Error(response.error.message)
+      } else if (response.data) {
+        paymentMethods.value = response.data
+        initialized.value.paymentMethods = true
+      }
+
+      return paymentMethods.value
+    } catch (error) {
+      errors.value.paymentMethods = error instanceof Error ? error.message : '載入付款方式失敗'
+      throw error
+    } finally {
+      loading.value.paymentMethods = false
     }
-
-    loading.value.paymentMethods = false
   }
 
   return {
     paymentMethods: computed(() => paymentMethods.value),
     loading: computed(() => loading.value.paymentMethods),
     error: computed(() => errors.value.paymentMethods),
+    isInitialized: computed(() => initialized.value.paymentMethods),
     fetchPaymentMethods
   }
 }
@@ -310,24 +429,39 @@ export function usePaymentMethods() {
 // 銀行資料管理
 export function useBankData() {
   const fetchBankData = async () => {
+    // 如果已經載入過，直接返回
+    if (initialized.value.bankData && ourBankData.value.length > 0) {
+      return ourBankData.value
+    }
+
     loading.value.bankData = true
     errors.value.bankData = null
 
-    const response = await OurBankDataService.getAllBankData()
+    try {
+      const response = await OurBankDataService.getAllBankData()
 
-    if (response.error) {
-      errors.value.bankData = response.error.message
-    } else if (response.data) {
-      ourBankData.value = response.data
+      if (response.error) {
+        errors.value.bankData = response.error.message
+        throw new Error(response.error.message)
+      } else if (response.data) {
+        ourBankData.value = response.data
+        initialized.value.bankData = true
+      }
+
+      return ourBankData.value
+    } catch (error) {
+      errors.value.bankData = error instanceof Error ? error.message : '載入銀行資料失敗'
+      throw error
+    } finally {
+      loading.value.bankData = false
     }
-
-    loading.value.bankData = false
   }
 
   return {
     ourBankData: computed(() => ourBankData.value),
     loading: computed(() => loading.value.bankData),
     error: computed(() => errors.value.bankData),
+    isInitialized: computed(() => initialized.value.bankData),
     fetchBankData
   }
 }
@@ -384,25 +518,53 @@ export function useStatistics() {
   }
 }
 
-// 全域初始化
-export function useSupabaseInit() {
-  const initializeData = async () => {
-    try {
-      await Promise.all([
-        useInventory().fetchInventory(),
-        useTransactions().fetchTransactions(),
-        useCustomers().fetchCustomers(),
-        useProducts().fetchProducts(),
-        useProductCategories().fetchCategories(),
-        usePaymentMethods().fetchPaymentMethods(),
-        useBankData().fetchBankData()
-      ])
-    } catch (error) {
-      console.error('初始化 Supabase 資料失敗:', error)
-    }
-  }
+// 清除快取資料（用於登出或重新整理）
+export function clearSupabaseCache() {
+  // 清除資料
+  inventoryItems.value = []
+  transactions.value = []
+  customers.value = []
+  products.value = []
+  productCategories.value = []
+  paymentMethods.value = []
+  ourBankData.value = []
+
+  // 重置初始化狀態
+  Object.keys(initialized.value).forEach(key => {
+    initialized.value[key as keyof typeof initialized.value] = false
+  })
+
+  // 清除錯誤狀態
+  Object.keys(errors.value).forEach(key => {
+    errors.value[key as keyof typeof errors.value] = null
+  })
+
+  // 重置載入狀態
+  Object.keys(loading.value).forEach(key => {
+    loading.value[key as keyof typeof loading.value] = false
+  })
+}
+
+// 檢查是否有任何載入中的狀態
+export function useSupabaseLoading() {
+  const isLoading = computed(() =>
+    Object.values(loading.value).some(loading => loading)
+  )
+
+  const hasErrors = computed(() =>
+    Object.values(errors.value).some(error => error !== null)
+  )
+
+  const getErrors = computed(() =>
+    Object.entries(errors.value)
+      .filter(([_, error]) => error !== null)
+      .map(([key, error]) => ({ key, error }))
+  )
 
   return {
-    initializeData
+    isLoading,
+    hasErrors,
+    getErrors,
+    clearSupabaseCache
   }
 }

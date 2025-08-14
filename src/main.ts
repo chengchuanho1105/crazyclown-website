@@ -9,8 +9,8 @@ import { setupPageSeo } from '@/routes/hook/setSeo'
 import App from './App.vue'
 import router from './router'
 
-// 初始化 Supabase
-import { useSupabaseInit } from './composables/useSupabase'
+// 移除全域 Supabase 初始化，改為按需載入
+// import { useSupabaseInit } from './composables/useSupabase'
 
 const app = createApp(App)
 const head = createHead()
@@ -18,9 +18,9 @@ const head = createHead()
 app.use(createPinia())
 app.use(router)
 
-// 初始化 Supabase 資料
-const { initializeData } = useSupabaseInit()
-initializeData()
+// 移除全域初始化，改為在需要資料的頁面中按需載入
+// const { initializeData } = useSupabaseInit()
+// initializeData()
 
 setupFavicon(router)
 setupPageTitleDescription(router)
