@@ -1,4 +1,4 @@
-import { supabase, TABLES, type InventoryItem, type Transaction, type Customer, type Product, type ProductCategory, type PaymentMethod, type OurBankData, type InventoryItemWithDetails } from '@/config/supabase'
+import { supabase, TABLES, type InventoryItem, type Transaction, type Customer, type Product, type ProductCategory, type PaymentMethod, type OurBankData, type InventoryItemWithDetails, type News } from '@/config/supabase'
 
 // 錯誤處理類型
 export interface SupabaseError {
@@ -404,9 +404,20 @@ export class CustomerService {
   // 新增客戶
   static async createCustomer(customer: Omit<Customer, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<Customer>> {
     try {
+      // 過濾掉空值，避免約束檢查錯誤
+      const cleanCustomer: Record<string, any> = {}
+
+      Object.entries(customer).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          cleanCustomer[key] = value
+        }
+      })
+
+      console.log('清理後的客戶資料:', cleanCustomer)
+
       const { data, error } = await supabase
         .from(TABLES.CUSTOMERS)
-        .insert([customer])
+        .insert([cleanCustomer])
         .select()
         .single()
 
@@ -418,6 +429,42 @@ export class CustomerService {
         data: null,
         error: {
           message: error.message || '新增客戶失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 更新客戶
+  static async updateCustomer(id: string, updates: Partial<Customer>): Promise<ApiResponse<Customer>> {
+    try {
+      // 過濾掉空值，避免約束檢查錯誤
+      const cleanUpdates: Record<string, any> = {}
+
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          cleanUpdates[key] = value
+        }
+      })
+
+      console.log('清理後的更新資料:', cleanUpdates)
+
+      const { data, error } = await supabase
+        .from(TABLES.CUSTOMERS)
+        .update(cleanUpdates)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '更新客戶失敗',
           details: error.details,
           code: error.code
         }
@@ -609,6 +656,273 @@ export class StatisticsService {
         data: null,
         error: {
           message: error.message || '獲取營收統計失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+}
+
+// 新聞服務
+export class NewsService {
+  // 獲取所有新聞（已發布且未刪除）
+  static async getAllPublishedNews(): Promise<ApiResponse<News[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.NEWS)
+        .select('*')
+        .eq('status', '發布')
+        .is('deleted_at', null)
+        .order('is_pinned', { ascending: false })
+        .order('priority', { ascending: false })
+        .order('published_at', { ascending: false })
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取新聞資料失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 獲取所有新聞（包含草稿和下架，用於後台管理）
+  static async getAllNews(): Promise<ApiResponse<News[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.NEWS)
+        .select('*')
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取所有新聞資料失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 根據 ID 獲取單個新聞
+  static async getNewsById(id: string): Promise<ApiResponse<News>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.NEWS)
+        .select('*')
+        .eq('id', id)
+        .is('deleted_at', null)
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取新聞詳情失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 根據 slug 獲取單個新聞
+  static async getNewsBySlug(slug: string): Promise<ApiResponse<News>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.NEWS)
+        .select('*')
+        .eq('slug', slug)
+        .eq('status', '發布')
+        .is('deleted_at', null)
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取新聞詳情失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 新增新聞
+  static async createNews(news: Omit<News, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>): Promise<ApiResponse<News>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.NEWS)
+        .insert([news])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '新增新聞失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 更新新聞
+  static async updateNews(id: string, updates: Partial<News>): Promise<ApiResponse<News>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.NEWS)
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '更新新聞失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 刪除新聞（軟刪除）
+  static async deleteNews(id: string): Promise<ApiResponse<boolean>> {
+    try {
+      const { error } = await supabase
+        .from(TABLES.NEWS)
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id)
+
+      if (error) throw error
+
+      return { data: true, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '刪除新聞失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 增加瀏覽次數
+  static async incrementViews(id: string): Promise<ApiResponse<boolean>> {
+    try {
+      // 先獲取當前瀏覽次數
+      const { data: currentNews, error: fetchError } = await supabase
+        .from(TABLES.NEWS)
+        .select('views_count')
+        .eq('id', id)
+        .single()
+
+      if (fetchError) throw fetchError
+
+      const newViewsCount = (currentNews?.views_count || 0) + 1
+
+      const { error } = await supabase
+        .from(TABLES.NEWS)
+        .update({ views_count: newViewsCount })
+        .eq('id', id)
+
+      if (error) throw error
+
+      return { data: true, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '更新瀏覽次數失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 根據分類獲取新聞
+  static async getNewsByCategory(category: string): Promise<ApiResponse<News[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.NEWS)
+        .select('*')
+        .eq('category', category)
+        .eq('status', '發布')
+        .is('deleted_at', null)
+        .order('is_pinned', { ascending: false })
+        .order('priority', { ascending: false })
+        .order('published_at', { ascending: false })
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取分類新聞失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 搜尋新聞
+  static async searchNews(query: string): Promise<ApiResponse<News[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.NEWS)
+        .select('*')
+        .or(`title.ilike.%${query}%,summary.ilike.%${query}%,content.ilike.%${query}%`)
+        .eq('status', '發布')
+        .is('deleted_at', null)
+        .order('is_pinned', { ascending: false })
+        .order('priority', { ascending: false })
+        .order('published_at', { ascending: false })
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '搜尋新聞失敗',
           details: error.details,
           code: error.code
         }

@@ -292,13 +292,30 @@ export function useCustomers() {
     return response.data
   }
 
+  const updateCustomer = async (id: string, updates: Partial<Customer>) => {
+    const response = await CustomerService.updateCustomer(id, updates)
+
+    if (response.error) {
+      throw new Error(response.error.message)
+    }
+
+    // 更新本地資料
+    const index = customers.value.findIndex(customer => customer.id === id)
+    if (index !== -1 && response.data) {
+      customers.value[index] = response.data
+    }
+
+    return response.data
+  }
+
   return {
     customers: computed(() => customers.value),
     loading: computed(() => loading.value.customers),
     error: computed(() => errors.value.customers),
     isInitialized: computed(() => initialized.value.customers),
     fetchCustomers,
-    createCustomer
+    createCustomer,
+    updateCustomer
   }
 }
 
@@ -323,7 +340,6 @@ export function useProducts() {
       } else if (response.data) {
         products.value = response.data
         initialized.value.products = true
-        console.log('商品載入成功，資料:', response.data)
       } else {
         console.warn('商品載入回應為空')
       }

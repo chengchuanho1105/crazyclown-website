@@ -1,11 +1,44 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Supabase 配置
-const supabaseUrl = 'https://eikrqunzxniunnprxlji.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpa3JxdW56eG5pdW5ucHJ4bGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzOTc3MDIsImV4cCI6MjA2OTk3MzcwMn0.tvzC1AEZc5fuakDom7izip0bIKYjHyzJIJNx1rhf3V8'
+// Supabase 配置 - 從環境變數讀取
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+// 檢查環境變數是否存在
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('缺少必要的 Supabase 環境變數：VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY')
+}
 
 // 建立 Supabase 客戶端
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+})
+
+// 認證狀態檢查
+export const checkAuthStatus = async () => {
+  const { data: { session }, error } = await supabase.auth.getSession()
+  return { session, error }
+}
+
+// 檢查用戶權限
+export const checkUserRole = async (requiredRoles: string[]) => {
+  try {
+    const { session } = await checkAuthStatus()
+    if (!session) return false
+
+    // 從 session.user.user_metadata 中獲取角色
+    // 如果沒有設定角色，預設為 'user'
+    const userRole = session.user.user_metadata?.role || 'user'
+    return requiredRoles.includes(userRole)
+  } catch (error) {
+    console.error('檢查用戶權限時發生錯誤:', error)
+    return false
+  }
+}
 
 // 資料庫表格名稱
 export const TABLES = {
@@ -15,7 +48,8 @@ export const TABLES = {
   PRODUCTS: 'product',  // 商品資料
   PRODUCT_CATEGORIES: 'product_category',  // 商品分類
   PAYMENT_METHODS: 'payment_method',  // 付款方式
-  OUR_BANK_DATA: 'our_bank_data'  // 我方收款銀行資料
+  OUR_BANK_DATA: 'our_bank_data',  // 我方收款銀行資料
+  NEWS: 'news'  // 新聞資料
 } as const
 
 // 資料庫類型定義
@@ -38,37 +72,37 @@ export interface InventoryItem {
 
 export interface Transaction {
   id: string  // 交易編號 yyyymmddhhmmss + 4碼亂數；e.g. 200011052100301234
-  customer_id: string | null  // 顧客編號 UUID
+  customer_id?: string | null  // 顧客編號 UUID
   inventory_item_id: string  // 庫存編號 yyyymmddhhmmss + 4碼亂數；e.g. 200011052100301234
   transactions_time: string  // 交易時間 yyyy-mm-dd hh:mm:ss.sss+00
-  actual_price: number  // 實際售價 #.00
-  amount_received: number  // 實際收款 #.00
-  amount_difference: number  // 差額 #.00
-  our_payment_method: string  // 我方收款方式 PMD + 5碼編號
-  our_bank_data: string  // 我方收款銀行資料 OBD + 5碼編號
-  customer_payment_method: string  // 顧客付款方式 PMD + 5碼編號
-  customer_bank_code: string  // 顧客銀行代碼
-  customer_bank_account: string  // 顧客銀行帳號
-  customer_account_name: string  // 顧客銀行帳號名稱
-  remarks: string  // 備註
+  actual_price?: number  // 實際售價 #.00
+  amount_received?: number  // 實際收款 #.00
+  amount_difference?: number  // 差額 #.00
+  our_payment_method?: string | null  // 我方收款方式 PMD + 5碼編號
+  our_bank_data?: string | null  // 我方收款銀行資料 OBD + 5碼編號
+  customer_payment_method?: string | null  // 顧客付款方式 PMD + 5碼編號
+  customer_bank_code?: string | null  // 顧客銀行代碼
+  customer_bank_account?: string | null  // 顧客銀行帳號
+  customer_account_name?: string | null  // 顧客銀行帳號名稱
+  remarks?: string | null  // 備註
   created_at: string  // 建立時間 yyyy-mm-dd hh:mm:ss.sss+00
   updated_at: string  // 更新時間 yyyy-mm-dd hh:mm:ss.sss+00
 }
 
 export interface Customer {
   id: string  // 顧客編號 UUID
-  id_number: string  // 顧客身分證字號
-  name: string  // 顧客姓名
-  nickname: string  // 顧客暱稱
-  phone: string  // 顧客電話
-  address: string  // 顧客地址
-  contact_method: string  // 聯絡方式
-  contact_method_id: string  // 聯絡方式編號
-  contact_method_account: string  // 聯絡方式帳號
-  contact_method_nickname: string  // 聯絡方式暱稱
-  pubg_nickname: string  // PUBG暱稱
-  pubg_account_id: string  // PUBG帳號ID
-  steam_id: string  // Steam帳號ID
+  id_number?: string | null  // 顧客身分證字號
+  name?: string | null  // 顧客姓名
+  nickname?: string | null  // 顧客暱稱
+  phone?: string | null  // 顧客電話
+  address?: string | null  // 顧客地址
+  contact_method?: string | null  // 聯絡方式
+  contact_method_id?: string | null  // 聯絡方式編號
+  contact_method_account?: string | null  // 聯絡方式帳號
+  contact_method_nickname?: string | null  // 聯絡方式暱稱
+  pubg_nickname?: string | null  // PUBG暱稱
+  pubg_account_id?: string | null  // PUBG帳號ID
+  steam_id?: string | null  // Steam帳號ID
   created_at: string  // 建立時間 yyyy-mm-dd hh:mm:ss.sss+00
   updated_at: string  // 更新時間 yyyy-mm-dd hh:mm:ss.sss+00
 }
@@ -118,4 +152,25 @@ export interface InventoryItemWithDetails extends InventoryItem {
   product_category?: ProductCategory
   transaction?: Transaction
   customer?: Customer
+}
+
+// 新聞資料類型定義
+export interface News {
+  id: string  // 新聞編號
+  title: string  // 標題
+  slug: string  // URL 友善的標題
+  summary: string  // 摘要
+  content: string  // 內容
+  cover_image_url: string  // 封面圖片 URL
+  author: string  // 作者
+  status: '草稿' | '發布' | '下架'  // 狀態
+  published_at: string | null  // 發布時間
+  is_pinned: boolean  // 是否置頂
+  tags: string[]  // 標籤
+  category: string  // 分類
+  priority: number  // 優先級
+  views_count: number  // 瀏覽次數
+  created_at: string  // 建立時間
+  updated_at: string  // 更新時間
+  deleted_at?: string | null  // 刪除時間
 }

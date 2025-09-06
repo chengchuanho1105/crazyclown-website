@@ -3,6 +3,7 @@ import generatedRoutes from 'virtual:generated-pages'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { PAGE_CONFIGS } from '@/routes'
 import type { PageRoute } from '@/routes/pageConfig/types'
+import { checkAuthStatus, checkUserRole } from '@/config/supabase'
 
 // 從 pageConfig 中尋找對應路由的 layout 資訊
 function findLayoutFromPageConfig(path: string, brand: string): string | undefined {
@@ -118,6 +119,40 @@ const router = createRouter({
       return { top: 0 }
     }
   },
+})
+
+// 路由守衛
+router.beforeEach(async (to, from, next) => {
+  try {
+    // 檢查是否需要認證
+    if (to.meta?.requiresAuth) {
+      const { session } = await checkAuthStatus()
+
+      if (!session) {
+        // 未登入，重定向到登入頁面
+        const brand = to.meta?.brand || MAIN_BRAND
+        next(`/${brand}/login`)
+        return
+      }
+
+      // 檢查角色權限
+      if (to.meta?.roles && Array.isArray(to.meta.roles)) {
+        const hasPermission = await checkUserRole(to.meta.roles)
+        if (!hasPermission) {
+          // 權限不足，重定向到首頁
+          const brand = to.meta?.brand || MAIN_BRAND
+          next(`/${brand}`)
+          return
+        }
+      }
+    }
+
+    next()
+  } catch (error) {
+    console.error('路由守衛錯誤:', error)
+    // 發生錯誤時，允許繼續（避免無限重定向）
+    next()
+  }
 })
 
 export default router

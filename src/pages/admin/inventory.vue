@@ -23,6 +23,7 @@ const currentPage = ref(1)
 const itemsPerPage = 20
 const isBusy = ref(false)
 const errorMsg = ref<string | null>(null)
+const successMsg = ref<string | null>(null)
 const anyError = computed(() => errorMsg.value || inventoryError?.value || productsError?.value || categoriesError?.value || paymentMethodsError?.value || bankDataError?.value || transactionsError?.value || customersError?.value || null)
 
 // sort
@@ -55,7 +56,30 @@ const saleFormData = ref({
   amount_received: 0,
   amount_difference: 0,
   transactions_time: '',
-  remarks: ''
+  remarks: '',
+  customer_id: '' // 新增客戶ID欄位
+})
+
+// 客戶選擇器相關
+const showCustomerSelector = ref(false)
+const customerSearchQuery = ref('')
+const selectedCustomer = ref<Customer | null>(null)
+
+// 快速新增客戶表單
+const showQuickAddCustomer = ref(false)
+const quickAddCustomerForm = ref({
+  name: '',
+  nickname: '',
+  phone: '',
+  id_number: '',
+  contact_method: '',
+  contact_method_id: '',
+  contact_method_account: '',
+  contact_method_nickname: '',
+  address: '',
+  pubg_nickname: '',
+  pubg_account_id: '',
+  steam_id: ''
 })
 
 type InventoryStatus = InventoryItem['status']
@@ -81,7 +105,7 @@ const resetNewItemForm = () => {
   newItemForm.value = {
     product_id: '',
     cd_key: '',
-    purchase_time: '',
+    purchase_time: formatDateTimeForInput(new Date().toISOString()), // 預設為當前時間
     purchase_store: '',
     purchase_payment_method: '',
     purchase_order_number: '',
@@ -108,7 +132,7 @@ const confirmAdd = async () => {
     await createInventoryItem({
       product_id: newItemForm.value.product_id,
       cd_key: newItemForm.value.cd_key,
-      purchase_time: newItemForm.value.purchase_time,
+      purchase_time: formatDateTimeForDB(newItemForm.value.purchase_time) || new Date().toISOString(),
       purchase_store: newItemForm.value.purchase_store,
       purchase_payment_method: newItemForm.value.purchase_payment_method,
       purchase_amount_cny: newItemForm.value.purchase_amount_cny,
@@ -139,11 +163,21 @@ const openEdit = async (item: InventoryItem) => {
   editingItem.value = {
     ...item,
     product_category_id: product?.product_category_id || '',
-    selectedSeries: product?.series || ''
+    selectedSeries: product?.series || '',
+    // 將進貨時間轉換為 datetime-local 格式（包含秒）
+    purchase_time: formatDateTimeForInput(item.purchase_time)
   };
 
   // 查找相關的交易資料
   const relatedTransaction = transactions.value.find(t => t.inventory_item_id === item.id);
+
+  // 設置選中的客戶
+  if (relatedTransaction?.customer_id) {
+    const customer = customers.value.find(c => c.id === relatedTransaction.customer_id);
+    selectedCustomer.value = customer || null;
+  } else {
+    selectedCustomer.value = null;
+  }
 
   // 初始化銷貨資料表單
   saleFormData.value = {
@@ -156,25 +190,31 @@ const openEdit = async (item: InventoryItem) => {
     actual_price: relatedTransaction?.actual_price || 0,
     amount_received: relatedTransaction?.amount_received || 0,
     amount_difference: relatedTransaction?.amount_difference || 0,
-    transactions_time: relatedTransaction?.transactions_time ? new Date(relatedTransaction.transactions_time).toISOString().slice(0, 16) : '',
-    remarks: relatedTransaction?.remarks || ''
+    transactions_time: formatDateTimeForInput(relatedTransaction?.transactions_time),
+    remarks: relatedTransaction?.remarks || '',
+    customer_id: relatedTransaction?.customer_id || ''
   }
   showEditModal.value = true
 }
-const cancelEdit = () => { showEditModal.value = false; editingItem.value = null }
+const cancelEdit = () => {
+  showEditModal.value = false;
+  editingItem.value = null;
+  selectedCustomer.value = null;
+}
 const saveEdit = async () => {
   if (!editingItem.value) return
   try {
     isBusy.value = true
     errorMsg.value = null
 
-    // 更新庫存項目
+        // 更新庫存項目
     const { updateInventoryItem } = useInventory()
     await updateInventoryItem(editingItem.value.id, {
+      product_id: editingItem.value.product_id,
       status: editingItem.value.status,
       cd_key: editingItem.value.cd_key,
       purchase_order_number: editingItem.value.purchase_order_number,
-      purchase_time: editingItem.value.purchase_time,
+      purchase_time: formatDateTimeForDB(editingItem.value.purchase_time) || undefined,
       purchase_store: editingItem.value.purchase_store,
       purchase_payment_method: editingItem.value.purchase_payment_method,
       purchase_amount_cny: editingItem.value.purchase_amount_cny,
@@ -183,61 +223,106 @@ const saveEdit = async () => {
       remarks: editingItem.value.remarks
     })
 
-    // 更新銷貨資料（如果存在相關交易）
+        // 更新銷貨資料（如果存在相關交易）
     const relatedTransaction = transactions.value.find(t => t.inventory_item_id === editingItem.value!.id)
-    const { updateTransaction, createTransaction } = useTransactions()
+    const { } = useTransactions()
 
     if (relatedTransaction) {
       // 更新現有交易記錄
-      await updateTransaction(relatedTransaction.id, {
-        our_payment_method: saleFormData.value.our_payment_method,
-        our_bank_data: saleFormData.value.our_bank_data,
-        customer_payment_method: saleFormData.value.customer_payment_method,
-        customer_bank_code: saleFormData.value.customer_bank_code,
-        customer_bank_account: saleFormData.value.customer_bank_account,
-        customer_account_name: saleFormData.value.customer_account_name,
-        actual_price: saleFormData.value.actual_price,
-        amount_received: saleFormData.value.amount_received,
-        amount_difference: saleFormData.value.amount_difference,
-        transactions_time: saleFormData.value.transactions_time,
-        remarks: saleFormData.value.remarks
-      })
+      try {
+        const { TransactionService } = await import('@/services/supabaseService')
+
+        const updateData = {
+          customer_id: saleFormData.value.customer_id || null,
+          our_payment_method: saleFormData.value.our_payment_method || null,
+          our_bank_data: saleFormData.value.our_bank_data || null,
+          customer_payment_method: saleFormData.value.customer_payment_method || null,
+          customer_bank_code: saleFormData.value.customer_bank_code || null,
+          customer_bank_account: saleFormData.value.customer_bank_account || null,
+          customer_account_name: saleFormData.value.customer_account_name || null,
+          actual_price: saleFormData.value.actual_price || 0,
+          amount_received: saleFormData.value.amount_received || 0,
+          amount_difference: saleFormData.value.amount_difference || 0,
+          transactions_time: formatDateTimeForDB(saleFormData.value.transactions_time) || undefined,
+          remarks: saleFormData.value.remarks || null
+        }
+
+        console.log('更新交易資料:', updateData)
+        const response = await TransactionService.updateTransaction(relatedTransaction.id, updateData)
+
+        if (response.error) {
+          console.error('交易更新錯誤:', response.error)
+          throw new Error(response.error.message)
+        }
+
+        console.log('交易更新成功:', response.data)
+      } catch (e) {
+        console.error('交易更新失敗:', e)
+        throw e
+      }
     } else {
-      // 檢查是否有任何銷貨資料需要創建交易記錄
+      // 檢查是否有任何銷貨資料需要創建交易記錄（更寬鬆的判斷）
       const hasSalesData = saleFormData.value.actual_price > 0 ||
                           saleFormData.value.our_payment_method ||
+                          saleFormData.value.our_bank_data ||
                           saleFormData.value.customer_payment_method ||
                           saleFormData.value.customer_bank_code ||
                           saleFormData.value.customer_bank_account ||
                           saleFormData.value.customer_account_name ||
+                          saleFormData.value.amount_received > 0 ||
+                          saleFormData.value.amount_difference !== 0 ||
                           saleFormData.value.remarks ||
-                          saleFormData.value.transactions_time;
+                          saleFormData.value.transactions_time ||
+                          saleFormData.value.customer_id;
 
-      if (hasSalesData) {
+            if (hasSalesData) {
         // 如果沒有相關交易但有銷貨資料，創建新的交易記錄
-        await createTransaction({
-          customer_id: null,
-          inventory_item_id: editingItem.value!.id,
-          our_payment_method: saleFormData.value.our_payment_method,
-          our_bank_data: saleFormData.value.our_bank_data,
-          customer_payment_method: saleFormData.value.customer_payment_method,
-          customer_bank_code: saleFormData.value.customer_bank_code,
-          customer_bank_account: saleFormData.value.customer_bank_account,
-          customer_account_name: saleFormData.value.customer_account_name,
-          actual_price: saleFormData.value.actual_price,
-          amount_received: saleFormData.value.amount_received,
-          amount_difference: saleFormData.value.amount_difference,
-          transactions_time: saleFormData.value.transactions_time,
-          remarks: saleFormData.value.remarks
-        })
+        const formattedTime = formatDateTimeForDB(saleFormData.value.transactions_time)
+
+        try {
+          // 直接使用 TransactionService 來獲得更好的錯誤處理
+          const { TransactionService } = await import('@/services/supabaseService')
+
+          const transactionData = {
+            inventory_item_id: editingItem.value!.id,
+            transactions_time: formattedTime || new Date().toISOString(),
+            customer_id: saleFormData.value.customer_id || null,
+            actual_price: saleFormData.value.actual_price || 0,
+            amount_received: saleFormData.value.amount_received || 0,
+            amount_difference: saleFormData.value.amount_difference || 0,
+            our_payment_method: saleFormData.value.our_payment_method || null,
+            our_bank_data: saleFormData.value.our_bank_data || null,
+            customer_payment_method: saleFormData.value.customer_payment_method || null,
+            customer_bank_code: saleFormData.value.customer_bank_code || null,
+            customer_bank_account: saleFormData.value.customer_bank_account || null,
+            customer_account_name: saleFormData.value.customer_account_name || null,
+            remarks: saleFormData.value.remarks || null
+          }
+
+          console.log('交易資料:', transactionData)
+          const response = await TransactionService.createTransaction(transactionData)
+
+          if (response.error) {
+            throw new Error(response.error.message)
+          }
+        } catch (e) {
+          throw e
+        }
       }
     }
 
     // 重新載入交易資料以確保資料同步
     await fetchTransactions()
 
+    successMsg.value = '編輯成功！'
     showEditModal.value = false
     editingItem.value = null
+    selectedCustomer.value = null
+
+    // 3秒後清除成功訊息
+    setTimeout(() => {
+      successMsg.value = null
+    }, 3000)
   } catch (e) {
     errorMsg.value = e instanceof Error ? e.message : '更新失敗'
   } finally {
@@ -413,17 +498,18 @@ onMounted(async () => {
   // 商品與分類採平行、各自容錯
   try {
     await fetchProducts()
-  } catch (e) {
+  } catch {
     errorMsg.value = '商品資料載入失敗'
   }
   try {
     await fetchCategories()
-  } catch (e) {
+  } catch {
+    // 忽略分類載入錯誤
   }
-  try { await fetchPaymentMethods() } catch (e) {  }
-  try { await fetchBankData() } catch (e) {  }
-  try { await fetchTransactions() } catch (e) {  }
-  try { await fetchCustomers() } catch (e) {  }
+  try { await fetchPaymentMethods() } catch { /* 忽略錯誤 */ }
+  try { await fetchBankData() } catch { /* 忽略錯誤 */ }
+  try { await fetchTransactions() } catch { /* 忽略錯誤 */ }
+  try { await fetchCustomers() } catch { /* 忽略錯誤 */ }
 
   isBusy.value = false
 })
@@ -494,6 +580,114 @@ const handlePaymentMethodChange = () => {
   }
 }
 
+// 客戶選擇器相關方法
+const openCustomerSelector = () => {
+  showCustomerSelector.value = true
+  customerSearchQuery.value = ''
+}
+
+const closeCustomerSelector = () => {
+  showCustomerSelector.value = false
+  customerSearchQuery.value = ''
+}
+
+const selectCustomer = (customer: Customer) => {
+  selectedCustomer.value = customer
+  saleFormData.value.customer_id = customer.id
+  showCustomerSelector.value = false
+}
+
+const clearSelectedCustomer = () => {
+  selectedCustomer.value = null
+  saleFormData.value.customer_id = ''
+}
+
+// 快速新增客戶相關方法
+const openQuickAddCustomer = () => {
+  showQuickAddCustomer.value = true
+  // 重置表單
+  quickAddCustomerForm.value = {
+    name: '',
+    nickname: '',
+    phone: '',
+    id_number: '',
+    contact_method: '',
+    contact_method_id: '',
+    contact_method_account: '',
+    contact_method_nickname: '',
+    address: '',
+    pubg_nickname: '',
+    pubg_account_id: '',
+    steam_id: ''
+  }
+}
+
+const closeQuickAddCustomer = () => {
+  showQuickAddCustomer.value = false
+}
+
+const confirmQuickAddCustomer = async () => {
+  try {
+    isBusy.value = true
+    errorMsg.value = null
+
+    const { createCustomer } = useCustomers()
+    const newCustomer = await createCustomer(quickAddCustomerForm.value)
+
+    // 自動選擇新建立的客戶
+    if (newCustomer) {
+      selectedCustomer.value = newCustomer
+      saleFormData.value.customer_id = newCustomer.id
+    }
+
+    showQuickAddCustomer.value = false
+
+    // 重新載入客戶資料
+    await fetchCustomers()
+  } catch (e) {
+    errorMsg.value = e instanceof Error ? e.message : '新增客戶失敗'
+  } finally {
+    isBusy.value = false
+  }
+}
+
+// 時間格式化輔助函數
+const formatDateTimeForInput = (dateTime: string | null | undefined): string => {
+  if (!dateTime) return ''
+  try {
+    const date = new Date(dateTime)
+    return date.toISOString().slice(0, 19) // 包含秒，不包含時區
+  } catch {
+    return ''
+  }
+}
+
+// 時間格式化輔助函數 - 用於資料庫儲存
+const formatDateTimeForDB = (dateTime: string | null | undefined): string | null => {
+  if (!dateTime || dateTime.trim() === '') return null
+  try {
+    const date = new Date(dateTime)
+    return date.toISOString() // 包含時區的完整格式
+  } catch {
+    return null
+  }
+}
+
+// 篩選客戶列表
+const filteredCustomersForSelector = computed(() => {
+  const query = customerSearchQuery.value.toLowerCase().trim()
+  if (!query) return customers.value.slice(0, 20) // 限制顯示數量
+
+  return customers.value.filter(customer =>
+    customer.name?.toLowerCase().includes(query) ||
+    customer.nickname?.toLowerCase().includes(query) ||
+    customer.phone?.includes(query) ||
+    customer.pubg_nickname?.toLowerCase().includes(query) ||
+    customer.contact_method_account?.toLowerCase().includes(query) ||
+    customer.id_number?.includes(query)
+  ).slice(0, 20)
+})
+
 
 
 
@@ -511,6 +705,13 @@ const handlePaymentMethodChange = () => {
       <div class="flex items-center">
         <i class="bi bi-exclamation-triangle text-red-600 dark:text-red-400 mr-2"></i>
         <span class="text-red-800 dark:text-red-200">{{ anyError }}</span>
+      </div>
+    </div>
+
+    <div v-if="successMsg" class="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg p-4">
+      <div class="flex items-center">
+        <i class="bi bi-check-circle text-green-600 dark:text-green-400 mr-2"></i>
+        <span class="text-green-800 dark:text-green-200">{{ successMsg }}</span>
       </div>
     </div>
 
@@ -588,9 +789,9 @@ const handlePaymentMethodChange = () => {
           <thead class="bg-gray-50 dark:bg-gray-700">
             <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">商品資訊</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">CD Key</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">進貨資訊</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">銷貨資訊</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">客戶資訊</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">狀態</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">操作</th>
             </tr>
@@ -613,40 +814,67 @@ const handlePaymentMethodChange = () => {
                   <div class="text-sm text-blue-600 dark:text-blue-400 font-medium">
                     NT$ {{ item.suggested_price?.toLocaleString() || '0' }}
                   </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                    CD Key: {{ item.cd_key || '無' }}
+                  </div>
+                  <div v-if="item.remarks" class="text-xs text-gray-500 dark:text-gray-400">
+                    備註: {{ item.remarks }}
+                  </div>
                 </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900 dark:text-gray-100 font-mono">{{ item.cd_key }}</div>
               </td>
             <td class="px-6 py-4 whitespace-nowrap">
                 <div>
                 <div class="text-sm text-gray-900 dark:text-gray-100">{{ item.purchase_store }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">{{ item.purchase_time }}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">進貨時間: {{ item.purchase_time }}</div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">¥{{ item.purchase_amount_cny }} / NT${{ item.purchase_amount_twd }}</div>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div>
-                  <div class="text-sm text-gray-900 dark:text-gray-100">
-                    {{ customers.find(c => c.id === transactions.find(t => t.inventory_item_id === item.id)?.customer_id)?.name || '' }}
-                    {{ customers.find(c => c.id === transactions.find(t => t.inventory_item_id === item.id)?.customer_id)?.nickname ? `(${customers.find(c => c.id === transactions.find(t => t.inventory_item_id === item.id)?.customer_id)?.nickname})` : '' }}
-                  </div>
                   <div class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ transactions.find(t => t.inventory_item_id === item.id)?.transactions_time || '' }}
+                    銷貨時間: {{ transactions.find(t => t.inventory_item_id === item.id)?.transactions_time || '未售出' }}
                   </div>
                   <div class="text-xs text-gray-500 dark:text-gray-400">
                     NT${{ transactions.find(t => t.inventory_item_id === item.id)?.actual_price?.toLocaleString() || '0' }} / NT${{ transactions.find(t => t.inventory_item_id === item.id)?.amount_received?.toLocaleString() || '0' }} / NT${{ transactions.find(t => t.inventory_item_id === item.id)?.amount_difference?.toLocaleString() || '0' }}
                   </div>
+                  <div v-if="transactions.find(t => t.inventory_item_id === item.id)?.remarks" class="text-xs text-gray-500 dark:text-gray-400">
+                    備註: {{ transactions.find(t => t.inventory_item_id === item.id)?.remarks }}
+                  </div>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-              <span :class="[
-                  'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
-                  item.status === '未售' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                  : item.status === '預訂' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                  : item.status === '已售' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                  : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                ]">{{ item.status }}</span>
+                <div>
+                  <div class="text-sm text-gray-900 dark:text-gray-100">
+                    {{ customers.find(c => c.id === transactions.find(t => t.inventory_item_id === item.id)?.customer_id)?.name || '未售出' }}
+                    {{ customers.find(c => c.id === transactions.find(t => t.inventory_item_id === item.id)?.customer_id)?.nickname ? `(${customers.find(c => c.id === transactions.find(t => t.inventory_item_id === item.id)?.customer_id)?.nickname})` : '' }}
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ customers.find(c => c.id === transactions.find(t => t.inventory_item_id === item.id)?.customer_id)?.phone || '' }}
+                  </div>
+
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div>
+                  <span :class="[
+                    'inline-flex px-2 py-1 text-xs font-semibold rounded-full mb-1',
+                    item.status === '未售' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                    : item.status === '預訂' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                    : item.status === '已售' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                    : item.status === '自用' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+                    : item.status === '福利' ? 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200'
+                    : item.status === '淘退' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                    : item.status === '被盜' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                    : item.status === '補償' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+                    : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                  ]">{{ item.status }}</span>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    建立: {{ new Date(item.created_at).toLocaleString('zh-TW') }}
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    更新: {{ new Date(item.updated_at).toLocaleString('zh-TW') }}
+                  </div>
+                </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex items-center space-x-4">
@@ -758,7 +986,7 @@ const handlePaymentMethodChange = () => {
               </div>
               <div class="col-span-4 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">進貨日期及時間</label>
-                <input type="datetime-local" v-model="newItemForm.purchase_time"
+                <input type="datetime-local" v-model="newItemForm.purchase_time" step="1"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg transition-all duration-200">
               </div>
               <div class="col-span-4 flex flex-col">
@@ -926,7 +1154,7 @@ const handlePaymentMethodChange = () => {
               </div>
               <div class="col-span-4 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">進貨日期及時間</label>
-                <input type="datetime-local" v-model="editingItem.purchase_time"
+                <input type="datetime-local" v-model="editingItem.purchase_time" step="1"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg transition-all duration-200">
               </div>
               <div class="col-span-4 flex flex-col">
@@ -989,7 +1217,7 @@ const handlePaymentMethodChange = () => {
               </div>
               <div class="col-span-4 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">銷貨日期及時間</label>
-                <input type="datetime-local" v-model="saleFormData.transactions_time"
+                <input type="datetime-local" v-model="saleFormData.transactions_time" step="1"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg transition-all duration-200">
               </div>
               <div class="col-span-4 flex flex-col">
@@ -1061,91 +1289,129 @@ const handlePaymentMethodChange = () => {
 
           <!-- 客戶資料 -->
           <div class="mb-4">
-            <div class="flex items-center mb-3">
-              <div class="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center mr-2">
-                <i class="bi bi-person-circle text-white text-xs"></i>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center mr-2">
+                  <i class="bi bi-person-circle text-white text-xs"></i>
+                </div>
+                <h4 class="text-base font-semibold text-gray-800">客戶資料</h4>
               </div>
-              <h4 class="text-base font-semibold text-gray-800">客戶資料</h4>
+              <div class="flex space-x-2">
+                <button @click="openCustomerSelector" type="button" class="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  <i class="bi bi-search mr-1"></i>選擇客戶
+                </button>
+                <button @click="openQuickAddCustomer" type="button" class="px-3 py-1 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700">
+                  <i class="bi bi-plus mr-1"></i>新增客戶
+                </button>
+              </div>
             </div>
-            <div class="grid grid-cols-12 gap-3">
+
+            <!-- 已選擇的客戶顯示 -->
+            <div v-if="selectedCustomer || saleFormData.customer_id" class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                  <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                    <i class="bi bi-person text-white text-lg"></i>
+                  </div>
+                  <div>
+                    <h5 class="font-medium text-gray-900">{{ selectedCustomer?.name || customers.find(c => c.id === saleFormData.customer_id)?.name || '未知客戶' }}</h5>
+                    <p class="text-sm text-gray-600">{{ selectedCustomer?.nickname || customers.find(c => c.id === saleFormData.customer_id)?.nickname || '' }}</p>
+                    <p class="text-sm text-gray-600">{{ selectedCustomer?.phone || customers.find(c => c.id === saleFormData.customer_id)?.phone || '' }}</p>
+                  </div>
+                </div>
+                <button @click="clearSelectedCustomer" class="text-red-600 hover:text-red-800">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 客戶詳細資料 -->
+            <div v-if="selectedCustomer || saleFormData.customer_id" class="grid grid-cols-12 gap-3">
               <div class="col-span-8 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">客戶 ID</label>
-                <input type="text" :value="transactions.find(t => t.inventory_item_id === editingItem?.id)?.customer_id || ''"
+                <input type="text" :value="selectedCustomer?.id || saleFormData.customer_id || ''"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg bg-gray-50 text-gray-600"
                   disabled>
               </div>
               <div class="col-span-4 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">客戶身份證字號</label>
-                <input type="text" :value="customers.find(c => c.id === transactions.find(t => t.inventory_item_id === editingItem?.id)?.customer_id)?.id_number || ''"
+                <input type="text" :value="selectedCustomer?.id_number || customers.find(c => c.id === saleFormData.customer_id)?.id_number || ''"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg bg-gray-50 text-gray-600"
                   disabled>
               </div>
               <div class="col-span-4 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">客戶姓名</label>
-                <input type="text" :value="customers.find(c => c.id === transactions.find(t => t.inventory_item_id === editingItem?.id)?.customer_id)?.name || ''"
+                <input type="text" :value="selectedCustomer?.name || customers.find(c => c.id === saleFormData.customer_id)?.name || ''"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg bg-gray-50 text-gray-600"
                   disabled>
               </div>
               <div class="col-span-4 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">客戶暱稱</label>
-                <input type="text" :value="customers.find(c => c.id === transactions.find(t => t.inventory_item_id === editingItem?.id)?.customer_id)?.nickname || ''"
+                <input type="text" :value="selectedCustomer?.nickname || customers.find(c => c.id === saleFormData.customer_id)?.nickname || ''"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg bg-gray-50 text-gray-600"
                   disabled>
               </div>
               <div class="col-span-4 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">客戶連絡電話</label>
-                <input type="text" :value="customers.find(c => c.id === transactions.find(t => t.inventory_item_id === editingItem?.id)?.customer_id)?.phone || ''"
+                <input type="text" :value="selectedCustomer?.phone || customers.find(c => c.id === saleFormData.customer_id)?.phone || ''"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg bg-gray-50 text-gray-600"
                   disabled>
               </div>
               <div class="col-span-12 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">客戶地址</label>
-                <input type="text" :value="customers.find(c => c.id === transactions.find(t => t.inventory_item_id === editingItem?.id)?.customer_id)?.address || ''"
+                <input type="text" :value="selectedCustomer?.address || customers.find(c => c.id === saleFormData.customer_id)?.address || ''"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg bg-gray-50 text-gray-600"
                   disabled>
               </div>
               <div class="col-span-3 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">客戶聯絡方式</label>
-                <input type="text" :value="customers.find(c => c.id === transactions.find(t => t.inventory_item_id === editingItem?.id)?.customer_id)?.contact_method || ''"
+                <input type="text" :value="selectedCustomer?.contact_method || customers.find(c => c.id === saleFormData.customer_id)?.contact_method || ''"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg bg-gray-50 text-gray-600"
                   disabled>
               </div>
               <div class="col-span-3 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">聯絡方式 ID</label>
-                <input type="text" :value="customers.find(c => c.id === transactions.find(t => t.inventory_item_id === editingItem?.id)?.customer_id)?.contact_method_id || ''"
+                <input type="text" :value="selectedCustomer?.contact_method_id || customers.find(c => c.id === saleFormData.customer_id)?.contact_method_id || ''"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg bg-gray-50 text-gray-600"
                   disabled>
               </div>
               <div class="col-span-3 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">聯絡方式帳號</label>
-                <input type="text" :value="customers.find(c => c.id === transactions.find(t => t.inventory_item_id === editingItem?.id)?.customer_id)?.contact_method_account || ''"
+                <input type="text" :value="selectedCustomer?.contact_method_account || customers.find(c => c.id === saleFormData.customer_id)?.contact_method_account || ''"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg bg-gray-50 text-gray-600"
                   disabled>
               </div>
               <div class="col-span-3 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">聯絡方式暱稱</label>
-                <input type="text" :value="customers.find(c => c.id === transactions.find(t => t.inventory_item_id === editingItem?.id)?.customer_id)?.contact_method_nickname || ''"
+                <input type="text" :value="selectedCustomer?.contact_method_nickname || customers.find(c => c.id === saleFormData.customer_id)?.contact_method_nickname || ''"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg bg-gray-50 text-gray-600"
                   disabled>
               </div>
               <div class="col-span-4 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">PUBG Nickname</label>
-                <input type="text" :value="customers.find(c => c.id === transactions.find(t => t.inventory_item_id === editingItem?.id)?.customer_id)?.pubg_nickname || ''"
+                <input type="text" :value="selectedCustomer?.pubg_nickname || customers.find(c => c.id === saleFormData.customer_id)?.pubg_nickname || ''"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg bg-gray-50 text-gray-600"
                   disabled>
               </div>
               <div class="col-span-4 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">PUBG Account ID</label>
-                <input type="text" :value="customers.find(c => c.id === transactions.find(t => t.inventory_item_id === editingItem?.id)?.customer_id)?.pubg_account_id || ''"
+                <input type="text" :value="selectedCustomer?.pubg_account_id || customers.find(c => c.id === saleFormData.customer_id)?.pubg_account_id || ''"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg bg-gray-50 text-gray-600"
                   disabled>
               </div>
               <div class="col-span-4 flex flex-col">
                 <label class="text-sm font-medium text-gray-700 mb-1">Steam ID</label>
-                <input type="text" :value="customers.find(c => c.id === transactions.find(t => t.inventory_item_id === editingItem?.id)?.customer_id)?.steam_id || ''"
+                <input type="text" :value="selectedCustomer?.steam_id || customers.find(c => c.id === saleFormData.customer_id)?.steam_id || ''"
                   class="w-full px-3 py-2 border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none rounded-lg bg-gray-50 text-gray-600"
                   disabled>
               </div>
+            </div>
+
+            <!-- 未選擇客戶時的提示 -->
+            <div v-else class="text-center py-8 text-gray-500">
+              <i class="bi bi-person-x text-4xl mb-2"></i>
+              <p>尚未選擇客戶</p>
+              <p class="text-sm">請點擊上方按鈕選擇或新增客戶</p>
             </div>
           </div>
         </div>
@@ -1283,6 +1549,165 @@ const handlePaymentMethodChange = () => {
             <button @click="closeDetail" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">關閉</button>
               </div>
               </div>
+      </div>
+    </div>
+
+    <!-- 客戶選擇器 -->
+    <div v-if="showCustomerSelector" class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+      <div class="relative w-full max-w-6xl bg-white rounded-2xl shadow-2xl border border-gray-100 mx-4">
+        <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-2xl">
+          <div class="flex items-center space-x-3">
+            <div class="w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center">
+              <i class="bi bi-person-circle text-white text-xs"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800">
+              選擇客戶
+            </h3>
+          </div>
+          <button @click="closeCustomerSelector" class="text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700 rounded-full text-sm w-8 h-8 inline-flex justify-center items-center transition-all duration-200 shadow-sm border border-gray-200">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <div class="p-4">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">搜尋客戶</label>
+            <input v-model="customerSearchQuery" type="text" placeholder="輸入客戶名稱、暱稱或電話..."
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">客戶資料</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">操作</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tr v-if="filteredCustomersForSelector.length === 0">
+                  <td class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400" colspan="2">
+                    沒有符合條件的客戶
+                  </td>
+                </tr>
+                <tr v-for="customer in filteredCustomersForSelector" :key="customer.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                     <td class="px-6 py-4 whitespace-nowrap">
+                     <div class="flex items-center">
+                       <div class="flex-shrink-0 h-10 w-10">
+                         <div class="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+                           <i class="bi bi-person text-white text-lg"></i>
+                         </div>
+                       </div>
+                      <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ customer.name }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ customer.nickname }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ customer.phone }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button @click="selectCustomer(customer)" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 mr-2">選擇</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+                 <div class="flex items-center justify-end p-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+           <button @click="openQuickAddCustomer" class="mx-2 py-2 px-4 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200">
+             新增客戶
+           </button>
+           <button @click="closeCustomerSelector" class="mx-2 py-2 px-4 text-sm font-medium text-gray-700 focus:outline-none bg-white rounded-lg border border-gray-300 hover:bg-gray-50 hover:border-gray-400 focus:ring-2 focus:ring-gray-200 transition-all duration-200 shadow-sm">
+             關閉
+           </button>
+         </div>
+      </div>
+    </div>
+
+    <!-- 快速新增客戶 Modal -->
+    <div v-if="showQuickAddCustomer" class="fixed inset-0 bg-black/60 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+      <div class="relative w-full max-w-6xl bg-white rounded-2xl shadow-2xl border border-gray-100 mx-4">
+        <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-2xl">
+          <div class="flex items-center space-x-3">
+            <div class="w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center">
+              <i class="bi bi-plus-circle text-white text-xs"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800">
+              新增客戶
+            </h3>
+          </div>
+          <button @click="closeQuickAddCustomer" class="text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700 rounded-full text-sm w-8 h-8 inline-flex justify-center items-center transition-all duration-200 shadow-sm border border-gray-200">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <div class="p-4">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">姓名</label>
+            <input v-model="quickAddCustomerForm.name" type="text" placeholder="請輸入姓名"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">暱稱</label>
+            <input v-model="quickAddCustomerForm.nickname" type="text" placeholder="請輸入暱稱"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">電話</label>
+            <input v-model="quickAddCustomerForm.phone" type="text" placeholder="請輸入電話"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">身份證字號</label>
+            <input v-model="quickAddCustomerForm.id_number" type="text" placeholder="請輸入身份證字號"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">聯絡方式</label>
+            <input v-model="quickAddCustomerForm.contact_method" type="text" placeholder="請輸入聯絡方式"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">聯絡方式 ID</label>
+            <input v-model="quickAddCustomerForm.contact_method_id" type="text" placeholder="請輸入聯絡方式 ID"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">聯絡方式帳號</label>
+            <input v-model="quickAddCustomerForm.contact_method_account" type="text" placeholder="請輸入聯絡方式帳號"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">聯絡方式暱稱</label>
+            <input v-model="quickAddCustomerForm.contact_method_nickname" type="text" placeholder="請輸入聯絡方式暱稱"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">地址</label>
+            <input v-model="quickAddCustomerForm.address" type="text" placeholder="請輸入地址"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">PUBG Nickname</label>
+            <input v-model="quickAddCustomerForm.pubg_nickname" type="text" placeholder="請輸入PUBG Nickname"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">PUBG Account ID</label>
+            <input v-model="quickAddCustomerForm.pubg_account_id" type="text" placeholder="請輸入PUBG Account ID"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Steam ID</label>
+            <input v-model="quickAddCustomerForm.steam_id" type="text" placeholder="請輸入Steam ID"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
+          </div>
+        </div>
+        <div class="flex items-center justify-end p-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+          <button @click="closeQuickAddCustomer" class="mx-2 py-2 px-4 text-sm font-medium text-gray-700 focus:outline-none bg-white rounded-lg border border-gray-300 hover:bg-gray-50 hover:border-gray-400 focus:ring-2 focus:ring-gray-200 transition-all duration-200 shadow-sm">
+            取消
+          </button>
+          <button @click="confirmQuickAddCustomer" class="mx-2 py-2 px-4 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+            確認新增
+          </button>
+        </div>
       </div>
     </div>
   </div>

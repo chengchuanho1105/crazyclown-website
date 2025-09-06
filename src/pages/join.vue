@@ -187,10 +187,16 @@ watch(discordUsername, (newValue) => {
   )
 })
 
-/** 3. 申請遊戲 (下拉選單) */
+/** 3. 申請戰隊 (下拉選單) */
 const gameOptions = [
-  { value: '', label: '請選擇遊戲' },
-  { value: 'PUBG', label: 'PUBG' },
+  { value: '', label: '請選擇欲申請的戰隊' },
+  { value: '皆可', label: 'Crazy_Clown (一軍)、Crazy_Clown_II (二軍) 皆可' },
+  { value: 'Crazy_Clown (一軍)', label: 'Crazy_Clown (一軍) 優先' },
+  { value: 'Crazy_Clown_II (二軍)', label: 'Crazy_Clown_II (二軍) 優先' },
+  { value: '', label: '==========注意事項==========' },  
+  { value: '', label: '1. 選擇一軍者，若因資格不符，將自動改為二軍優先' },
+  { value: '', label: '2. 選擇一軍者，若因一軍滿員，將自動改為二軍優先' },
+  { value: '', label: '3. 入取二軍者，可於加入一個月後申請加入一軍審核' },
 ]
 const gameApplied = ref<string | null>(null) // 將初始值設為 null
 const isGameAppliedFocused = ref(false)
@@ -224,6 +230,29 @@ const handleGameIdBlur = () => {
 }
 watch(gameId, (newValue) => {
   updateValidationStatus(newValue, isGameIdFocused, gameIdStatus, (val) => !isStringEmpty(val))
+})
+
+/** 5. Steam 17位數字ID */
+const steamId = ref('')
+const isSteamIdFocused = ref(false)
+const steamIdStatus = ref<null | 'success' | 'error'>(null)
+
+/** 檢查 Steam ID 是否為有效的17位數字 */
+const isValidSteamId = (value: string | null | undefined): boolean => {
+  if (isStringEmpty(value)) {
+    return false
+  }
+  // 檢查是否為17位數字
+  const steamIdRegex = /^\d{17}$/
+  return steamIdRegex.test(value as string)
+}
+
+const handleSteamIdBlur = () => {
+  isSteamIdFocused.value = false
+  updateValidationStatus(steamId.value, isSteamIdFocused, steamIdStatus, isValidSteamId)
+}
+watch(steamId, (newValue) => {
+  updateValidationStatus(newValue, isSteamIdFocused, steamIdStatus, isValidSteamId)
 })
 
 /** 5. 累計遊玩時數 */
@@ -340,6 +369,7 @@ const validateForm = () => {
   handleDiscordUsernameBlur()
   handleGameAppliedBlur()
   handleGameIdBlur()
+  handleSteamIdBlur()
   handleTotalPlaytimeBlur()
   handleWeeklyPlaytimeBlur()
   handleFriendGameIdBlur() // 即使沒有朋友，也會執行，但會被內部邏輯處理
@@ -349,6 +379,7 @@ const validateForm = () => {
     discordUsernameStatus.value === 'success' &&
     gameAppliedStatus.value === 'success' &&
     gameIdStatus.value === 'success' &&
+    steamIdStatus.value === 'success' &&
     totalPlaytimeStatus.value === 'success' &&
     weeklyPlaytimeStatus.value === 'success' &&
     (!hasFriends.value || friendGameIdStatus.value === 'success') // 如果有朋友，朋友ID必須成功
@@ -367,6 +398,7 @@ const handleSubmit = async (event: Event) => {
       Discord使用者名稱: discordUsername.value,
       申請的遊戲: gameApplied.value,
       遊戲ID: gameId.value,
+      Steam17位數字ID: steamId.value,
       累計遊玩時數: totalPlaytime.value,
       每週遊玩時數: weeklyPlaytime.value,
       是否有朋友一同加入: hasFriends.value ? '是' : '否',
@@ -432,6 +464,10 @@ const handleResetForm = () => {
   isGameIdFocused.value = false
   gameIdStatus.value = null
 
+  steamId.value = ''
+  isSteamIdFocused.value = false
+  steamIdStatus.value = null
+
   totalPlaytime.value = null
   isTotalPlaytimeFocused.value = false
   totalPlaytimeStatus.value = null
@@ -492,8 +528,7 @@ function toggleRow(idx: number) {
     <DecorSection main-title="戰隊狀態" en-title="Clan Status" :is-loading="clanStatusLoading">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div
-          class="flex flex-col items-center bg-white dark:bg-zinc-800 rounded-lg shadow p-6 border border-blue-100 dark:border-zinc-700"
-        >
+          class="flex flex-col items-center bg-white dark:bg-zinc-800 rounded-lg shadow p-6 border border-blue-100 dark:border-zinc-700">
           <span v-html="memberIcon"></span>
           <div class="mt-2 text-2xl font-bold text-blue-700 dark:text-blue-300">
             {{ clanStatusData[0]?.clanMemberCount || 0 }}
@@ -501,8 +536,7 @@ function toggleRow(idx: number) {
           <div class="text-gray-600 dark:text-gray-300 mt-1">當前成員人數</div>
         </div>
         <div
-          class="flex flex-col items-center bg-white dark:bg-zinc-800 rounded-lg shadow p-6 border border-green-100 dark:border-zinc-700"
-        >
+          class="flex flex-col items-center bg-white dark:bg-zinc-800 rounded-lg shadow p-6 border border-green-100 dark:border-zinc-700">
           <span v-html="slotIcon"></span>
           <div class="mt-2 text-2xl font-bold text-green-700 dark:text-green-300">
             {{ clanStatusData[0]?.availableSlots || 0 }}
@@ -510,8 +544,7 @@ function toggleRow(idx: number) {
           <div class="text-gray-600 dark:text-gray-300 mt-1">開放加入人數</div>
         </div>
         <div
-          class="flex flex-col items-center bg-white dark:bg-zinc-800 rounded-lg shadow p-6 border border-yellow-100 dark:border-zinc-700"
-        >
+          class="flex flex-col items-center bg-white dark:bg-zinc-800 rounded-lg shadow p-6 border border-yellow-100 dark:border-zinc-700">
           <span v-html="pendingIcon"></span>
           <div class="mt-2 text-2xl font-bold text-yellow-700 dark:text-yellow-300">
             {{ clanStatusData[0]?.pendingReviewCount || 0 }}
@@ -522,39 +555,24 @@ function toggleRow(idx: number) {
     </DecorSection>
 
     <DecorSection main-title="審核進度" en-title="Review Progress">
-      <div
-        class="p-4 mb-6 border-l-4 border-yellow-500 bg-yellow-50 dark:bg-zinc-700 rounded-md shadow-inner"
-      >
+      <div class="p-4 mb-6 border-l-4 border-yellow-500 bg-yellow-50 dark:bg-zinc-700 rounded-md shadow-inner">
         <p class="text-gray-700 dark:text-zinc-200">
           本頁面資料非即時更新，請以
-          <a
-            href="https://discord.gg/3TEHPZhYUK"
-            target="_blank"
+          <a href="https://discord.gg/3TEHPZhYUK" target="_blank" rel="noopener noreferrer"
+            class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
+            「戰隊Discord社群<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a>的<a
+            href="https://discord.com/channels/490129931808931840/1182389838582915162" target="_blank"
             rel="noopener noreferrer"
-            class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center"
-          >
-            「戰隊Discord社群<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a
-          >的<a
-            href="https://discord.com/channels/490129931808931840/1182389838582915162"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center"
-          >
-            「⚖️⇜戰隊審核進度<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a
-          >頻道資料為準。
+            class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
+            「⚖️⇜戰隊審核進度<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a>頻道資料為準。
         </p>
       </div>
 
       <div class="space-y-6">
-        <div
-          v-for="(item, idx) in sortedReviewStatusData"
-          :key="item.rank + '-' + item.nickName"
-          class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg border border-gray-100 dark:border-zinc-700 transition-transform duration-200 hover:shadow-2xl hover:-translate-y-1"
-        >
-          <button
-            @click="toggleRow(idx)"
-            class="w-full flex items-center justify-between px-6 py-4 focus:outline-none group"
-          >
+        <div v-for="(item, idx) in sortedReviewStatusData" :key="item.rank + '-' + item.nickName"
+          class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg border border-gray-100 dark:border-zinc-700 transition-transform duration-200 hover:shadow-2xl hover:-translate-y-1">
+          <button @click="toggleRow(idx)"
+            class="w-full flex items-center justify-between px-6 py-4 focus:outline-none group">
             <div class="flex items-center space-x-6">
               <span class="font-semibold text-blue-700 dark:text-blue-300 text-base">{{
                 item.status
@@ -562,50 +580,29 @@ function toggleRow(idx: number) {
               <span class="text-gray-700 dark:text-gray-200 text-base">{{ item.result }}</span>
               <span class="text-gray-500 dark:text-gray-400 text-base">{{ item.nickName }}</span>
             </div>
-            <span
-              v-html="expandedRow === idx ? chevronUp : chevronDown"
+            <span v-html="expandedRow === idx ? chevronUp : chevronDown"
               class="text-blue-500 group-hover:text-blue-700 transition-transform duration-300"
-              :class="expandedRow === idx ? 'rotate-180' : ''"
-            ></span>
+              :class="expandedRow === idx ? 'rotate-180' : ''"></span>
           </button>
           <transition name="fade-slide">
-            <div
-              v-if="expandedRow === idx"
-              class="px-6 pb-6 pt-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-100 dark:border-zinc-700 bg-gradient-to-br from-blue-50/60 via-white/80 to-white dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 rounded-b-xl"
-            >
+            <div v-if="expandedRow === idx"
+              class="px-6 pb-6 pt-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-100 dark:border-zinc-700 bg-gradient-to-br from-blue-50/60 via-white/80 to-white dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 rounded-b-xl">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                 <div class="flex items-center gap-2">
-                  <span class="text-gray-400"
-                    ><svg
-                      class="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"
-                      ></path>
-                      <circle cx="12" cy="12" r="10" /></svg></span
-                  ><b>審核排名：</b>{{ item.rank }}
+                  <span class="text-gray-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                      viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"></path>
+                      <circle cx="12" cy="12" r="10" />
+                    </svg></span><b>審核排名：</b>{{ item.rank }}
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="text-gray-400"
-                    ><svg
-                      class="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      ></path></svg></span
-                  ><b>申請日期：</b>{{ item.date }}
+                  <span class="text-gray-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                      viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                      </path>
+                    </svg></span><b>申請日期：</b>{{ item.date }}
                 </div>
                 <div class="flex items-center gap-2">
                   <span v-html="discordIcon"></span><b>Discord ID：</b>{{ item.discordID }}
@@ -614,139 +611,66 @@ function toggleRow(idx: number) {
                   <span v-html="pubgIcon"></span><b>PUBG ID：</b>{{ item.pubgID }}
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="text-pink-400"
-                    ><svg
-                      class="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                    >
+                  <span class="text-pink-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                      viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"></path>
-                      <circle cx="12" cy="12" r="10" /></svg></span
-                  ><b>累計遊玩時數：</b>{{ item.gameAge }}
+                      <circle cx="12" cy="12" r="10" />
+                    </svg></span><b>累計遊玩時數：</b>{{ item.gameAge }}
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="text-yellow-400"
-                    ><svg
-                      class="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                    >
+                  <span class="text-yellow-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                      viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"></path>
-                      <circle cx="12" cy="12" r="10" /></svg></span
-                  ><b>每週遊玩時數：</b>{{ item.weekTime }}
+                      <circle cx="12" cy="12" r="10" />
+                    </svg></span><b>每週遊玩時數：</b>{{ item.weekTime }}
                 </div>
               </div>
               <div class="flex flex-wrap gap-3 items-center mb-4">
-                <span
-                  class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm"
-                  :class="
-                    item.checkInA
-                      ? 'bg-green-100 text-green-700 border border-green-200'
-                      : 'bg-red-100 text-red-700 border border-red-200'
-                  "
-                >
-                  <svg
-                    v-if="item.checkInA"
-                    class="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                  >
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm" :class="item.checkInA
+                  ? 'bg-green-100 text-green-700 border border-green-200'
+                  : 'bg-red-100 text-red-700 border border-red-200'
+                  ">
+                  <svg v-if="item.checkInA" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                   </svg>
-                  <svg
-                    v-else
-                    class="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M6 18L18 6M6 6l12 12"
-                    ></path>
+                  <svg v-else class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                   </svg>
                   報到第一站
                 </span>
-                <span
-                  class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm"
-                  :class="
-                    item.checkInB
-                      ? 'bg-green-100 text-green-700 border border-green-200'
-                      : 'bg-red-100 text-red-700 border border-red-200'
-                  "
-                >
-                  <svg
-                    v-if="item.checkInB"
-                    class="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                  >
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm" :class="item.checkInB
+                  ? 'bg-green-100 text-green-700 border border-green-200'
+                  : 'bg-red-100 text-red-700 border border-red-200'
+                  ">
+                  <svg v-if="item.checkInB" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                   </svg>
-                  <svg
-                    v-else
-                    class="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M6 18L18 6M6 6l12 12"
-                    ></path>
+                  <svg v-else class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                   </svg>
                   報到第二站
                 </span>
-                <span
-                  class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm"
-                  :class="
-                    item.applyInGgame
-                      ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                      : 'bg-gray-100 text-gray-500 border border-gray-200'
-                  "
-                >
-                  <svg
-                    v-if="item.applyInGgame"
-                    class="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                  >
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm" :class="item.applyInGgame
+                  ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                  : 'bg-gray-100 text-gray-500 border border-gray-200'
+                  ">
+                  <svg v-if="item.applyInGgame" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                   </svg>
-                  <svg
-                    v-else
-                    class="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M6 18L18 6M6 6l12 12"
-                    ></path>
+                  <svg v-else class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                   </svg>
                   遊戲內申請
                 </span>
               </div>
               <div
-                class="bg-blue-50 dark:bg-zinc-900 rounded p-3 mt-2 text-gray-700 dark:text-gray-200 flex items-start"
-              >
+                class="bg-blue-50 dark:bg-zinc-900 rounded p-3 mt-2 text-gray-700 dark:text-gray-200 flex items-start">
                 <span v-html="infoIcon" class="mr-2 mt-0.5"></span>
                 <span><b>備註：</b>{{ item.note || '—' }}</span>
               </div>
@@ -765,9 +689,7 @@ function toggleRow(idx: number) {
             </h1>
           </div>
 
-          <div
-            class="p-4 mb-6 border-l-4 border-yellow-500 bg-yellow-50 dark:bg-zinc-700 rounded-md shadow-inner"
-          >
+          <div class="p-4 mb-6 border-l-4 border-yellow-500 bg-yellow-50 dark:bg-zinc-700 rounded-md shadow-inner">
             <h2 class="ml-2 space-x-2 text-2xl font-bold text-yellow-700 dark:text-yellow-300">
               <i class="bi bi-exclamation-triangle" /><span>重要注意事項</span>
             </h2>
@@ -777,74 +699,45 @@ function toggleRow(idx: number) {
             <ul class="list-disc pl-5 space-y-2 text-gray-700 dark:text-zinc-200">
               <li>
                 申請提交後，請務必
-                <a href="https://discord.gg/3TEHPZhYUK"
-                  ><span class="font-bold text-red-500">立即加入</span></a
-                >
+                <a href="https://discord.gg/3TEHPZhYUK"><span class="font-bold text-red-500">立即加入</span></a>
                 我們的
-                <a
-                  href="https://discord.gg/3TEHPZhYUK"
-                  target="_blank"
-                  class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center"
-                >
-                  「戰隊Discord社群<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a
-                >。
+                <a href="https://discord.gg/3TEHPZhYUK" target="_blank"
+                  class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
+                  「戰隊Discord社群<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a>。
               </li>
               <li>
                 審核進度/通知皆在
-                <a
-                  href="https://discord.com/channels/490129931808931840/1389642260936790211"
-                  target="_blank"
-                  class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center"
-                >
+                <a href="https://discord.com/channels/490129931808931840/1389642260936790211" target="_blank"
+                  class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
                   <span class="font-mono text-purple-700 dark:text-purple-300">
                     「#⚖️⇜戰隊審核進度<i class="bi bi-box-arrow-up-right ml-1"></i>」
-                  </span> </a
-                >頻道發布，請多加留意！。
+                  </span> </a>頻道發布，請多加留意！。
               </li>
             </ul>
             <hr class="my-3 border-yellow-300 dark:border-zinc-600" />
             <p class="text-gray-700 dark:text-zinc-200">
               如頻繁提交失敗，可前直接前往
-              <a
-                href="https://discord.gg/3TEHPZhYUK"
-                target="_blank"
+              <a href="https://discord.gg/3TEHPZhYUK" target="_blank" rel="noopener noreferrer"
+                class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
+                「戰隊Discord社群<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a>的<a
+                href="https://discord.com/channels/490129931808931840/1182389838582915162" target="_blank"
                 rel="noopener noreferrer"
-                class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center"
-              >
-                「戰隊Discord社群<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a
-              >的<a
-                href="https://discord.com/channels/490129931808931840/1182389838582915162"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center"
-              >
-                「📭⇜客服服務台<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a
-              >頻道申請。
+                class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
+                「📭⇜客服服務台<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a>頻道申請。
             </p>
           </div>
         </div>
 
-        <div
-          v-if="showErrorMessage"
-          class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6"
-          role="alert"
-        >
+        <div v-if="showErrorMessage"
+          class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
           <strong class="font-bold">提交失敗！</strong>
           <span class="block sm:inline">您的申請未能送出，請稍後再試或聯繫管理員。</span>
-          <span
-            class="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer"
-            @click="showErrorMessage = false"
-          >
-            <svg
-              class="fill-current h-6 w-6 text-red-500"
-              role="button"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-            >
+          <span class="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" @click="showErrorMessage = false">
+            <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20">
               <title>Close</title>
               <path
-                d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.103l-2.651 3.746a1.2 1.2 0 0 1-1.697-1.697l3.746-2.651-3.746-2.651a1.2 1.2 0 0 1 1.697-1.697L10 8.897l2.651-3.746a1.2 1.2 0 0 1 1.697 1.697L11.103 10l3.746 2.651a1.2 1.2 0 0 1 0 1.697z"
-              />
+                d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.103l-2.651 3.746a1.2 1.2 0 0 1-1.697-1.697l3.746-2.651-3.746-2.651a1.2 1.2 0 0 1 1.697-1.697L10 8.897l2.651-3.746a1.2 1.2 0 0 1 1.697 1.697L11.103 10l3.746 2.651a1.2 1.2 0 0 1 0 1.697z" />
             </svg>
           </span>
         </div>
@@ -853,21 +746,16 @@ function toggleRow(idx: number) {
           <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-400 mb-2">您的基本資料</h2>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div
-              class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out"
-              :class="{
-                'border-gray-300 dark:border-zinc-600':
-                  !isNickNameFocused && nickNameStatus === null,
-                'border-blue-500 dark:border-blue-400': isNickNameFocused,
-                'border-green-500 dark:border-green-400':
-                  !isNickNameFocused && nickNameStatus === 'success',
-                'border-red-500 dark:border-red-400':
-                  !isNickNameFocused && nickNameStatus === 'error',
-              }"
-            >
-              <label
-                for="nickName"
-                class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none"
+            <div class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out" :class="{
+              'border-gray-300 dark:border-zinc-600':
+                !isNickNameFocused && nickNameStatus === null,
+              'border-blue-500 dark:border-blue-400': isNickNameFocused,
+              'border-green-500 dark:border-green-400':
+                !isNickNameFocused && nickNameStatus === 'success',
+              'border-red-500 dark:border-red-400':
+                !isNickNameFocused && nickNameStatus === 'error',
+            }">
+              <label for="nickName" class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none"
                 :class="{
                   'text-gray-600 dark:text-zinc-400': !isNickNameFocused && !nickName,
                   'text-blue-500 dark:text-blue-400': isNickNameFocused,
@@ -877,45 +765,30 @@ function toggleRow(idx: number) {
                     !isNickNameFocused && nickNameStatus === 'error',
                   'text-xs -top-2 bg-white dark:bg-zinc-800 px-1': isNickNameFocused || nickName,
                   'top-1/2 -translate-y-1/2': !isNickNameFocused && !nickName,
-                }"
-              >
+                }">
                 姓名/暱稱 <span class="text-red-500 dark:text-red-400">*</span>
               </label>
-              <input
-                type="text"
-                id="nickName"
-                v-model="nickName"
-                @focus="isNickNameFocused = true"
+              <input type="text" id="nickName" v-model="nickName" @focus="isNickNameFocused = true"
                 @blur="handleNickNameBlur"
                 class="block w-full px-1 pt-3 pb-1 bg-transparent appearance-none h-10 text-gray-900 dark:text-zinc-100 focus:outline-none placeholder-gray-400 dark:placeholder-zinc-500"
-                placeholder=""
-                autocomplete="off"
-                name="暱稱"
-              />
-              <p
-                v-if="nickNameStatus === 'error'"
-                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs"
-              >
+                placeholder="" autocomplete="off" name="暱稱" />
+              <p v-if="nickNameStatus === 'error'"
+                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs">
                 請輸入姓名/暱稱
               </p>
             </div>
 
-            <div
-              class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out"
-              :class="{
-                'border-gray-300 dark:border-zinc-600':
-                  !isDiscordUsernameFocused && discordUsernameStatus === null,
-                'border-blue-500 dark:border-blue-400': isDiscordUsernameFocused,
-                'border-green-500 dark:border-green-400':
-                  !isDiscordUsernameFocused && discordUsernameStatus === 'success',
-                'border-red-500 dark:border-red-400':
-                  !isDiscordUsernameFocused && discordUsernameStatus === 'error',
-              }"
-            >
-              <label
-                for="discordUsername"
-                class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none"
-                :class="{
+            <div class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out" :class="{
+              'border-gray-300 dark:border-zinc-600':
+                !isDiscordUsernameFocused && discordUsernameStatus === null,
+              'border-blue-500 dark:border-blue-400': isDiscordUsernameFocused,
+              'border-green-500 dark:border-green-400':
+                !isDiscordUsernameFocused && discordUsernameStatus === 'success',
+              'border-red-500 dark:border-red-400':
+                !isDiscordUsernameFocused && discordUsernameStatus === 'error',
+            }">
+              <label for="discordUsername"
+                class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none" :class="{
                   'text-gray-600 dark:text-zinc-400': !isDiscordUsernameFocused && !discordUsername,
                   'text-blue-500 dark:text-blue-400': isDiscordUsernameFocused,
                   'text-green-500 dark:text-green-400':
@@ -925,32 +798,19 @@ function toggleRow(idx: number) {
                   'text-xs -top-2 bg-white dark:bg-zinc-800 px-1':
                     isDiscordUsernameFocused || discordUsername,
                   'top-1/2 -translate-y-1/2': !isDiscordUsernameFocused && !discordUsername,
-                }"
-              >
+                }">
                 Discord 使用者名稱 <span class="text-red-500 dark:text-red-400">*</span>
               </label>
-              <input
-                type="text"
-                id="discordUsername"
-                v-model="discordUsername"
-                @focus="isDiscordUsernameFocused = true"
+              <input type="text" id="discordUsername" v-model="discordUsername" @focus="isDiscordUsernameFocused = true"
                 @blur="handleDiscordUsernameBlur"
                 class="block w-full px-1 pt-3 pb-1 bg-transparent appearance-none h-10 text-gray-900 dark:text-zinc-100 focus:outline-none placeholder-gray-400 dark:placeholder-zinc-500"
-                placeholder=""
-                autocomplete="off"
-                name="Discord 使用者名稱"
-              />
-              <p
-                v-if="discordUsernameStatus === 'error'"
-                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs"
-              >
+                placeholder="" autocomplete="off" name="Discord 使用者名稱" />
+              <p v-if="discordUsernameStatus === 'error'"
+                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs">
                 請輸入有效的 Discord 使用者名稱 (僅限數字、字母、底線_、英文句號.)
               </p>
-              <button
-                type="button"
-                @click="showDiscordTooltipModal = true"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200 focus:outline-none"
-              >
+              <button type="button" @click="showDiscordTooltipModal = true"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200 focus:outline-none">
                 <i class="bi bi-exclamation-circle"></i>
               </button>
             </div>
@@ -961,22 +821,17 @@ function toggleRow(idx: number) {
           <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-400 mb-2">您的遊戲資料</h2>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div
-              class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out"
-              :class="{
-                'border-gray-300 dark:border-zinc-600':
-                  !isGameAppliedFocused && gameAppliedStatus === null,
-                'border-blue-500 dark:border-blue-400': isGameAppliedFocused,
-                'border-green-500 dark:border-green-400':
-                  !isGameAppliedFocused && gameAppliedStatus === 'success',
-                'border-red-500 dark:border-red-400':
-                  !isGameAppliedFocused && gameAppliedStatus === 'error',
-              }"
-            >
-              <label
-                for="gameApplied"
-                class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none"
-                :class="{
+            <div class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out" :class="{
+              'border-gray-300 dark:border-zinc-600':
+                !isGameAppliedFocused && gameAppliedStatus === null,
+              'border-blue-500 dark:border-blue-400': isGameAppliedFocused,
+              'border-green-500 dark:border-green-400':
+                !isGameAppliedFocused && gameAppliedStatus === 'success',
+              'border-red-500 dark:border-red-400':
+                !isGameAppliedFocused && gameAppliedStatus === 'error',
+            }">
+              <label for="gameApplied"
+                class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none" :class="{
                   'text-gray-600 dark:text-zinc-400': !isGameAppliedFocused && gameApplied === null,
                   'text-blue-500 dark:text-blue-400': isGameAppliedFocused,
                   'text-green-500 dark:text-green-400':
@@ -986,55 +841,36 @@ function toggleRow(idx: number) {
                   'text-xs -top-2 bg-white dark:bg-zinc-800 px-1':
                     isGameAppliedFocused || gameApplied !== null,
                   'top-1/2 -translate-y-1/2': !isGameAppliedFocused && gameApplied === null,
-                }"
-              >
+                }">
                 申請的遊戲 <span class="text-red-500 dark:text-red-400">*</span>
               </label>
-              <select
-                id="gameApplied"
-                v-model="gameApplied"
-                @focus="isGameAppliedFocused = true"
+              <select id="gameApplied" v-model="gameApplied" @focus="isGameAppliedFocused = true"
                 @blur="handleGameAppliedBlur"
                 class="block w-full px-1 pt-3 pb-1 bg-transparent appearance-none h-10 cursor-pointer text-gray-900 dark:text-zinc-100 focus:outline-none"
-                autocomplete="off"
-                name="申請的遊戲"
-              >
-                <option
-                  v-for="game in gameOptions"
-                  :key="game.value"
-                  :value="game.value"
-                  :disabled="game.value === ''"
-                  class="bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100"
-                >
+                autocomplete="off" name="申請的遊戲">
+                <option v-for="game in gameOptions" :key="game.value" :value="game.value" :disabled="game.value === ''"
+                  class="bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100">
                   {{ game.label }}
                 </option>
               </select>
-              <p
-                v-if="gameAppliedStatus === 'error'"
-                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs"
-              >
+              <p v-if="gameAppliedStatus === 'error'"
+                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs">
                 請選擇申請的遊戲
               </p>
               <div
-                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-zinc-300"
-              >
+                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-zinc-300">
                 <i class="bi bi-chevron-down"></i>
               </div>
             </div>
 
-            <div
-              class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out"
-              :class="{
-                'border-gray-300 dark:border-zinc-600': !isGameIdFocused && gameIdStatus === null,
-                'border-blue-500 dark:border-blue-400': isGameIdFocused,
-                'border-green-500 dark:border-green-400':
-                  !isGameIdFocused && gameIdStatus === 'success',
-                'border-red-500 dark:border-red-400': !isGameIdFocused && gameIdStatus === 'error',
-              }"
-            >
-              <label
-                for="gameId"
-                class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none"
+            <div class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out" :class="{
+              'border-gray-300 dark:border-zinc-600': !isGameIdFocused && gameIdStatus === null,
+              'border-blue-500 dark:border-blue-400': isGameIdFocused,
+              'border-green-500 dark:border-green-400':
+                !isGameIdFocused && gameIdStatus === 'success',
+              'border-red-500 dark:border-red-400': !isGameIdFocused && gameIdStatus === 'error',
+            }">
+              <label for="gameId" class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none"
                 :class="{
                   'text-gray-600 dark:text-zinc-400': !isGameIdFocused && !gameId,
                   'text-blue-500 dark:text-blue-400': isGameIdFocused,
@@ -1043,47 +879,61 @@ function toggleRow(idx: number) {
                   'text-red-500 dark:text-red-400': !isGameIdFocused && gameIdStatus === 'error',
                   'text-xs -top-2 bg-white dark:bg-zinc-800 px-1': isGameIdFocused || gameId,
                   'top-1/2 -translate-y-1/2': !isGameIdFocused && !gameId,
-                }"
-              >
+                }">
                 遊戲 ID <span class="text-red-500 dark:text-red-400">*</span>
               </label>
-              <input
-                type="text"
-                id="gameId"
-                v-model="gameId"
-                @focus="isGameIdFocused = true"
-                @blur="handleGameIdBlur"
+              <input type="text" id="gameId" v-model="gameId" @focus="isGameIdFocused = true" @blur="handleGameIdBlur"
                 class="block w-full px-1 pt-3 pb-1 bg-transparent appearance-none h-10 text-gray-900 dark:text-zinc-100 focus:outline-none placeholder-gray-400 dark:placeholder-zinc-500"
-                placeholder=""
-                autocomplete="off"
-                name="遊戲 ID"
-              />
-              <p
-                v-if="gameIdStatus === 'error'"
-                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs"
-              >
+                placeholder="" autocomplete="off" name="遊戲 ID" />
+              <p v-if="gameIdStatus === 'error'"
+                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs">
                 請輸入遊戲 ID
               </p>
             </div>
-          </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-            <div
-              class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out"
-              :class="{
-                'border-gray-300 dark:border-zinc-600':
-                  !isTotalPlaytimeFocused && totalPlaytimeStatus === null,
-                'border-blue-500 dark:border-blue-400': isTotalPlaytimeFocused,
-                'border-green-500 dark:border-green-400':
-                  !isTotalPlaytimeFocused && totalPlaytimeStatus === 'success',
-                'border-red-500 dark:border-red-400':
-                  !isTotalPlaytimeFocused && totalPlaytimeStatus === 'error',
-              }"
-            >
-              <label
-                for="totalPlaytime"
-                class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none"
+            <div class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out" :class="{
+              'border-gray-300 dark:border-zinc-600':
+                !isSteamIdFocused && steamIdStatus === null,
+              'border-blue-500 dark:border-blue-400': isSteamIdFocused,
+              'border-green-500 dark:border-green-400':
+                !isSteamIdFocused && steamIdStatus === 'success',
+              'border-red-500 dark:border-red-400':
+                !isSteamIdFocused && steamIdStatus === 'error',
+            }">
+              <label for="steamId" class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none"
                 :class="{
+                  'text-gray-600 dark:text-zinc-400': !isSteamIdFocused && !steamId,
+                  'text-blue-500 dark:text-blue-400': isSteamIdFocused,
+                  'text-green-500 dark:text-green-400':
+                    !isSteamIdFocused && steamIdStatus === 'success',
+                  'text-red-500 dark:text-red-400':
+                    !isSteamIdFocused && steamIdStatus === 'error',
+                  'text-xs -top-2 bg-white dark:bg-zinc-800 px-1': isSteamIdFocused || steamId,
+                  'top-1/2 -translate-y-1/2': !isSteamIdFocused && !steamId,
+                }">
+                Steam 17位數字ID <span class="text-red-500 dark:text-red-400">*</span>
+              </label>
+              <input type="text" id="steamId" v-model="steamId" @focus="isSteamIdFocused = true"
+                @blur="handleSteamIdBlur"
+                class="block w-full px-1 pt-3 pb-1 bg-transparent appearance-none h-10 text-gray-900 dark:text-zinc-100 focus:outline-none placeholder-gray-400 dark:placeholder-zinc-500"
+                placeholder="" autocomplete="off" name="Steam 17位數字ID" maxlength="17" />
+              <p v-if="steamIdStatus === 'error'"
+                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs">
+                請輸入有效的 Steam 17位數字ID
+              </p>
+            </div>
+
+            <div class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out" :class="{
+              'border-gray-300 dark:border-zinc-600':
+                !isTotalPlaytimeFocused && totalPlaytimeStatus === null,
+              'border-blue-500 dark:border-blue-400': isTotalPlaytimeFocused,
+              'border-green-500 dark:border-green-400':
+                !isTotalPlaytimeFocused && totalPlaytimeStatus === 'success',
+              'border-red-500 dark:border-red-400':
+                !isTotalPlaytimeFocused && totalPlaytimeStatus === 'error',
+            }">
+              <label for="totalPlaytime"
+                class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none" :class="{
                   'text-gray-600 dark:text-zinc-400':
                     !isTotalPlaytimeFocused && totalPlaytime === null,
                   'text-blue-500 dark:text-blue-400': isTotalPlaytimeFocused,
@@ -1094,45 +944,30 @@ function toggleRow(idx: number) {
                   'text-xs -top-2 bg-white dark:bg-zinc-800 px-1':
                     isTotalPlaytimeFocused || totalPlaytime !== null,
                   'top-1/2 -translate-y-1/2': !isTotalPlaytimeFocused && totalPlaytime === null,
-                }"
-              >
+                }">
                 累計遊玩時數 <span class="text-red-500 dark:text-red-400">*</span>
               </label>
-              <input
-                type="number"
-                id="totalPlaytime"
-                v-model.number="totalPlaytime"
-                @focus="isTotalPlaytimeFocused = true"
-                @blur="handleTotalPlaytimeBlur"
+              <input type="number" id="totalPlaytime" v-model.number="totalPlaytime"
+                @focus="isTotalPlaytimeFocused = true" @blur="handleTotalPlaytimeBlur"
                 class="block w-full px-1 pt-3 pb-1 bg-transparent appearance-none h-10 text-gray-900 dark:text-zinc-100 focus:outline-none placeholder-gray-400 dark:placeholder-zinc-500"
-                placeholder=""
-                autocomplete="off"
-                name="累計遊玩時數"
-              />
-              <p
-                v-if="totalPlaytimeStatus === 'error'"
-                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs"
-              >
+                placeholder="" autocomplete="off" name="累計遊玩時數" />
+              <p v-if="totalPlaytimeStatus === 'error'"
+                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs">
                 請輸入有效數字
               </p>
             </div>
 
-            <div
-              class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out"
-              :class="{
-                'border-gray-300 dark:border-zinc-600':
-                  !isWeeklyPlaytimeFocused && weeklyPlaytimeStatus === null,
-                'border-blue-500 dark:border-blue-400': isWeeklyPlaytimeFocused,
-                'border-green-500 dark:border-green-400':
-                  !isWeeklyPlaytimeFocused && weeklyPlaytimeStatus === 'success',
-                'border-red-500 dark:border-red-400':
-                  !isWeeklyPlaytimeFocused && weeklyPlaytimeStatus === 'error',
-              }"
-            >
-              <label
-                for="weeklyPlaytime"
-                class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none"
-                :class="{
+            <div class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out" :class="{
+              'border-gray-300 dark:border-zinc-600':
+                !isWeeklyPlaytimeFocused && weeklyPlaytimeStatus === null,
+              'border-blue-500 dark:border-blue-400': isWeeklyPlaytimeFocused,
+              'border-green-500 dark:border-green-400':
+                !isWeeklyPlaytimeFocused && weeklyPlaytimeStatus === 'success',
+              'border-red-500 dark:border-red-400':
+                !isWeeklyPlaytimeFocused && weeklyPlaytimeStatus === 'error',
+            }">
+              <label for="weeklyPlaytime"
+                class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none" :class="{
                   'text-gray-600 dark:text-zinc-400':
                     !isWeeklyPlaytimeFocused && weeklyPlaytime === null,
                   'text-blue-500 dark:text-blue-400': isWeeklyPlaytimeFocused,
@@ -1143,25 +978,15 @@ function toggleRow(idx: number) {
                   'text-xs -top-2 bg-white dark:bg-zinc-800 px-1':
                     isWeeklyPlaytimeFocused || weeklyPlaytime !== null,
                   'top-1/2 -translate-y-1/2': !isWeeklyPlaytimeFocused && weeklyPlaytime === null,
-                }"
-              >
+                }">
                 每週遊玩時數 <span class="text-red-500 dark:text-red-400">*</span>
               </label>
-              <input
-                type="number"
-                id="weeklyPlaytime"
-                v-model.number="weeklyPlaytime"
-                @focus="isWeeklyPlaytimeFocused = true"
-                @blur="handleWeeklyPlaytimeBlur"
+              <input type="number" id="weeklyPlaytime" v-model.number="weeklyPlaytime"
+                @focus="isWeeklyPlaytimeFocused = true" @blur="handleWeeklyPlaytimeBlur"
                 class="block w-full px-1 pt-3 pb-1 bg-transparent appearance-none h-10 text-gray-900 dark:text-zinc-100 focus:outline-none placeholder-gray-400 dark:placeholder-zinc-500"
-                placeholder=""
-                autocomplete="off"
-                name="每週遊玩時數"
-              />
-              <p
-                v-if="weeklyPlaytimeStatus === 'error'"
-                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs"
-              >
+                placeholder="" autocomplete="off" name="每週遊玩時數" />
+              <p v-if="weeklyPlaytimeStatus === 'error'"
+                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs">
                 請輸入有效數字
               </p>
             </div>
@@ -1173,22 +998,14 @@ function toggleRow(idx: number) {
 
           <div class="grid grid-cols-1 gap-8">
             <div class="flex items-center">
-              <input
-                type="checkbox"
-                id="hasFriends"
-                v-model="hasFriends"
+              <input type="checkbox" id="hasFriends" v-model="hasFriends"
                 class="mr-3 h-5 w-5 text-blue-600 dark:text-blue-400 border-gray-300 dark:border-zinc-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400"
-                name="是否有朋友一同加入"
-              />
-              <label for="hasFriends" class="text-gray-900 dark:text-zinc-100 text-lg font-medium"
-                >是否有朋友一同加入?</label
-              >
+                name="是否有朋友一同加入" />
+              <label for="hasFriends" class="text-gray-900 dark:text-zinc-100 text-lg font-medium">是否有朋友一同加入?</label>
             </div>
 
-            <div
-              v-if="hasFriends"
-              class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out"
-              :class="{
+            <div v-if="hasFriends"
+              class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out" :class="{
                 'border-gray-300 dark:border-zinc-600':
                   !isFriendGameIdFocused && friendGameIdStatus === null,
                 'border-blue-500 dark:border-blue-400': isFriendGameIdFocused,
@@ -1196,12 +1013,9 @@ function toggleRow(idx: number) {
                   !isFriendGameIdFocused && friendGameIdStatus === 'success',
                 'border-red-500 dark:border-red-400':
                   !isFriendGameIdFocused && friendGameIdStatus === 'error',
-              }"
-            >
-              <label
-                for="friendGameId"
-                class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none"
-                :class="{
+              }">
+              <label for="friendGameId"
+                class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none" :class="{
                   'text-gray-600 dark:text-zinc-400': !isFriendGameIdFocused && !friendGameId,
                   'text-blue-500 dark:text-blue-400': isFriendGameIdFocused,
                   'text-green-500 dark:text-green-400':
@@ -1211,44 +1025,29 @@ function toggleRow(idx: number) {
                   'text-xs -top-2 bg-white dark:bg-zinc-800 px-1':
                     isFriendGameIdFocused || friendGameId,
                   'top-1/2 -translate-y-1/2': !isFriendGameIdFocused && !friendGameId,
-                }"
-              >
+                }">
                 朋友遊戲 ID
                 <span class="text-sm text-red-500 dark:text-red-400">(若有多位請用"、"區隔)</span>
                 <span class="text-red-500 dark:text-red-400">*</span>
               </label>
-              <input
-                type="text"
-                id="friendGameId"
-                v-model="friendGameId"
-                @focus="isFriendGameIdFocused = true"
+              <input type="text" id="friendGameId" v-model="friendGameId" @focus="isFriendGameIdFocused = true"
                 @blur="handleFriendGameIdBlur"
                 class="block w-full px-1 pt-3 pb-1 bg-transparent appearance-none h-10 text-gray-900 dark:text-zinc-100 focus:outline-none placeholder-gray-400 dark:placeholder-zinc-500"
-                placeholder=""
-                autocomplete="off"
-                name="朋友遊戲 ID"
-              />
-              <p
-                v-if="friendGameIdStatus === 'error'"
-                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs"
-              >
+                placeholder="" autocomplete="off" name="朋友遊戲 ID" />
+              <p v-if="friendGameIdStatus === 'error'"
+                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs">
                 請輸入朋友遊戲 ID
               </p>
             </div>
 
-            <div
-              class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out"
-              :class="{
-                'border-gray-300 dark:border-zinc-600': !isNotesFocused && notesStatus === null,
-                'border-blue-500 dark:border-blue-400': isNotesFocused,
-                'border-green-500 dark:border-green-400':
-                  !isNotesFocused && notesStatus === 'success',
-                'border-red-500 dark:border-red-400': !isNotesFocused && notesStatus === 'error',
-              }"
-            >
-              <label
-                for="notes"
-                class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none"
+            <div class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out" :class="{
+              'border-gray-300 dark:border-zinc-600': !isNotesFocused && notesStatus === null,
+              'border-blue-500 dark:border-blue-400': isNotesFocused,
+              'border-green-500 dark:border-green-400':
+                !isNotesFocused && notesStatus === 'success',
+              'border-red-500 dark:border-red-400': !isNotesFocused && notesStatus === 'error',
+            }">
+              <label for="notes" class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none"
                 :class="{
                   'text-gray-600 dark:text-zinc-400': !isNotesFocused && !notes,
                   'text-blue-500 dark:text-blue-400': isNotesFocused,
@@ -1257,149 +1056,90 @@ function toggleRow(idx: number) {
                   'text-red-500 dark:text-red-400': !isNotesFocused && notesStatus === 'error',
                   'text-xs -top-2 bg-white dark:bg-zinc-800 px-1': isNotesFocused || notes,
                   'top-3': !isNotesFocused && !notes, // 對於 textarea 調整預設 label 位置
-                }"
-              >
+                }">
                 備註
               </label>
-              <textarea
-                id="notes"
-                v-model="notes"
-                @focus="isNotesFocused = true"
-                @blur="handleNotesBlur"
+              <textarea id="notes" v-model="notes" @focus="isNotesFocused = true" @blur="handleNotesBlur"
                 class="block w-full px-1 pt-6 pb-1 bg-transparent appearance-none h-24 resize-y text-gray-900 dark:text-zinc-100 focus:outline-none placeholder-gray-400 dark:placeholder-zinc-500"
-                placeholder=""
-                name="備註"
-              ></textarea>
+                placeholder="" name="備註"></textarea>
             </div>
           </div>
         </div>
 
         <div class="flex justify-center mt-10">
-          <button
-            type="button"
-            @click="handleResetForm"
-            class="inline-block w-1/2 md:w-1/3 rounded-l-full border border-gray-300 dark:border-zinc-700 bg-gray-200 dark:bg-zinc-700 px-5 py-3 font-medium text-gray-700 dark:text-zinc-200 shadow-sm transition-colors hover:bg-gray-300 dark:hover:bg-zinc-600"
-          >
+          <button type="button" @click="handleResetForm"
+            class="inline-block w-1/2 md:w-1/3 rounded-l-full border border-gray-300 dark:border-zinc-700 bg-gray-200 dark:bg-zinc-700 px-5 py-3 font-medium text-gray-700 dark:text-zinc-200 shadow-sm transition-colors hover:bg-gray-300 dark:hover:bg-zinc-600">
             清除
           </button>
-          <button
-            type="submit"
-            class="inline-block w-1/2 md:w-1/3 rounded-r-full border border-blue-600 dark:border-blue-500 bg-blue-600 dark:bg-blue-500 px-5 py-3 font-medium text-white shadow-sm transition-colors hover:bg-blue-700 dark:hover:bg-blue-600"
-          >
+          <button type="submit"
+            class="inline-block w-1/2 md:w-1/3 rounded-r-full border border-blue-600 dark:border-blue-500 bg-blue-600 dark:bg-blue-500 px-5 py-3 font-medium text-white shadow-sm transition-colors hover:bg-blue-700 dark:hover:bg-blue-600">
             提交申請
           </button>
         </div>
       </form>
 
-      <div
-        v-if="showSuccessModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
-      >
+      <div v-if="showSuccessModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
         <div
-          class="bg-white dark:bg-zinc-800 rounded-lg shadow-2xl p-8 w-full max-w-lg mx-auto relative transform transition-all duration-300 scale-100 opacity-100 sm:max-w-xl md:max-w-2xl"
-        >
+          class="bg-white dark:bg-zinc-800 rounded-lg shadow-2xl p-8 w-full max-w-lg mx-auto relative transform transition-all duration-300 scale-100 opacity-100 sm:max-w-xl md:max-w-2xl">
           <div class="text-center mb-6">
             <div
-              class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-700 mb-4"
-            >
-              <svg
-                class="h-8 w-8 text-green-600 dark:text-green-200"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M5 13l4 4L19 7"
-                ></path>
+              class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-700 mb-4">
+              <svg class="h-8 w-8 text-green-600 dark:text-green-200" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
             </div>
-            <h3
-              class="text-2xl leading-8 font-extrabold text-gray-900 dark:text-zinc-100"
-              id="modal-title"
-            >
+            <h3 class="text-2xl leading-8 font-extrabold text-gray-900 dark:text-zinc-100" id="modal-title">
               恭喜！申請已成功送出！
             </h3>
           </div>
 
-          <div
-            class="border-l-4 border-blue-500 bg-blue-50 dark:bg-zinc-700 p-4 rounded-md shadow-inner"
-          >
+          <div class="border-l-4 border-blue-500 bg-blue-50 dark:bg-zinc-700 p-4 rounded-md shadow-inner">
             <div class="flex items-center mb-3">
-              <svg
-                class="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3 flex-shrink-0"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
+              <svg class="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3 flex-shrink-0" fill="currentColor"
+                viewBox="0 0 20 20" aria-hidden="true">
+                <path fill-rule="evenodd"
                   d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9.293 11.293a1 1 0 001.414 1.414L12 10.414V14a1 1 0 102 0v-3.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3z"
-                  clip-rule="evenodd"
-                />
+                  clip-rule="evenodd" />
               </svg>
               <h2 class="text-xl font-bold text-blue-700 dark:text-blue-300">重要指引</h2>
             </div>
             <hr class="my-3 border-blue-300 dark:border-zinc-600" />
             <ul class="list-disc pl-5 space-y-2 text-gray-700 dark:text-zinc-200">
               <li>
-                請務必<a href="https://discord.gg/3TEHPZhYUK"
-                  ><span class="font-bold text-red-500">立即加入</span></a
-                >我們的
-                <a
-                  href="https://discord.gg/3TEHPZhYUK"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center"
-                >
-                  「戰隊Discord社群<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a
-                >。
+                請務必<a href="https://discord.gg/3TEHPZhYUK"><span class="font-bold text-red-500">立即加入</span></a>我們的
+                <a href="https://discord.gg/3TEHPZhYUK" target="_blank" rel="noopener noreferrer"
+                  class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
+                  「戰隊Discord社群<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a>。
               </li>
               <li>
                 審核進度/通知皆在
-                <a
-                  href="https://discord.com/channels/490129931808931840/1389642260936790211"
-                  target="_blank"
+                <a href="https://discord.com/channels/490129931808931840/1389642260936790211" target="_blank"
                   rel="noopener noreferrer"
-                  class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center"
-                >
+                  class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
                   <span class="font-mono text-purple-700 dark:text-purple-300">
                     「#⚖️⇜戰隊審核進度<i class="bi bi-box-arrow-up-right ml-1"></i>」
-                  </span> </a
-                >頻道發布，請多加留意！。
+                  </span> </a>頻道發布，請多加留意！。
               </li>
             </ul>
           </div>
 
           <div class="mt-6 sm:mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-            <button
-              type="button"
+            <button type="button"
               class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-3 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-lg dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600 dark:border-zinc-600 transition-colors duration-200"
-              @click="closeSuccessModalAndResetForm"
-            >
+              @click="closeSuccessModalAndResetForm">
               回到首頁
             </button>
-            <a
-              href="https://discord.gg/3TEHPZhYUK"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-3 bg-purple-700 text-base font-medium text-white hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:text-lg dark:bg-purple-600 dark:hover:bg-purple-700 transition-colors duration-200"
-            >
+            <a href="https://discord.gg/3TEHPZhYUK" target="_blank" rel="noopener noreferrer"
+              class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-3 bg-purple-700 text-base font-medium text-white hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:text-lg dark:bg-purple-600 dark:hover:bg-purple-700 transition-colors duration-200">
               <svg class="mr-2 h-6 w-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                 <path
-                  d="M6.29 18.29a1 1 0 01-1.41-1.41L15.59 7H12a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V7.41L6.29 18.29z"
-                />
+                  d="M6.29 18.29a1 1 0 01-1.41-1.41L15.59 7H12a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V7.41L6.29 18.29z" />
+                <path fill-rule="evenodd" d="M10 3a7 7 0 100 14 7 7 0 000-14zM2 10a8 8 0 1116 0 8 8 0 01-16 0z"
+                  clip-rule="evenodd" />
                 <path
-                  fill-rule="evenodd"
-                  d="M10 3a7 7 0 100 14 7 7 0 000-14zM2 10a8 8 0 1116 0 8 8 0 01-16 0z"
-                  clip-rule="evenodd"
-                />
-                <path
-                  d="M12.5 7.5a.5.5 0 11-1 0 .5.5 0 011 0zM7.5 7.5a.5.5 0 11-1 0 .5.5 0 011 0zM10 12a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
-                />
+                  d="M12.5 7.5a.5.5 0 11-1 0 .5.5 0 011 0zM7.5 7.5a.5.5 0 11-1 0 .5.5 0 011 0zM10 12a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" />
                 <path d="M11 9H9a1 1 0 100 2h2a1 1 0 100-2z" />
               </svg>
               立即加入 Discord
@@ -1408,41 +1148,22 @@ function toggleRow(idx: number) {
         </div>
       </div>
 
-      <div
-        v-if="showDiscordTooltipModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
-      >
-        <div
-          class="bg-white dark:bg-zinc-800 rounded-lg shadow-2xl p-4 w-full max-w-lg mx-auto relative"
-        >
-          <button
-            @click="showDiscordTooltipModal = false"
-            class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200 focus:outline-none"
-          >
-            <svg
-              class="h-6 w-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              ></path>
+      <div v-if="showDiscordTooltipModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
+        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-2xl p-4 w-full max-w-lg mx-auto relative">
+          <button @click="showDiscordTooltipModal = false"
+            class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200 focus:outline-none">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
           </button>
           <div class="text-center">
             <h4 class="text-lg font-bold mb-4 text-gray-900 dark:text-zinc-100">
               Discord 使用者名稱範例
             </h4>
-            <img
-              src="https://i.meee.com.tw/lD5Gz9t.png"
-              alt="Discord Username Example"
-              class="max-w-full h-auto mx-auto rounded-md shadow-md"
-            />
+            <img src="https://i.meee.com.tw/lD5Gz9t.png" alt="Discord Username Example"
+              class="max-w-full h-auto mx-auto rounded-md shadow-md" />
             <p class="mt-4 text-sm text-gray-600 dark:text-zinc-300">
               請輸入紅框處顯示的 Discord 使用者名稱。
             </p>
