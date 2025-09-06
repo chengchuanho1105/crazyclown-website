@@ -119,6 +119,11 @@ const isValidPositiveNumber = (value: number | null | undefined): boolean => {
   return value !== null && value !== undefined && !isNaN(value) && value >= 0
 }
 
+/** 3. 檢查每週遊玩時數是否為有效數字且不超過168小時 */
+const isValidWeeklyPlaytime = (value: number | null | undefined): boolean => {
+  return value !== null && value !== undefined && !isNaN(value) && value >= 0 && value <= 168
+}
+
 /** 3. 根據值和焦點狀態更新驗證狀態 */
 const updateValidationStatus = <T,>(
   value: T,
@@ -287,7 +292,7 @@ const handleWeeklyPlaytimeBlur = () => {
     weeklyPlaytime.value,
     isWeeklyPlaytimeFocused,
     weeklyPlaytimeStatus,
-    isValidPositiveNumber,
+    isValidWeeklyPlaytime,
   )
 }
 watch(weeklyPlaytime, (newValue) => {
@@ -295,7 +300,7 @@ watch(weeklyPlaytime, (newValue) => {
     newValue,
     isWeeklyPlaytimeFocused,
     weeklyPlaytimeStatus,
-    isValidPositiveNumber,
+    isValidWeeklyPlaytime,
   )
 })
 
@@ -987,7 +992,7 @@ function toggleRow(idx: number) {
                 placeholder="" autocomplete="off" name="每週遊玩時數" />
               <p v-if="weeklyPlaytimeStatus === 'error'"
                 class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs">
-                請輸入有效數字
+                請輸入有效數值 (上限168小時)
               </p>
             </div>
           </div>
