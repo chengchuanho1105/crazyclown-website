@@ -43,7 +43,7 @@ const isHomePage = computed(() => path.value === '/' || path.value === '')
                 <div class="max-w-prose text-left" data-aos="zoom-in">
                   <h3 class="font-bold text-gray-800 dark:text-gray-400 sm:text-5xl">
                     <span class="text-2xl md:text-4xl text-indigo-800 dark:text-gray-100"
-                      >S級戰隊·強者集結</span
+                      >PUBG官方戰隊·強者集結</span
                     >
                     <br />
                     <span class="text-3xl md:text-5xl text-indigo-800 dark:text-gray-100"
