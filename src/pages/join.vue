@@ -198,7 +198,7 @@ const gameOptions = [
   { value: '皆可', label: 'Crazy_Clown (一軍)、Crazy_Clown_II (二軍) 皆可' },
   { value: 'Crazy_Clown (一軍)', label: 'Crazy_Clown (一軍) 優先' },
   { value: 'Crazy_Clown_II (二軍)', label: 'Crazy_Clown_II (二軍) 優先' },
-  { value: '', label: '==========注意事項==========' },  
+  { value: '', label: '==========注意事項==========' },
   { value: '', label: '1. 選擇一軍者，若因資格不符，將自動改為二軍優先' },
   { value: '', label: '2. 選擇一軍者，若因一軍滿員，將自動改為二軍優先' },
   { value: '', label: '3. 入取二軍者，可於加入一個月後申請加入一軍審核' },
@@ -345,7 +345,48 @@ watch(friendGameId, (newValue) => {
   }
 })
 
-/** 9. 備註 */
+/** 9. 是否有介紹人 */
+const hasReferrer = ref(false)
+watch(hasReferrer, (newValue) => {
+  if (!newValue) {
+    referrerName.value = '' // 如果不選擇有介紹人，清空介紹人姓名
+    referrerNameStatus.value = null // 重置介紹人姓名的狀態
+  }
+})
+
+/** 10. 介紹人姓名 */
+const referrerName = ref('')
+const isReferrerNameFocused = ref(false)
+const referrerNameStatus = ref<null | 'success' | 'error'>(null)
+const handleReferrerNameBlur = () => {
+  isReferrerNameFocused.value = false
+  if (hasReferrer.value) {
+    // 只有當 hasReferrer 為 true 時才驗證
+    updateValidationStatus(
+      referrerName.value,
+      isReferrerNameFocused,
+      referrerNameStatus,
+      (val) => !isStringEmpty(val),
+    )
+  } else {
+    referrerNameStatus.value = null // 如果沒有介紹人，則不驗證
+  }
+}
+watch(referrerName, (newValue) => {
+  if (hasReferrer.value) {
+    // 只有當 hasReferrer 為 true 時才監聽
+    updateValidationStatus(
+      newValue,
+      isReferrerNameFocused,
+      referrerNameStatus,
+      (val) => !isStringEmpty(val),
+    )
+  } else {
+    referrerNameStatus.value = null
+  }
+})
+
+/** 11. 備註 */
 const notes = ref('')
 const isNotesFocused = ref(false)
 const notesStatus = ref<null | 'success' | 'error'>(null)
@@ -378,6 +419,7 @@ const validateForm = () => {
   handleTotalPlaytimeBlur()
   handleWeeklyPlaytimeBlur()
   handleFriendGameIdBlur() // 即使沒有朋友，也會執行，但會被內部邏輯處理
+  handleReferrerNameBlur() // 即使沒有介紹人，也會執行，但會被內部邏輯處理
 
   isFormValid.value =
     nickNameStatus.value === 'success' &&
@@ -387,7 +429,8 @@ const validateForm = () => {
     steamIdStatus.value === 'success' &&
     totalPlaytimeStatus.value === 'success' &&
     weeklyPlaytimeStatus.value === 'success' &&
-    (!hasFriends.value || friendGameIdStatus.value === 'success') // 如果有朋友，朋友ID必須成功
+    (!hasFriends.value || friendGameIdStatus.value === 'success') && // 如果有朋友，朋友ID必須成功
+    (!hasReferrer.value || referrerNameStatus.value === 'success') // 如果有介紹人，介紹人姓名必須成功
 }
 
 /** 4. 提交表單 */
@@ -408,6 +451,8 @@ const handleSubmit = async (event: Event) => {
       每週遊玩時數: weeklyPlaytime.value,
       是否有朋友一同加入: hasFriends.value ? '是' : '否',
       朋友遊戲ID: hasFriends.value ? friendGameId.value : '無',
+      是否有介紹人: hasReferrer.value ? '是' : '否',
+      介紹人姓名: hasReferrer.value ? referrerName.value : '無',
       備註: notes.value || '無',
     }
 
@@ -485,6 +530,11 @@ const handleResetForm = () => {
   friendGameId.value = ''
   isFriendGameIdFocused.value = false
   friendGameIdStatus.value = null
+
+  hasReferrer.value = false
+  referrerName.value = ''
+  isReferrerNameFocused.value = false
+  referrerNameStatus.value = null
 
   notes.value = ''
   isNotesFocused.value = false
@@ -1042,6 +1092,47 @@ function toggleRow(idx: number) {
               <p v-if="friendGameIdStatus === 'error'"
                 class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs">
                 請輸入朋友遊戲 ID
+              </p>
+            </div>
+
+            <div class="flex items-center">
+              <input type="checkbox" id="hasReferrer" v-model="hasReferrer"
+                class="mr-3 h-5 w-5 text-blue-600 dark:text-blue-400 border-gray-300 dark:border-zinc-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400"
+                name="是否有介紹人" />
+              <label for="hasReferrer" class="text-gray-900 dark:text-zinc-100 text-lg font-medium">是否有介紹人?</label>
+            </div>
+
+            <div v-if="hasReferrer"
+              class="relative border-2 rounded-md px-3 py-2 transition-all duration-200 ease-in-out" :class="{
+                'border-gray-300 dark:border-zinc-600':
+                  !isReferrerNameFocused && referrerNameStatus === null,
+                'border-blue-500 dark:border-blue-400': isReferrerNameFocused,
+                'border-green-500 dark:border-green-400':
+                  !isReferrerNameFocused && referrerNameStatus === 'success',
+                'border-red-500 dark:border-red-400':
+                  !isReferrerNameFocused && referrerNameStatus === 'error',
+              }">
+              <label for="referrerName"
+                class="absolute left-3 transition-all duration-200 ease-in-out pointer-events-none" :class="{
+                  'text-gray-600 dark:text-zinc-400': !isReferrerNameFocused && !referrerName,
+                  'text-blue-500 dark:text-blue-400': isReferrerNameFocused,
+                  'text-green-500 dark:text-green-400':
+                    !isReferrerNameFocused && referrerNameStatus === 'success',
+                  'text-red-500 dark:text-red-400':
+                    !isReferrerNameFocused && referrerNameStatus === 'error',
+                  'text-xs -top-2 bg-white dark:bg-zinc-800 px-1':
+                    isReferrerNameFocused || referrerName,
+                  'top-1/2 -translate-y-1/2': !isReferrerNameFocused && !referrerName,
+                }">
+                介紹人姓名 <span class="text-red-500 dark:text-red-400">*</span>
+              </label>
+              <input type="text" id="referrerName" v-model="referrerName" @focus="isReferrerNameFocused = true"
+                @blur="handleReferrerNameBlur"
+                class="block w-full px-1 pt-3 pb-1 bg-transparent appearance-none h-10 text-gray-900 dark:text-zinc-100 focus:outline-none placeholder-gray-400 dark:placeholder-zinc-500"
+                placeholder="" autocomplete="off" name="介紹人姓名" />
+              <p v-if="referrerNameStatus === 'error'"
+                class="absolute -bottom-5 left-0 text-red-500 dark:text-red-400 text-xs">
+                請輸入介紹人姓名
               </p>
             </div>
 
