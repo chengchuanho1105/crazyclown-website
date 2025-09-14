@@ -613,9 +613,9 @@ function toggleRow(idx: number) {
       <div class="p-4 mb-6 border-l-4 border-yellow-500 bg-yellow-50 dark:bg-zinc-700 rounded-md shadow-inner">
         <p class="text-gray-700 dark:text-zinc-200">
           本頁面資料非即時更新，請以
-          <a href="https://discord.gg/3TEHPZhYUK" target="_blank" rel="noopener noreferrer"
+          <a href="https://crazyclown.online/dc" target="_blank" rel="noopener noreferrer"
             class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
-            「戰隊Discord社群<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a>的<a
+            「Crazy_Clown Discord 社群<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a>的<a
             href="https://discord.com/channels/490129931808931840/1182389838582915162" target="_blank"
             rel="noopener noreferrer"
             class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
@@ -753,12 +753,14 @@ function toggleRow(idx: number) {
 
             <ul class="list-disc pl-5 space-y-2 text-gray-700 dark:text-zinc-200">
               <li>
-                申請提交後，請務必
-                <a href="https://discord.gg/3TEHPZhYUK"><span class="font-bold text-red-500">立即加入</span></a>
-                我們的
-                <a href="https://discord.gg/3TEHPZhYUK" target="_blank"
+                請務必<span>立即加入</span>
+                <a href="https://crazyclown.online/dc" target="_blank" rel="noopener noreferrer"
                   class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
-                  「戰隊Discord社群<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a>。
+                  「Crazy_clown Discord 社群<i class="bi bi-box-arrow-up-right ml-1"></i>」
+                </a>及<a href="https://kraftontw.info/Discord" target="_blank" rel="noopener noreferrer"
+                  class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
+                  「PUBG 官方 Discord 社群<i class="bi bi-box-arrow-up-right ml-1"></i>」
+                </a>。
               </li>
               <li>
                 審核進度/通知皆在
@@ -772,9 +774,9 @@ function toggleRow(idx: number) {
             <hr class="my-3 border-yellow-300 dark:border-zinc-600" />
             <p class="text-gray-700 dark:text-zinc-200">
               如頻繁提交失敗，可前直接前往
-              <a href="https://discord.gg/3TEHPZhYUK" target="_blank" rel="noopener noreferrer"
+              <a href="https://crazyclown.online/dc" target="_blank" rel="noopener noreferrer"
                 class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
-                「戰隊Discord社群<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a>的<a
+                「Crazy_Clown Discord 社群<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a>的<a
                 href="https://discord.com/channels/490129931808931840/1182389838582915162" target="_blank"
                 rel="noopener noreferrer"
                 class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
@@ -854,7 +856,7 @@ function toggleRow(idx: number) {
                     isDiscordUsernameFocused || discordUsername,
                   'top-1/2 -translate-y-1/2': !isDiscordUsernameFocused && !discordUsername,
                 }">
-                Discord 使用者名稱 <span class="text-red-500 dark:text-red-400">*</span>
+                Discord 使用者名稱 <span class="text-red-500 dark:text-red-400">* 👉請先查看右方<i class="bi bi-exclamation-circle mx-1"/>範例，避免填寫錯誤</span>
               </label>
               <input type="text" id="discordUsername" v-model="discordUsername" @focus="isDiscordUsernameFocused = true"
                 @blur="handleDiscordUsernameBlur"
@@ -1204,10 +1206,14 @@ function toggleRow(idx: number) {
             <hr class="my-3 border-blue-300 dark:border-zinc-600" />
             <ul class="list-disc pl-5 space-y-2 text-gray-700 dark:text-zinc-200">
               <li>
-                請務必<a href="https://discord.gg/3TEHPZhYUK"><span class="font-bold text-red-500">立即加入</span></a>我們的
-                <a href="https://discord.gg/3TEHPZhYUK" target="_blank" rel="noopener noreferrer"
+                請務必<span>立即加入</span>
+                <a href="https://crazyclown.online/dc" target="_blank" rel="noopener noreferrer"
                   class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
-                  「戰隊Discord社群<i class="bi bi-box-arrow-up-right ml-1"></i>」 </a>。
+                  「Crazy_clown Discord 社群<i class="bi bi-box-arrow-up-right ml-1"></i>」
+                </a>及<a href="https://kraftontw.info/Discord" target="_blank" rel="noopener noreferrer"
+                  class="text-blue-600 dark:text-blue-400 font-semibold hover:underline transition-colors duration-200 flex-grow-0 inline-flex items-center">
+                  「PUBG 官方 Discord 社群<i class="bi bi-box-arrow-up-right ml-1"></i>」
+                </a>。
               </li>
               <li>
                 審核進度/通知皆在
@@ -1227,7 +1233,7 @@ function toggleRow(idx: number) {
               @click="closeSuccessModalAndResetForm">
               回到首頁
             </button>
-            <a href="https://discord.gg/3TEHPZhYUK" target="_blank" rel="noopener noreferrer"
+            <a href="https://crazyclown.online/dc" target="_blank" rel="noopener noreferrer"
               class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-3 bg-purple-700 text-base font-medium text-white hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:text-lg dark:bg-purple-600 dark:hover:bg-purple-700 transition-colors duration-200">
               <svg class="mr-2 h-6 w-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                 <path
