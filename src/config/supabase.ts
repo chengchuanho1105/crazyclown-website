@@ -50,7 +50,8 @@ export const TABLES = {
   PAYMENT_METHODS: 'payment_method',  // 付款方式
   OUR_BANK_DATA: 'our_bank_data',  // 我方收款銀行資料
   NEWS: 'news',  // 新聞資料
-  HOMEPAGE_HERO: 'homepage_hero'  // 首頁 Hero 內容
+  HOMEPAGE_HERO: 'homepage_hero',  // 首頁 Hero 內容
+  PRICE_LIST: 'price_list'  // 價格列表
 } as const
 
 // 資料庫類型定義
@@ -187,6 +188,21 @@ export interface HomepageHero {
   bgImage: string  // 背景圖片 URL
   aos: string  // AOS 動畫設定
   scrollDown?: boolean  // 是否顯示向下滾動提示
+  created_at: string  // 建立時間
+  updated_at: string  // 更新時間
+}
+
+// 價格列表資料類型定義
+export interface PriceList {
+  id: string  // 價格項目編號
+  category: string  // 商品分類
+  currency: string  // 貨幣類型 (usd/gcoin)
+  name: string  // 商品名稱
+  usd?: number  // USD 價格
+  gcoin?: number  // G-Coin 價格
+  specialPrice: number  // 優惠價格 (TWD)
+  hotSale: boolean  // 是否為熱銷商品
+  sort: number  // 排序欄位
   created_at: string  // 建立時間
   updated_at: string  // 更新時間
 }

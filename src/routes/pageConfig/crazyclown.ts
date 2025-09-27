@@ -215,6 +215,30 @@ export const pageConfig: PageConfig = {
         },
       },
     },
+    {
+      path: '/admin/price-list',
+      name: `${brandName}-Price-List`,
+      component: () => import(`@/pages/admin/price-list.vue`),
+      meta: {
+        title: `價目表 | ${brandDisplayName}`,
+        description: '',
+        layout: 'admin',
+        requiresAuth: true,
+        roles: ['admin'],
+      },
+    },
+    {
+      path: '/admin/pages',
+      name: `${brandName}-Pages`,
+      component: () => import(`@/pages/admin/pages.vue`),
+      meta: {
+        title: `頁面內容 | ${brandDisplayName}`,
+        description: '',
+        layout: 'admin',
+        requiresAuth: true,
+        roles: ['admin'],
+      },
+    },
 
 
     {

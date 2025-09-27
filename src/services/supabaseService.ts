@@ -1,4 +1,4 @@
-import { supabase, TABLES, type InventoryItem, type Transaction, type Customer, type Product, type ProductCategory, type PaymentMethod, type OurBankData, type InventoryItemWithDetails, type News, type HomepageHero } from '@/config/supabase'
+import { supabase, TABLES, type InventoryItem, type Transaction, type Customer, type Product, type ProductCategory, type PaymentMethod, type OurBankData, type InventoryItemWithDetails, type News, type HomepageHero, type PriceList } from '@/config/supabase'
 
 // 錯誤處理類型
 export interface SupabaseError {
@@ -1045,6 +1045,177 @@ export class HomepageHeroService {
         data: null,
         error: {
           message: error.message || '刪除首頁 Hero 內容失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+}
+
+// 價格列表服務
+export class PriceListService {
+  // 獲取所有價格列表項目
+  static async getAllPriceListItems(): Promise<ApiResponse<PriceList[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.PRICE_LIST)
+        .select('*')
+        .order('sort', { ascending: true })
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取價格列表資料失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 根據 ID 獲取單個價格列表項目
+  static async getPriceListItemById(id: string): Promise<ApiResponse<PriceList>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.PRICE_LIST)
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取價格列表項目詳情失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 根據分類獲取價格列表項目
+  static async getPriceListItemsByCategory(category: string): Promise<ApiResponse<PriceList[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.PRICE_LIST)
+        .select('*')
+        .eq('category', category)
+        .order('sort', { ascending: true })
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取分類價格列表失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 新增價格列表項目
+  static async createPriceListItem(item: Omit<PriceList, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<PriceList>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.PRICE_LIST)
+        .insert([item])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '新增價格列表項目失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 更新價格列表項目
+  static async updatePriceListItem(id: string, updates: Partial<PriceList>): Promise<ApiResponse<PriceList>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.PRICE_LIST)
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '更新價格列表項目失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 刪除價格列表項目
+  static async deletePriceListItem(id: string): Promise<ApiResponse<boolean>> {
+    try {
+      const { error } = await supabase
+        .from(TABLES.PRICE_LIST)
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      return { data: true, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '刪除價格列表項目失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 獲取所有分類
+  static async getAllCategories(): Promise<ApiResponse<string[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.PRICE_LIST)
+        .select('category')
+        .order('category')
+
+      if (error) throw error
+
+      // 去重並返回唯一的分類列表
+      const uniqueCategories = [...new Set(data?.map(item => item.category) || [])]
+      return { data: uniqueCategories, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取分類列表失敗',
           details: error.details,
           code: error.code
         }

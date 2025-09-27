@@ -7,47 +7,39 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 // ---------- 組件引入區（版面用） ----------
 import DecorSection from '@/components/DecorSection.vue'
 
-// ---------- 工具函式 ----------
-import { useSheetData } from '@/composables/useSheetData'
-
-// ---------- 資料處理 ----------
-// 移除本地資料引入
+// ---------- 服務引入 ----------
+import { PriceListService, type ApiResponse } from '@/services/supabaseService'
+import type { PriceList } from '@/config/supabase'
 
 /** ========== 商品資料處理 ========== */
 
-interface ProductListData {
-  category: string
-  currency: string
-  name: string
-  usd?: number
-  gcoin?: number
-  specialPrice: number
-  hotSale: boolean
-}
+// ---------- 響應式資料 ----------
+const productListData = ref<PriceList[]>([])
+const productListDataLoading = ref(false)
+const productListDataError = ref<string | null>(null)
 
-/** 2. 取得商品資料 CSV 來源 */
-const PRODUCTLISTDATA_CSV_URL =
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vRBdBIEkQ5g_U0tXrNAdLXwaViW_NhBPy3EwPhiiJ3oX8vinj-K69yBeVHtJmbVFXPBqY7i09Os5GTE/pub?gid=1913119360&single=true&output=csv'
+// ---------- 方法 ----------
+const loadProductListData = async () => {
+  productListDataLoading.value = true
+  productListDataError.value = null
 
-/** 3. 定義 CSV 欄位轉換函式 */
-const mapProductListData = (item: Record<string, string>): ProductListData => {
-  return {
-    category: item.category || '',
-    currency: item.currency || '',
-    name: item.name || '',
-    usd: item.usd ? Number(item.usd) : undefined,
-    gcoin: item.gcoin ? Number(item.gcoin) : undefined,
-    specialPrice: Number(item.specialPrice) || 0,
-    hotSale: item.hotSale === 'true',
+  try {
+    const response: ApiResponse<PriceList[]> = await PriceListService.getAllPriceListItems()
+
+    if (response.error) {
+      productListDataError.value = response.error.message
+      console.error('獲取商品資料失敗:', response.error)
+    } else {
+      productListData.value = response.data || []
+      console.log('成功獲取商品資料:', response.data)
+    }
+  } catch (err: unknown) {
+    productListDataError.value = err instanceof Error ? err.message : '未知錯誤'
+    console.error('獲取商品資料時發生錯誤:', err)
+  } finally {
+    productListDataLoading.value = false
   }
 }
-
-const {
-  data: productListData,
-  loading: productListDataLoading,
-  error: productListDataError,
-  load: loadProductListData,
-} = useSheetData<ProductListData>(PRODUCTLISTDATA_CSV_URL, mapProductListData)
 
 const usd2twd = ref(30)
 const FEE = ref(1.03)
