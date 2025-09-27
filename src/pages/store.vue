@@ -10,6 +10,7 @@ import DecorSection from '@/components/DecorSection.vue'
 // ---------- 服務引入 ----------
 import { PriceListService, type ApiResponse } from '@/services/supabaseService'
 import type { PriceList } from '@/config/supabase'
+import { getExchangeRate, type ExchangeRateData } from '@/services/exchangeRateService'
 
 /** ========== 商品資料處理 ========== */
 
@@ -24,14 +25,13 @@ const loadProductListData = async () => {
   productListDataError.value = null
 
   try {
-    const response: ApiResponse<PriceList[]> = await PriceListService.getAllPriceListItems()
+    const response: ApiResponse<PriceList[]> = await PriceListService.getPublicPriceListItems()
 
     if (response.error) {
       productListDataError.value = response.error.message
       console.error('獲取商品資料失敗:', response.error)
     } else {
       productListData.value = response.data || []
-      console.log('成功獲取商品資料:', response.data)
     }
   } catch (err: unknown) {
     productListDataError.value = err instanceof Error ? err.message : '未知錯誤'
@@ -41,20 +41,25 @@ const loadProductListData = async () => {
   }
 }
 
-const usd2twd = ref(30)
-const FEE = ref(1.03)
-const USD2TWD_CSV_URL =
+// ---------- 匯率資料 ----------
+const exchangeRateData = ref<ExchangeRateData | null>(null)
+const exchangeRateLoading = ref(false)
+const exchangeRateError = ref<string | null>(null)
+const FEE = ref(1.03) // 手續費率
+
+// 從 Google Sheets 獲取手續費率
+const FEE_CSV_URL =
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vRBdBIEkQ5g_U0tXrNAdLXwaViW_NhBPy3EwPhiiJ3oX8vinj-K69yBeVHtJmbVFXPBqY7i09Os5GTE/pub?gid=1049789859&single=true&output=csv'
-async function fetchUsd2Twd() {
+
+async function fetchFeeRate() {
   try {
-    const response = await fetch(USD2TWD_CSV_URL)
+    const response = await fetch(FEE_CSV_URL)
     const csvText = await response.text()
     const lines = csvText.trim().split('\n')
 
     if (lines.length > 0) {
       const data = lines[1].split(',')
       if (data.length >= 2) {
-        usd2twd.value = parseFloat(data[0])
         FEE.value = parseFloat(data[1])
       }
     }
@@ -63,11 +68,30 @@ async function fetchUsd2Twd() {
   }
 }
 
+// 獲取即時匯率
+async function loadExchangeRate() {
+  exchangeRateLoading.value = true
+  exchangeRateError.value = null
+
+  try {
+    const rateData = await getExchangeRate()
+    exchangeRateData.value = rateData
+  } catch (error) {
+    exchangeRateError.value = error instanceof Error ? error.message : '獲取匯率失敗'
+    console.error('獲取即時匯率失敗:', error)
+  } finally {
+    exchangeRateLoading.value = false
+  }
+}
+
 onMounted(() => {
   loadProductListData()
-  fetchUsd2Twd()
+  loadExchangeRate()
+  fetchFeeRate()
 })
 
+// 計算屬性：使用即時匯率
+const usd2twd = computed(() => exchangeRateData.value?.usd2twd || 30)
 const GCOIN2TWD = computed(() => (usd2twd.value / 100) * FEE.value) // 1 G-Coin = 1/100 USD * 匯率 * 手續費
 
 // 以 category 為分頁
@@ -165,6 +189,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="max-w-7xl mx-auto px-4 py-8">
+
     <DecorSection
       :mainTitle="`<i class='bi bi-currency-exchange'></i> 特惠商品`"
       enTitle="Promotion List"

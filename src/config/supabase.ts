@@ -196,13 +196,15 @@ export interface HomepageHero {
 export interface PriceList {
   id: string  // 價格項目編號
   category: string  // 商品分類
+  category_sort: number  // 分類排序欄位
   currency: string  // 貨幣類型 (usd/gcoin)
   name: string  // 商品名稱
   usd?: number  // USD 價格
   gcoin?: number  // G-Coin 價格
   specialPrice: number  // 優惠價格 (TWD)
   hotSale: boolean  // 是否為熱銷商品
-  sort: number  // 排序欄位
+  product_sort: number  // 商品排序欄位
+  show: boolean  // 是否在價目表中顯示
   created_at: string  // 建立時間
   updated_at: string  // 更新時間
 }

@@ -1061,7 +1061,8 @@ export class PriceListService {
       const { data, error } = await supabase
         .from(TABLES.PRICE_LIST)
         .select('*')
-        .order('sort', { ascending: true })
+        .order('category_sort', { ascending: true })
+        .order('product_sort', { ascending: true })
 
       if (error) throw error
 
@@ -1109,7 +1110,7 @@ export class PriceListService {
         .from(TABLES.PRICE_LIST)
         .select('*')
         .eq('category', category)
-        .order('sort', { ascending: true })
+        .order('product_sort', { ascending: true })
 
       if (error) throw error
 
@@ -1216,6 +1217,92 @@ export class PriceListService {
         data: null,
         error: {
           message: error.message || '獲取分類列表失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 獲取前台顯示的價格列表項目（只顯示 show=true 的項目）
+  static async getPublicPriceListItems(): Promise<ApiResponse<PriceList[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.PRICE_LIST)
+        .select('*')
+        .eq('show', true)
+        .order('category_sort', { ascending: true })
+        .order('product_sort', { ascending: true })
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取前台價格列表資料失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 根據分類獲取前台顯示的價格列表項目
+  static async getPublicPriceListItemsByCategory(category: string): Promise<ApiResponse<PriceList[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.PRICE_LIST)
+        .select('*')
+        .eq('category', category)
+        .eq('show', true)
+        .order('product_sort', { ascending: true })
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取前台分類價格列表失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 獲取前台顯示的分類列表（按 category_sort 排序）
+  static async getPublicCategories(): Promise<ApiResponse<string[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.PRICE_LIST)
+        .select('category, category_sort')
+        .eq('show', true)
+        .order('category_sort', { ascending: true })
+
+      if (error) throw error
+
+      // 去重並按照 category_sort 排序
+      const categoryMap = new Map<string, number>()
+      data?.forEach(item => {
+        if (!categoryMap.has(item.category) || categoryMap.get(item.category)! > item.category_sort) {
+          categoryMap.set(item.category, item.category_sort)
+        }
+      })
+
+      const sortedCategories = Array.from(categoryMap.entries())
+        .sort((a, b) => a[1] - b[1])
+        .map(([category]) => category)
+
+      return { data: sortedCategories, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取前台分類列表失敗',
           details: error.details,
           code: error.code
         }

@@ -80,13 +80,15 @@ const startCreate = () => {
   editingItem.value = null
   formData.value = {
     category: '',
+    category_sort: 0,
     currency: 'usd',
     name: '',
     usd: undefined,
     gcoin: undefined,
     specialPrice: 0,
     hotSale: false,
-    sort: 0
+    product_sort: 0,
+    show: true
   }
   showForm.value = true
 }
@@ -310,7 +312,10 @@ onMounted(() => {
             <thead class="bg-gray-50 dark:bg-gray-900">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  排序
+                  分類排序
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  商品排序
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   商品資訊
@@ -338,12 +343,18 @@ onMounted(() => {
                 :key="item.id"
                 :class="[
                   'hover:bg-gray-50 dark:hover:bg-gray-700',
-                  item.hotSale ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''
+                  item.hotSale ? 'bg-yellow-50 dark:bg-yellow-900/20' : '',
+                  !item.show ? 'opacity-50' : ''
                 ]"
               >
                 <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-200">
+                    {{ item.category_sort }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-                    {{ item.sort }}
+                    {{ item.product_sort }}
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -376,17 +387,29 @@ onMounted(() => {
                   TWD {{ item.specialPrice.toLocaleString() }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <button
-                    @click="toggleHotSale(item)"
-                    :class="[
-                      'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors',
-                      item.hotSale
-                        ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                    ]"
-                  >
-                    {{ item.hotSale ? '🔥 熱銷' : '一般' }}
-                  </button>
+                  <div class="flex flex-col space-y-1">
+                    <button
+                      @click="toggleHotSale(item)"
+                      :class="[
+                        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors',
+                        item.hotSale
+                          ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                          : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                      ]"
+                    >
+                      {{ item.hotSale ? '🔥 熱銷' : '一般' }}
+                    </button>
+                    <span
+                      :class="[
+                        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                        item.show
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                      ]"
+                    >
+                      {{ item.show ? '✅ 顯示' : '❌ 隱藏' }}
+                    </span>
+                  </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div class="flex items-center justify-end space-x-2">
@@ -512,18 +535,33 @@ onMounted(() => {
                 />
               </div>
 
-              <!-- 排序 -->
+              <!-- 分類排序 -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  排序 <span class="text-red-500">*</span>
+                  分類排序 <span class="text-red-500">*</span>
                 </label>
                 <input
-                  v-model.number="formData.sort"
+                  v-model.number="formData.category_sort"
                   type="number"
                   required
                   min="0"
                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                  placeholder="數字越小排序越靠前"
+                  placeholder="分類標籤列的排序，數字越小越靠前"
+                />
+              </div>
+
+              <!-- 商品排序 -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  商品排序 <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model.number="formData.product_sort"
+                  type="number"
+                  required
+                  min="0"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="同分類內商品的排序，數字越小越靠前"
                 />
               </div>
 
@@ -536,6 +574,18 @@ onMounted(() => {
                 />
                 <label class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                   設為熱銷商品
+                </label>
+              </div>
+
+              <!-- 顯示控制 -->
+              <div class="flex items-center">
+                <input
+                  v-model="formData.show"
+                  type="checkbox"
+                  class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+                <label class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                  在價目表中顯示
                 </label>
               </div>
 
