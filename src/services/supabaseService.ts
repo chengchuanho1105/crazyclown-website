@@ -1,4 +1,4 @@
-import { supabase, TABLES, type InventoryItem, type Transaction, type Customer, type Product, type ProductCategory, type PaymentMethod, type OurBankData, type InventoryItemWithDetails, type News } from '@/config/supabase'
+import { supabase, TABLES, type InventoryItem, type Transaction, type Customer, type Product, type ProductCategory, type PaymentMethod, type OurBankData, type InventoryItemWithDetails, type News, type HomepageHero } from '@/config/supabase'
 
 // 錯誤處理類型
 export interface SupabaseError {
@@ -923,6 +923,128 @@ export class NewsService {
         data: null,
         error: {
           message: error.message || '搜尋新聞失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+}
+
+// 首頁 Hero 服務
+export class HomepageHeroService {
+  // 獲取所有首頁 Hero 內容
+  static async getAllHomepageHeroes(): Promise<ApiResponse<HomepageHero[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.HOMEPAGE_HERO)
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取首頁 Hero 資料失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 根據 ID 獲取單個首頁 Hero 內容
+  static async getHomepageHeroById(id: string): Promise<ApiResponse<HomepageHero>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.HOMEPAGE_HERO)
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取首頁 Hero 詳情失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 新增首頁 Hero 內容
+  static async createHomepageHero(hero: Omit<HomepageHero, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<HomepageHero>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.HOMEPAGE_HERO)
+        .insert([hero])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '新增首頁 Hero 內容失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 更新首頁 Hero 內容
+  static async updateHomepageHero(id: string, updates: Partial<HomepageHero>): Promise<ApiResponse<HomepageHero>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.HOMEPAGE_HERO)
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '更新首頁 Hero 內容失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 刪除首頁 Hero 內容
+  static async deleteHomepageHero(id: string): Promise<ApiResponse<boolean>> {
+    try {
+      const { error } = await supabase
+        .from(TABLES.HOMEPAGE_HERO)
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      return { data: true, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '刪除首頁 Hero 內容失敗',
           details: error.details,
           code: error.code
         }

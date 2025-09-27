@@ -49,7 +49,8 @@ export const TABLES = {
   PRODUCT_CATEGORIES: 'product_category',  // 商品分類
   PAYMENT_METHODS: 'payment_method',  // 付款方式
   OUR_BANK_DATA: 'our_bank_data',  // 我方收款銀行資料
-  NEWS: 'news'  // 新聞資料
+  NEWS: 'news',  // 新聞資料
+  HOMEPAGE_HERO: 'homepage_hero'  // 首頁 Hero 內容
 } as const
 
 // 資料庫類型定義
@@ -173,4 +174,19 @@ export interface News {
   created_at: string  // 建立時間
   updated_at: string  // 更新時間
   deleted_at?: string | null  // 刪除時間
+}
+
+// 首頁 Hero 資料類型定義
+export interface HomepageHero {
+  id: string  // Hero 編號
+  title: string  // 標題
+  description: string  // 描述
+  buttonText: string  // 按鈕文字
+  buttonLink: string  // 按鈕連結
+  align: 'left' | 'right'  // 對齊方式
+  bgImage: string  // 背景圖片 URL
+  aos: string  // AOS 動畫設定
+  scrollDown?: boolean  // 是否顯示向下滾動提示
+  created_at: string  // 建立時間
+  updated_at: string  // 更新時間
 }

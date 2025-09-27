@@ -2,65 +2,46 @@
 defineOptions({ name: 'CrazyClown-Home' })
 
 // ---------- Vue 核心工具函式 ----------
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 
 // ---------- 組件引入區（版面用） ----------
 import FeatureImageSection from '@/components/FeatureImageSection.vue'
 
-// ---------- 工具函式 ----------
-import { useSheetData } from '@/composables/useSheetData'
-
-// ---------- 資料來源 ----------
-// 移除本地資料引入
+// ---------- 服務引入 ----------
+import { HomepageHeroService, type ApiResponse } from '@/services/supabaseService'
+import type { HomepageHero } from '@/config/supabase'
 
 /** ========== Home Hero Data 資料處裡 ========== */
 
-/** 1. Home Hero Data 的資料格式 */
-interface HomeHeroData {
-  title: string
-  description: string
-  buttonText: string
-  buttonLink: string
-  align: 'left' | 'right' | undefined
-  bgImage: string
-  aos: string
-  scrollDown?: boolean
-}
+// ---------- 響應式資料 ----------
+const homeHeroData = ref<HomepageHero[]>([])
+const homeHeroLoading = ref(false)
+const homeHeroError = ref<string | null>(null)
 
-/** 2. 取得 Home Hero Data CSV 來源 */
-const HOMEHERODATA_CSV_URL =
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vTRzBzSCLW9Ch8Hdo6fPDZKfdT1qhlFr9h3o-r3y4ZQsx7BvnkFw4hwCilPvU5bwWaP2N3llAX0S_Ud/pub?output=csv'
+// ---------- 方法 ----------
+const loadHomeHeroData = async () => {
+  homeHeroLoading.value = true
+  homeHeroError.value = null
 
-/** 3. 定義 CSV 欄位轉換函式 */
-const mapHomeHeroData = (item: Record<string, string>): HomeHeroData => {
-  return {
-    title: item.title || '',
-    description: item.description || '',
-    buttonText: item.buttonText || '',
-    buttonLink: item.buttonLink || '',
-    align: item.align === 'left' || item.align === 'right' ? item.align : 'left',
-    bgImage: item.bgImage || '',
-    aos: item.aos || '',
-    scrollDown:
-      typeof item.scrollDown === 'string'
-        ? item.scrollDown.trim().toLowerCase() === 'true'
-          ? true
-          : item.scrollDown.trim().toLowerCase() === 'false'
-            ? false
-            : undefined
-        : typeof item.scrollDown === 'boolean'
-          ? item.scrollDown
-          : undefined,
+  try {
+    const response: ApiResponse<HomepageHero[]> = await HomepageHeroService.getAllHomepageHeroes()
+
+    if (response.error) {
+      homeHeroError.value = response.error.message
+      console.error('獲取首頁 Hero 資料失敗:', response.error)
+    } else {
+      homeHeroData.value = response.data || []
+      console.log('成功獲取首頁 Hero 資料:', response.data)
+    }
+  } catch (err: unknown) {
+    homeHeroError.value = err instanceof Error ? err.message : '未知錯誤'
+    console.error('獲取首頁 Hero 資料時發生錯誤:', err)
+  } finally {
+    homeHeroLoading.value = false
   }
 }
 
-const {
-  data: homeHeroData,
-  loading: homeHeroLoading,
-  error: homeHeroError,
-  load: loadHomeHeroData,
-} = useSheetData<HomeHeroData>(HOMEHERODATA_CSV_URL, mapHomeHeroData)
-
+// ---------- 生命週期 ----------
 onMounted(() => {
   loadHomeHeroData()
 })
@@ -113,7 +94,7 @@ onMounted(() => {
     <template v-else>
       <FeatureImageSection
         v-for="item in homeHeroData"
-        :key="item.title"
+        :key="item.id"
         :title="item.title"
         :description="item.description"
         :button-text="item.buttonText"

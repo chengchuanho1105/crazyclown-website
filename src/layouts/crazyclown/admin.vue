@@ -16,6 +16,7 @@ const menuItems = [
   { name: '儀表板', icon: 'bi-speedometer2', path: '/admin' },
   { name: '庫存管理', icon: 'bi-box', path: '/admin/inventory' },
   { name: '用戶管理', icon: 'bi-people', path: '/admin/customers' },
+  { name: '頁面內容', icon: 'bi-file-earmark-text', path: '/admin/pages' },
 ]
 
 </script>
