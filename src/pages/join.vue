@@ -580,6 +580,7 @@ function toggleRow(idx: number) {
 
 <template>
   <div class="max-w-7xl m-auto px-4 py-8">
+    <!--
     <DecorSection main-title="戰隊狀態" en-title="Clan Status" :is-loading="clanStatusLoading">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div
@@ -608,7 +609,8 @@ function toggleRow(idx: number) {
         </div>
       </div>
     </DecorSection>
-
+    -->
+    <!--
     <DecorSection main-title="審核進度" en-title="Review Progress">
       <div class="p-4 mb-6 border-l-4 border-yellow-500 bg-yellow-50 dark:bg-zinc-700 rounded-md shadow-inner">
         <p class="text-gray-700 dark:text-zinc-200">
@@ -734,6 +736,7 @@ function toggleRow(idx: number) {
         </div>
       </div>
     </DecorSection>
+    -->
 
     <DecorSection mainTitle="加入我們" enTitle="Join Us">
       <form class="text-gray-900 dark:bg-zinc-900" autocomplete="off" @submit="handleSubmit">
@@ -856,7 +859,8 @@ function toggleRow(idx: number) {
                     isDiscordUsernameFocused || discordUsername,
                   'top-1/2 -translate-y-1/2': !isDiscordUsernameFocused && !discordUsername,
                 }">
-                Discord 使用者名稱 <span class="text-red-500 dark:text-red-400">* 👉請先查看右方<i class="bi bi-exclamation-circle mx-1"/>範例，避免填寫錯誤</span>
+                Discord 使用者名稱 <span class="text-red-500 dark:text-red-400">* 👉請先查看右方<i
+                    class="bi bi-exclamation-circle mx-1" />範例，避免填寫錯誤</span>
               </label>
               <input type="text" id="discordUsername" v-model="discordUsername" @focus="isDiscordUsernameFocused = true"
                 @blur="handleDiscordUsernameBlur"
