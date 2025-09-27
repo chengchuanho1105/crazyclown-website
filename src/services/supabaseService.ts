@@ -939,7 +939,7 @@ export class HomepageHeroService {
       const { data, error } = await supabase
         .from(TABLES.HOMEPAGE_HERO)
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('id', { ascending: true })
 
       if (error) throw error
 

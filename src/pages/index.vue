@@ -30,8 +30,19 @@ const loadHomeHeroData = async () => {
       homeHeroError.value = response.error.message
       console.error('獲取首頁 Hero 資料失敗:', response.error)
     } else {
-      homeHeroData.value = response.data || []
-      console.log('成功獲取首頁 Hero 資料:', response.data)
+      // 按照 ID 排序（假設 ID 是數字或可排序的字串）
+      const sortedData = (response.data || []).sort((a, b) => {
+        // 如果 ID 是數字，按數字大小排序
+        const aId = parseInt(a.id)
+        const bId = parseInt(b.id)
+        if (!isNaN(aId) && !isNaN(bId)) {
+          return aId - bId
+        }
+        // 如果 ID 不是數字，按字串排序
+        return a.id.localeCompare(b.id)
+      })
+      homeHeroData.value = sortedData
+      console.log('成功獲取首頁 Hero 資料（已排序）:', sortedData)
     }
   } catch (err: unknown) {
     homeHeroError.value = err instanceof Error ? err.message : '未知錯誤'
