@@ -666,17 +666,15 @@ export class StatisticsService {
 
 // 新聞服務
 export class NewsService {
-  // 獲取所有新聞（已發布且未刪除）
-  static async getAllPublishedNews(): Promise<ApiResponse<News[]>> {
+  // 獲取前台顯示的新聞（show=true）
+  static async getPublicNews(): Promise<ApiResponse<News[]>> {
     try {
       const { data, error } = await supabase
         .from(TABLES.NEWS)
         .select('*')
-        .eq('status', '發布')
-        .is('deleted_at', null)
-        .order('is_pinned', { ascending: false })
-        .order('priority', { ascending: false })
-        .order('published_at', { ascending: false })
+        .eq('show', true)
+        .order('pin', { ascending: false })  // 置頂優先
+        .order('show_date', { ascending: false })  // 上架日期由新到舊
 
       if (error) throw error
 
@@ -693,14 +691,14 @@ export class NewsService {
     }
   }
 
-  // 獲取所有新聞（包含草稿和下架，用於後台管理）
+  // 獲取所有新聞（用於後台管理）
   static async getAllNews(): Promise<ApiResponse<News[]>> {
     try {
       const { data, error } = await supabase
         .from(TABLES.NEWS)
         .select('*')
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
+        .order('pin', { ascending: false })  // 置頂優先
+        .order('show_date', { ascending: false })  // 上架日期由新到舊
 
       if (error) throw error
 
@@ -724,7 +722,6 @@ export class NewsService {
         .from(TABLES.NEWS)
         .select('*')
         .eq('id', id)
-        .is('deleted_at', null)
         .single()
 
       if (error) throw error
@@ -735,6 +732,58 @@ export class NewsService {
         data: null,
         error: {
           message: error.message || '獲取新聞詳情失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 根據分類獲取前台顯示的新聞
+  static async getPublicNewsByCategory(category: string): Promise<ApiResponse<News[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.NEWS)
+        .select('*')
+        .eq('category', category)
+        .eq('show', true)
+        .order('pin', { ascending: false })  // 置頂優先
+        .order('show_date', { ascending: false })  // 上架日期由新到舊
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取分類新聞失敗',
+          details: error.details,
+          code: error.code
+        }
+      }
+    }
+  }
+
+  // 獲取所有分類
+  static async getAllCategories(): Promise<ApiResponse<string[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.NEWS)
+        .select('category')
+        .eq('show', true)
+        .order('category')
+
+      if (error) throw error
+
+      // 去重並返回唯一的分類列表
+      const uniqueCategories = [...new Set(data?.map(item => item.category) || [])]
+      return { data: uniqueCategories, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取分類列表失敗',
           details: error.details,
           code: error.code
         }
@@ -769,7 +818,7 @@ export class NewsService {
   }
 
   // 新增新聞
-  static async createNews(news: Omit<News, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>): Promise<ApiResponse<News>> {
+  static async createNews(news: Omit<News, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<News>> {
     try {
       const { data, error } = await supabase
         .from(TABLES.NEWS)
@@ -817,12 +866,12 @@ export class NewsService {
     }
   }
 
-  // 刪除新聞（軟刪除）
+  // 刪除新聞
   static async deleteNews(id: string): Promise<ApiResponse<boolean>> {
     try {
       const { error } = await supabase
         .from(TABLES.NEWS)
-        .update({ deleted_at: new Date().toISOString() })
+        .delete()
         .eq('id', id)
 
       if (error) throw error

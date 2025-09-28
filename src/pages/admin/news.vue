@@ -14,19 +14,19 @@ const error = ref<string | null>(null)
 const showForm = ref(false)
 const editingNews = ref<News | null>(null)
 const formData = ref({
-  title: '',
-  slug: '',
-  summary: '',
-  content: '',
-  cover_image_url: '',
-  author: '',
-  status: '草稿' as '草稿' | '發布' | '下架',
-  published_at: '',
-  is_pinned: false,
-  tags: [] as string[],
+  sort: 0,
+  slot: 'news', // 預設為 news
   category: '',
-  priority: 0,
-  views_count: 0
+  author: '',
+  image: '',
+  tags: [] as string[],
+  title: '',
+  introduce: '',
+  formatting_style: true, // 對應舊欄位 addStyle，boolean 型別
+  html: '',
+  show: true,
+  pin: false,
+  show_date: ''
 })
 
 // 載入新聞資料
@@ -56,19 +56,19 @@ onMounted(() => {
 // 重置表單
 const resetForm = () => {
   formData.value = {
-    title: '',
-    slug: '',
-    summary: '',
-    content: '',
-    cover_image_url: '',
-    author: '',
-    status: '草稿',
-    published_at: '',
-    is_pinned: false,
-    tags: [],
+    sort: 0,
+    slot: 'news', // 預設為 news
     category: '',
-    priority: 0,
-    views_count: 0
+    author: '',
+    image: '',
+    tags: [],
+    title: '',
+    introduce: '',
+    formatting_style: true, // 對應舊欄位 addStyle，boolean 型別
+    html: '',
+    show: true,
+    pin: false,
+    show_date: ''
   }
   editingNews.value = null
 }
@@ -76,7 +76,6 @@ const resetForm = () => {
 // 開啟新增表單
 const openAddForm = () => {
   resetForm()
-  formData.value.published_at = new Date().toISOString().slice(0, 16)
   showForm.value = true
 }
 
@@ -84,19 +83,19 @@ const openAddForm = () => {
 const openEditForm = (news: News) => {
   editingNews.value = news
   formData.value = {
-    title: news.title,
-    slug: news.slug,
-    summary: news.summary,
-    content: news.content,
-    cover_image_url: news.cover_image_url,
-    author: news.author,
-    status: news.status,
-    published_at: news.published_at ? new Date(news.published_at).toISOString().slice(0, 16) : '',
-    is_pinned: news.is_pinned,
-    tags: [...news.tags],
+    sort: news.sort,
+    slot: news.slot,
     category: news.category,
-    priority: news.priority,
-    views_count: news.views_count
+    author: news.author,
+    image: news.image,
+    tags: [...news.tags],
+    title: news.title,
+    introduce: news.introduce,
+    formatting_style: news.formatting_style,
+    html: news.html,
+    show: news.show,
+    pin: news.pin,
+    show_date: news.show_date
   }
   showForm.value = true
 }
@@ -121,16 +120,13 @@ const removeTag = (index: number) => {
   formData.value.tags.splice(index, 1)
 }
 
-// 自動生成 slug
+// 自動生成 slug（保留函數以備將來使用）
 const generateSlug = () => {
+  // 目前 News 介面中沒有 slug 欄位，此函數保留以備將來使用
   const title = formData.value.title
   if (title) {
-    formData.value.slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim()
+    // 可以在這裡添加 slug 生成邏輯
+    console.log('生成 slug for:', title)
   }
 }
 
@@ -139,7 +135,7 @@ const saveNews = async () => {
   try {
     const newsData = {
       ...formData.value,
-      published_at: formData.value.published_at ? new Date(formData.value.published_at).toISOString() : null
+      show_date: formData.value.show_date ? new Date(formData.value.show_date).toISOString() : null
     }
 
     if (editingNews.value) {
@@ -153,7 +149,7 @@ const saveNews = async () => {
       }
     } else {
       // 新增新聞
-      const response = await NewsService.createNews(newsData as Omit<News, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>)
+      const response = await NewsService.createNews(newsData as Omit<News, 'id' | 'created_at' | 'updated_at'>)
       if (response.error) {
         error.value = response.error.message
       } else {
@@ -242,11 +238,11 @@ const getStatusColor = (status: string) => {
           <thead class="bg-gray-50 dark:bg-gray-700">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">標題</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">分類槽位</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">分類</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">狀態</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">作者</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">發布時間</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">瀏覽次數</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">上架日期</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">操作</th>
             </tr>
           </thead>
@@ -255,7 +251,7 @@ const getStatusColor = (status: string) => {
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
                   <div class="flex-shrink-0 h-10 w-10">
-                    <img v-if="news.cover_image_url" :src="news.cover_image_url" :alt="news.title" class="h-10 w-10 rounded object-cover" />
+                    <img v-if="news.image" :src="news.image" :alt="news.title" class="h-10 w-10 rounded object-cover" />
                     <div v-else class="h-10 w-10 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
                       <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -264,19 +260,34 @@ const getStatusColor = (status: string) => {
                   </div>
                   <div class="ml-4">
                     <div class="text-sm font-medium text-gray-900 dark:text-white">{{ news.title }}</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ news.slug }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ news.introduce }}</div>
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ news.category }}</td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span :class="['inline-flex px-2 py-1 text-xs font-semibold rounded-full', getStatusColor(news.status)]">
-                  {{ news.status }}
+                <span :class="[
+                  'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
+                  news.slot === 'featured' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                ]">
+                  {{ news.slot === 'featured' ? '特色新聞' : '最新消息' }}
                 </span>
               </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ news.category }}</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex flex-col gap-1">
+                  <span :class="[
+                    'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
+                    news.show ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  ]">
+                    {{ news.show ? '顯示' : '隱藏' }}
+                  </span>
+                  <span v-if="news.pin" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                    置頂
+                  </span>
+                </div>
+              </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ news.author }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ formatDate(news.published_at) }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ news.views_count }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ formatDate(news.show_date || news.created_at) }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button
                   @click="openEditForm(news)"
@@ -311,7 +322,6 @@ const getStatusColor = (status: string) => {
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">標題</label>
                 <input
                   v-model="formData.title"
-                  @blur="generateSlug"
                   type="text"
                   required
                   class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -319,29 +329,30 @@ const getStatusColor = (status: string) => {
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Slug</label>
-                <input
-                  v-model="formData.slug"
-                  type="text"
-                  required
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">分類槽位</label>
+                <select
+                  v-model="formData.slot"
                   class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
+                >
+                  <option value="news">最新消息</option>
+                  <option value="featured">特色新聞</option>
+                </select>
               </div>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">摘要</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">簡介</label>
               <textarea
-                v-model="formData.summary"
+                v-model="formData.introduce"
                 rows="3"
                 class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               ></textarea>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">內容</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">HTML 內容</label>
               <textarea
-                v-model="formData.content"
+                v-model="formData.html"
                 rows="10"
                 class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               ></textarea>
@@ -349,9 +360,9 @@ const getStatusColor = (status: string) => {
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">封面圖片 URL</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">圖片 URL</label>
                 <input
-                  v-model="formData.cover_image_url"
+                  v-model="formData.image"
                   type="url"
                   class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
@@ -369,15 +380,13 @@ const getStatusColor = (status: string) => {
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">狀態</label>
-                <select
-                  v-model="formData.status"
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">排序</label>
+                <input
+                  v-model.number="formData.sort"
+                  type="number"
+                  min="0"
                   class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                >
-                  <option value="草稿">草稿</option>
-                  <option value="發布">發布</option>
-                  <option value="下架">下架</option>
-                </select>
+                />
               </div>
 
               <div>
@@ -390,11 +399,10 @@ const getStatusColor = (status: string) => {
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">優先級</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">上架日期</label>
                 <input
-                  v-model.number="formData.priority"
-                  type="number"
-                  min="0"
+                  v-model="formData.show_date"
+                  type="datetime-local"
                   class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
               </div>
@@ -402,23 +410,73 @@ const getStatusColor = (status: string) => {
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">發布時間</label>
-                <input
-                  v-model="formData.published_at"
-                  type="datetime-local"
-                  class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">標籤</label>
+                <div class="mt-1">
+                  <div class="flex flex-wrap gap-2 mb-2">
+                    <span
+                      v-for="(tag, index) in formData.tags"
+                      :key="index"
+                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                    >
+                      {{ tag }}
+                      <button
+                        type="button"
+                        @click="removeTag(index)"
+                        class="ml-1 text-indigo-600 hover:text-indigo-800"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  </div>
+                  <div class="flex">
+                    <input
+                      v-model="tagInput"
+                      @keyup.enter="addTag"
+                      type="text"
+                      placeholder="輸入標籤後按 Enter"
+                      class="flex-1 border border-gray-300 rounded-l-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    />
+                    <button
+                      type="button"
+                      @click="addTag"
+                      class="px-3 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700"
+                    >
+                      新增
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <div class="flex items-center">
-                <input
-                  v-model="formData.is_pinned"
-                  type="checkbox"
-                  class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label class="ml-2 block text-sm text-gray-900 dark:text-white">置頂</label>
+              <div class="space-y-4">
+                <div class="flex items-center">
+                  <input
+                    v-model="formData.show"
+                    type="checkbox"
+                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <label class="ml-2 block text-sm text-gray-700 dark:text-gray-300">顯示</label>
+                </div>
+
+                <div class="flex items-center">
+                  <input
+                    v-model="formData.pin"
+                    type="checkbox"
+                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <label class="ml-2 block text-sm text-gray-700 dark:text-gray-300">置頂</label>
+                </div>
+
+                <div class="flex items-center">
+                  <input
+                    v-model="formData.formatting_style"
+                    type="checkbox"
+                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <label class="ml-2 block text-sm text-gray-700 dark:text-gray-300">格式化樣式</label>
+                </div>
               </div>
             </div>
+
 
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">標籤</label>

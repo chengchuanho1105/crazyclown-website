@@ -2,66 +2,47 @@
 defineOptions({ name: 'ChuanLife-News' })
 
 // ---------- Vue 核心工具函式 ----------
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Ref } from 'vue'
 
 // ---------- 組件引入區（版面用） ----------
 import DecorSection from '@/components/DecorSection.vue'
 
-// ---------- 工具函式 ----------
-import { useSheetData } from '@/composables/useSheetData'
+// ---------- 服務引入 ----------
+import { NewsService, type ApiResponse } from '@/services/supabaseService'
+import type { News } from '@/config/supabase'
 
 /** ========== News Data 資料處裡 ========== */
 
-/** 1. News Data 的資料格式 */
-interface NewsData {
-  id: string
-  slot: string
-  category: string
-  date: string
-  author: string
-  image: string
-  tags: string
-  title: string
-  introduction: string
-  addBaseStyle: string
-  html: string
-}
 
-/** 2. 取得 News Data CSV 來源 */
-const NEWS_CSV_URL =
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7y16Qi2dNWRFl7OVgU78wv0SIMi_lPFt0WbZ6-7OqBFo7z2pN7LHs2heesTI4W5TnHM3lTcsXJS8s/pub?output=csv'
+/** 3. 新聞資料狀態 */
+const newsData = ref<News[]>([])
+const newsDataLoading = ref(false)
+const newsDataError = ref<string | null>(null)
 
-/** 3. 定義 CSV 欄位轉換函式 */
-const mapNewsData = (item: Record<string, string>): NewsData => {
-  // 處理標籤欄位，移除多餘的引號
-  let tags = item.tags || ''
-  if (tags.startsWith('"') && tags.endsWith('"')) {
-    tags = tags.slice(1, -1)
-  }
+/** 4. 載入新聞資料 */
+const loadNewsData = async () => {
+  newsDataLoading.value = true
+  newsDataError.value = null
 
-  return {
-    id: item.id || '', // 編號
-    slot: item.slot || '', // 類型 (news, featured, none(不顯示))
-    category: item.category || '', // 分類
-    date: item.date || '', // 日期
-    author: item.author || '', // 作者
-    image: item.image || '', // 圖片
-    tags: tags, // 標籤
-    title: item.title || '', // 標題
-    introduction: item.introduce || '', // 內容
-    addBaseStyle: item.addBaseStyle || '', // 是否添加基礎樣式
-    html: item.html || '', // 內容
+  try {
+    const response: ApiResponse<News[]> = await NewsService.getPublicNews()
+
+    if (response.error) {
+      newsDataError.value = response.error.message
+      console.error('獲取新聞資料失敗:', response.error)
+    } else {
+      newsData.value = response.data || []
+      console.log('成功獲取新聞資料:', response.data)
+    }
+  } catch (err: unknown) {
+    newsDataError.value = err instanceof Error ? err.message : '未知錯誤'
+    console.error('獲取新聞資料時發生錯誤:', err)
+  } finally {
+    newsDataLoading.value = false
   }
 }
-
-const {
-  data: newsData,
-  loading: newsDataLoading,
-  error: newsDataError,
-  load: loadNewsData,
-} = useSheetData<NewsData>(NEWS_CSV_URL, mapNewsData)
 
 onMounted(() => {
   loadNewsData()
@@ -70,12 +51,12 @@ onMounted(() => {
 // 分頁設定
 const PAGE_SIZE = 6
 
-// 過濾資料
+// 過濾資料 - 根據 slot 欄位區分最新消息和特色新聞
 const regularNewsList = computed(() =>
-  newsData.value.filter((n: NewsData) => n.slot !== 'none' && n.slot !== 'featured'),
+  newsData.value.filter((n: News) => n.show === true && n.slot === 'news'), // 最新消息 (slot === 'news')
 )
 const featuredNewsList = computed(() =>
-  newsData.value.filter((n: NewsData) => n.slot === 'featured'),
+  newsData.value.filter((n: News) => n.show === true && n.slot === 'featured'), // 特色新聞 (slot === 'featured')
 )
 
 // 最新消息分頁
@@ -97,7 +78,7 @@ const featuredPaged = computed(() =>
 
 // 同頁面跳轉新聞詳情
 const router = useRouter()
-function openNewsDetail(news: NewsData) {
+function openNewsDetail(news: News) {
   router.push(`/news/${news.id}`)
 }
 
@@ -203,15 +184,15 @@ function goToFeaturedPage(page: number) {
               <div class="p-6">
                 <div class="flex items-center gap-2 mb-3">
                   <span
-                    class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs font-medium rounded-full"
+                    class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full"
                   >
                     {{ news.category }}
                   </span>
                   <span
-                    v-if="news.slot && news.slot !== 'none' && news.slot !== 'featured'"
-                    class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full"
+                    v-if="news.pin"
+                    class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded-full"
                   >
-                    {{ news.slot }}
+                    置頂
                   </span>
                 </div>
                 <h3
@@ -219,11 +200,11 @@ function goToFeaturedPage(page: number) {
                 >
                   {{ news.title }}
                 </h3>
-                <div class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3" v-html="news.introduction"></div>
+                <div class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3" v-html="news.introduce"></div>
                 <div
                   class="mt-auto flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
                 >
-                  <span>{{ formatDate(news.date || '') }}</span>
+                  <span>{{ formatDate(news.show_date || news.created_at || '') }}</span>
                   <span>{{ news.author }}</span>
                 </div>
               </div>
@@ -265,16 +246,16 @@ function goToFeaturedPage(page: number) {
         <div v-else class="text-center py-20 text-gray-500 dark:text-gray-400">沒有最新消息</div>
       </DecorSection>
 
-      <!-- 特色新聞區塊 -->
-      <DecorSection ref="featuredSectionRef" main-title="特色新聞" en-title="FEATURED NEWS">
-        <div v-if="featuredPaged.length > 0" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div
-              v-for="news in featuredPaged"
-              :key="news.id"
-              class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group"
-              @click="openNewsDetail(news)"
-            >
+       <!-- 特色新聞區塊 -->
+       <DecorSection ref="featuredSectionRef" main-title="特色新聞" en-title="FEATURED NEWS">
+         <div v-if="featuredPaged.length > 0" class="space-y-6">
+           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             <div
+               v-for="news in featuredPaged"
+               :key="news.id"
+               class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group"
+               @click="openNewsDetail(news)"
+             >
               <div class="aspect-video bg-gray-200 dark:bg-gray-700 overflow-hidden">
                 <img
                   :src="news.image"
@@ -283,37 +264,36 @@ function goToFeaturedPage(page: number) {
                 />
               </div>
               <div class="p-6">
-                <div class="flex items-center gap-2 mb-3">
-                  <span
-                    class="px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 text-xs font-medium rounded-full"
-                  >
-                    {{ news.category }}
-                  </span>
-                  <span
-                    v-if="news.slot === 'featured'"
-                    class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded-full"
-                  >
-                    特色
-                  </span>
-                  <span
-                    v-if="news.slot && news.slot !== 'none'"
-                    class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full"
-                  >
-                    {{ news.slot }}
-                  </span>
-                </div>
+                 <div class="flex items-center gap-2 mb-3">
+                   <span
+                     class="px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 text-xs font-medium rounded-full"
+                   >
+                     {{ news.category }}
+                   </span>
+                   <span
+                     v-if="news.pin"
+                     class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded-full"
+                   >
+                     置頂
+                   </span>
+                   <span
+                     class="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs font-medium rounded-full"
+                   >
+                     特色
+                   </span>
+                 </div>
                 <h3
                   class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
                 >
                   {{ news.title }}
                 </h3>
-                <div class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3" v-html="news.introduction"></div>
-                <div
-                  class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
-                >
-                  <span>{{ formatDate(news.date || '') }}</span>
-                  <span>{{ news.author }}</span>
-                </div>
+                <div class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3" v-html="news.introduce"></div>
+                 <div
+                   class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
+                 >
+                   <span>{{ formatDate(news.show_date || news.created_at || '') }}</span>
+                   <span>{{ news.author }}</span>
+                 </div>
               </div>
             </div>
           </div>

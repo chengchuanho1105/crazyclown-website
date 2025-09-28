@@ -159,22 +159,21 @@ export interface InventoryItemWithDetails extends InventoryItem {
 // 新聞資料類型定義
 export interface News {
   id: string  // 新聞編號
-  title: string  // 標題
-  slug: string  // URL 友善的標題
-  summary: string  // 摘要
-  content: string  // 內容
-  cover_image_url: string  // 封面圖片 URL
+  sort: number  // 排序欄位
+  slot: string  // 分類槽位 (news/featured)
+  category: string  // 新聞分類
   author: string  // 作者
-  status: '草稿' | '發布' | '下架'  // 狀態
-  published_at: string | null  // 發布時間
-  is_pinned: boolean  // 是否置頂
-  tags: string[]  // 標籤
-  category: string  // 分類
-  priority: number  // 優先級
-  views_count: number  // 瀏覽次數
+  image: string  // 圖片 URL
+  tags: string[]  // 標籤陣列
+  title: string  // 新聞標題
+  introduce: string  // 簡介
+  formatting_style: boolean  // 格式化樣式 (對應舊欄位 addStyle)
+  html: string  // HTML 內容
+  show: boolean  // 是否顯示
+  pin: boolean  // 是否置頂
+  show_date: string  // 上架日期 (timestamptz)
   created_at: string  // 建立時間
   updated_at: string  // 更新時間
-  deleted_at?: string | null  // 刪除時間
 }
 
 // 首頁 Hero 資料類型定義

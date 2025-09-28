@@ -18,6 +18,7 @@ const menuItems = [
   { name: '用戶管理', icon: 'bi-people', path: '/admin/customers' },
   { name: '價目表', icon: 'bi-table', path: '/admin/price-list' },
   { name: '頁面內容', icon: 'bi-file-earmark-text', path: '/admin/pages' },
+  { name: '新聞管理', icon: 'bi-newspaper', path: '/admin/news' },
 ]
 
 </script>
