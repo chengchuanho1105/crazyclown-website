@@ -14,7 +14,6 @@ const error = ref<string | null>(null)
 const showForm = ref(false)
 const editingNews = ref<News | null>(null)
 const formData = ref({
-  sort: 0,
   slot: 'news', // 預設為 news
   category: '',
   author: '',
@@ -56,7 +55,6 @@ onMounted(() => {
 // 重置表單
 const resetForm = () => {
   formData.value = {
-    sort: 0,
     slot: 'news', // 預設為 news
     category: '',
     author: '',
@@ -83,7 +81,6 @@ const openAddForm = () => {
 const openEditForm = (news: News) => {
   editingNews.value = news
   formData.value = {
-    sort: news.sort,
     slot: news.slot,
     category: news.category,
     author: news.author,
@@ -95,7 +92,7 @@ const openEditForm = (news: News) => {
     html: news.html,
     show: news.show,
     pin: news.pin,
-    show_date: news.show_date
+    show_date: news.show_date ? new Date(news.show_date).toISOString().slice(0, 16) : ''
   }
   showForm.value = true
 }
@@ -378,17 +375,7 @@ const getStatusColor = (status: string) => {
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">排序</label>
-                <input
-                  v-model.number="formData.sort"
-                  type="number"
-                  min="0"
-                  class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
-              </div>
-
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">分類</label>
                 <input
@@ -447,7 +434,7 @@ const getStatusColor = (status: string) => {
                 </div>
               </div>
 
-              <div class="space-y-4">
+              <div class="flex items-center justify-center space-x-6">
                 <div class="flex items-center">
                   <input
                     v-model="formData.show"
@@ -478,41 +465,6 @@ const getStatusColor = (status: string) => {
             </div>
 
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">標籤</label>
-              <div class="mt-1 flex items-center space-x-2">
-                <input
-                  v-model="tagInput"
-                  @keyup.enter="addTag"
-                  type="text"
-                  placeholder="輸入標籤後按 Enter"
-                  class="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
-                <button
-                  @click="addTag"
-                  type="button"
-                  class="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-                >
-                  新增
-                </button>
-              </div>
-              <div class="mt-2 flex flex-wrap gap-2">
-                <span
-                  v-for="(tag, index) in formData.tags"
-                  :key="index"
-                  class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-                >
-                  {{ tag }}
-                  <button
-                    @click="removeTag(index)"
-                    type="button"
-                    class="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full text-indigo-400 hover:bg-indigo-200 hover:text-indigo-500"
-                  >
-                    ×
-                  </button>
-                </span>
-              </div>
-            </div>
 
             <div class="flex justify-end space-x-3 pt-4">
               <button
