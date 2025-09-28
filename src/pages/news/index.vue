@@ -34,7 +34,6 @@ const loadNewsData = async () => {
       console.error('獲取新聞資料失敗:', response.error)
     } else {
       newsData.value = response.data || []
-      console.log('成功獲取新聞資料:', response.data)
     }
   } catch (err: unknown) {
     newsDataError.value = err instanceof Error ? err.message : '未知錯誤'

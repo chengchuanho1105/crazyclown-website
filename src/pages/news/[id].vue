@@ -1,78 +1,55 @@
 <script setup lang="ts">
 defineOptions({ name: 'CrazyClown-News' })
-import { useSheetData } from '@/composables/useSheetData'
+import { NewsService } from '@/services/supabaseService'
+import type { News } from '@/config/supabase'
 import { useHead } from '@unhead/vue'
-import { computed, onMounted, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-
-// 定義新聞資料類型
-interface NewsDetailData {
-  id: string
-  slot: string
-  category: string
-  date: string
-  author: string
-  image: string
-  tags: string
-  title: string
-  introduce: string
-  html: string
-  addBaseStyle: string
-}
 
 // 取得路由參數
 const route = useRoute()
 const newsId = computed(() => route.params.id as string)
 
-// 取得所有新聞資料
-const {
-  data: newsData,
-  loading: newsDataLoading,
-  error: newsDataError,
-  load: loadNewsData,
-} = useSheetData<NewsDetailData>(
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7y16Qi2dNWRFl7OVgU78wv0SIMi_lPFt0WbZ6-7OqBFo7z2pN7LHs2heesTI4W5TnHM3lTcsXJS8s/pub?output=csv',
-  (item: Record<string, string>) => {
-    // 處理標籤欄位，移除多餘的引號
-    let tags = item.tags || ''
-    if (tags.startsWith('"') && tags.endsWith('"')) {
-      tags = tags.slice(1, -1)
-    }
+// 新聞資料狀態
+const newsData = ref<News[]>([])
+const loading = ref(false)
+const error = ref<string | null>(null)
 
-    return {
-      id: item.id || '',
-      slot: item.slot || '',
-      category: item.category || '',
-      date: item.date || '',
-      author: item.author || '',
-      image: item.image || '',
-      tags: tags,
-      title: item.title || '',
-      introduce: item.introduce || '',
-      html: item.html || '',
-      addBaseStyle: item.addStyle ?? item.addBaseStyle ?? '',
+// 載入新聞資料
+const loadNewsData = async () => {
+  loading.value = true
+  error.value = null
+
+  try {
+    const response = await NewsService.getPublicNews()
+    if (response.error) {
+      error.value = response.error.message
+      console.error('載入新聞資料錯誤:', response.error)
+    } else {
+      newsData.value = response.data || []
     }
-  },
-)
+  } catch (err) {
+    error.value = '載入新聞資料時發生錯誤'
+    console.error('載入新聞資料錯誤:', err)
+  } finally {
+    loading.value = false
+  }
+}
 
 onMounted(() => {
   loadNewsData()
-  // 添加調試信息
-  setTimeout(() => {
-    newsData.value.forEach((item, index) => {
-      console.log(`新聞 ${index + 1}:`, {
-        id: item.id,
-        title: item.title,
-        addBaseStyle: item.addBaseStyle,
-        addBaseStyleType: typeof item.addBaseStyle,
-        addBaseStyleLowerCase: item.addBaseStyle?.toLowerCase(),
-      })
-    })
-  }, 2000)
 })
 
-// 找到對應新聞
-const news = computed(() => newsData.value.find((n: NewsDetailData) => n.id === newsId.value))
+// 找到對應新聞 - 處理 ID 類型轉換
+const news = computed(() => {
+  const id = newsId.value
+  return newsData.value.find((n: News) =>
+    n.id === id ||
+    n.id === String(id) ||
+    String(n.id) === id ||
+    Number(n.id) === Number(id)
+  )
+})
 
 // 動態設定 meta
 const metaTitle = computed(() => {
@@ -116,20 +93,20 @@ watch(
   { immediate: true },
 )
 
-// 處理文章 HTML，根據 addBaseStyle 欄位決定是否處理
+// 處理文章 HTML，根據 formatting_style 欄位決定是否處理
 const processedArticle = computed(() => {
   if (!news.value?.html) {
     return ''
   }
 
-  // 檢查 addBaseStyle 的值
-  const addBaseStyleValue = news.value.addBaseStyle?.toLowerCase()
+  // 檢查 formatting_style 的值
+  const formattingStyleValue = news.value.formatting_style
 
-  // 如果 addBaseStyle 為 'false'，直接返回原始 HTML
-  if (addBaseStyleValue === 'false') {
+  // 如果 formatting_style 為 false，直接返回原始 HTML
+  if (!formattingStyleValue) {
     return news.value.html
   }
-  // 如果 addBaseStyle 為 true 或其他值，才進行樣式處理
+  // 如果 formatting_style 為 true，才進行樣式處理
   let html = news.value.html
 
   // 為 h2 標籤添加樣式
@@ -181,31 +158,20 @@ const processedArticle = computed(() => {
   return html
 })
 
-function parseTags(tags: string): string[] {
-  if (typeof tags !== 'string') return []
-
-  // 移除開頭和結尾的引號
-  let cleanTags = tags.trim()
-  if (cleanTags.startsWith('"') && cleanTags.endsWith('"')) {
-    cleanTags = cleanTags.slice(1, -1)
-  }
-
-  // 按逗號分割並清理每個標籤
-  return cleanTags
-    .split(',')
-    .map((tag) => tag.trim())
-    .filter((tag) => tag.length > 0)
+function parseTags(tags: string[]): string[] {
+  if (!Array.isArray(tags)) return []
+  return tags.filter((tag) => tag && tag.trim().length > 0)
 }
 </script>
 
 <template>
   <div class="max-w-5xl mx-auto my-8 p-4 md:p-6 bg-white dark:bg-zinc-800 rounded-lg shadow-lg">
-    <div v-if="newsDataLoading" class="flex justify-center items-center py-20">
+    <div v-if="loading" class="flex justify-center items-center py-20">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       <span class="ml-3 text-gray-600 dark:text-gray-300">載入中...</span>
     </div>
     <div
-      v-else-if="newsDataError"
+      v-else-if="error"
       class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 m-4"
     >
       <div class="flex">
@@ -219,7 +185,7 @@ function parseTags(tags: string): string[] {
           </svg>
         </div>
         <div class="ml-3">
-          <p class="text-sm text-red-700 dark:text-red-300">{{ newsDataError }}</p>
+          <p class="text-sm text-red-700 dark:text-red-300">{{ error }}</p>
         </div>
       </div>
     </div>
@@ -255,7 +221,7 @@ function parseTags(tags: string): string[] {
           <span
             v-if="news.slot && news.slot !== 'none'"
             class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
-            >{{ news.slot }}</span
+            >{{ news.slot === 'featured' ? '特色新聞' : '最新消息' }}</span
           >
           <span
             v-if="news.author"
@@ -263,14 +229,19 @@ function parseTags(tags: string): string[] {
             >{{ news.author }}</span
           >
           <span
-            v-if="news.date"
+            v-if="news.show_date"
             class="px-2 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded-full"
-            >{{ news.date }}</span
+            >{{ new Date(news.show_date).toLocaleDateString('zh-TW') }}</span
+          >
+          <span
+            v-if="news.pin"
+            class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full"
+            >置頂</span
           >
         </div>
-        <div v-if="news.tags" class="flex flex-wrap gap-2 mb-4">
+        <div v-if="news.tags && news.tags.length > 0" class="flex flex-wrap gap-2 mb-4">
           <span
-            v-for="tag in parseTags(news.tags as string)"
+            v-for="tag in parseTags(news.tags)"
             :key="tag"
             class="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full"
             >#{{ tag }}</span
