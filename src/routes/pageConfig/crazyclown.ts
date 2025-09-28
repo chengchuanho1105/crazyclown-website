@@ -239,6 +239,18 @@ export const pageConfig: PageConfig = {
         roles: ['admin'],
       },
     },
+    {
+      path: '/admin/news',
+      name: `${brandName}-News`,
+      component: () => import(`@/pages/admin/news.vue`),
+      meta: {
+        title: `新聞管理 | ${brandDisplayName}`,
+        description: '',
+        layout: 'admin',
+        requiresAuth: true,
+        roles: ['admin'],
+      },
+    },
 
 
     {
