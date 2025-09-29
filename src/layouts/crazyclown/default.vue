@@ -88,7 +88,7 @@ const isHomePage = computed(() => path.value === '/' || path.value === '')
 
                     <a
                       class="inline-block py-3 rounded-lg shadow-sm font-medium text-center border border-indigo-200 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 hover:text-indigo-900 transition-colors"
-                      href=" https://discord.gg/3TEHPZhYUK"
+                      href="https://crazyclown.online/dc"
                       data-aos="fade-up"
                     >
                       <i class="bi bi-discord"></i> Discord 社群
