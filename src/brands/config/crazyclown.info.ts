@@ -24,7 +24,7 @@ export const brandInfoConfig: BrandInfoConfig = {
   language: 'zh-TW', // 語言
   currency: 'TWD', // 貨幣
   social: {
-    discord: { id: '3TEHPZhYUK', name: 'Crazy_Clown', url: 'https://discord.gg/3TEHPZhYUK' },
+    discord: { name: 'Crazy_Clown', url: 'https://crazyclown.online/dc' },
     line: { id: 'MvNfwjVwKA', name: '銓生活', url: 'https://line.me/R/ti/g/MvNfwjVwKA' },
   },
 }
