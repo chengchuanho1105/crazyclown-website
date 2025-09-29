@@ -791,45 +791,40 @@ export class NewsService {
     }
   }
 
-  // 根據 slug 獲取單個新聞
-  static async getNewsBySlug(slug: string): Promise<ApiResponse<News>> {
-    try {
-      const { data, error } = await supabase
-        .from(TABLES.NEWS)
-        .select('*')
-        .eq('slug', slug)
-        .eq('status', '發布')
-        .is('deleted_at', null)
-        .single()
-
-      if (error) throw error
-
-      return { data, error: null }
-    } catch (error: any) {
-      return {
-        data: null,
-        error: {
-          message: error.message || '獲取新聞詳情失敗',
-          details: error.details,
-          code: error.code
-        }
-      }
-    }
-  }
 
   // 新增新聞
   static async createNews(news: Omit<News, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<News>> {
     try {
+      console.log('嘗試新增新聞:', news)
+
       const { data, error } = await supabase
         .from(TABLES.NEWS)
         .insert([news])
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase 錯誤:', error)
 
+        // 處理 ID 衝突錯誤
+        if (error.code === '23505' && error.message.includes('duplicate key value violates unique constraint "news_pkey"')) {
+          return {
+            data: null,
+            error: {
+              message: '資料庫 ID 序列衝突，請聯繫管理員重置序列值',
+              details: error.details,
+              code: error.code
+            }
+          }
+        }
+
+        throw error
+      }
+
+      console.log('新增成功:', data)
       return { data, error: null }
     } catch (error: any) {
+      console.error('新增新聞錯誤:', error)
       return {
         data: null,
         error: {

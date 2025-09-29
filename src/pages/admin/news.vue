@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineOptions({ name: 'Admin-News' })
 
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { NewsService } from '@/services/supabaseService'
 import type { News } from '@/config/supabase'
 
@@ -117,22 +117,23 @@ const removeTag = (index: number) => {
   formData.value.tags.splice(index, 1)
 }
 
-// 自動生成 slug（保留函數以備將來使用）
-const generateSlug = () => {
-  // 目前 News 介面中沒有 slug 欄位，此函數保留以備將來使用
-  const title = formData.value.title
-  if (title) {
-    // 可以在這裡添加 slug 生成邏輯
-    console.log('生成 slug for:', title)
-  }
-}
+// 移除 slug 相關函數，因為現在由後端自動生成
 
 // 儲存新聞
 const saveNews = async () => {
   try {
+    // 處理 show_date 欄位
+    let processedShowDate = null
+    if (formData.value.show_date && formData.value.show_date.trim() !== '') {
+      const date = new Date(formData.value.show_date)
+      if (!isNaN(date.getTime())) {
+        processedShowDate = date.toISOString()
+      }
+    }
+
     const newsData = {
       ...formData.value,
-      show_date: formData.value.show_date ? new Date(formData.value.show_date).toISOString() : null
+      show_date: processedShowDate
     }
 
     if (editingNews.value) {

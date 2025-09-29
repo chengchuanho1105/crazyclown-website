@@ -159,7 +159,6 @@ export interface InventoryItemWithDetails extends InventoryItem {
 // 新聞資料類型定義
 export interface News {
   id: string  // 新聞編號
-  sort: number  // 排序欄位
   slot: string  // 分類槽位 (news/featured)
   category: string  // 新聞分類
   author: string  // 作者
