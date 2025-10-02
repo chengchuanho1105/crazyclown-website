@@ -51,7 +51,8 @@ export const TABLES = {
   OUR_BANK_DATA: 'our_bank_data',  // 我方收款銀行資料
   NEWS: 'news',  // 新聞資料
   HOMEPAGE_HERO: 'homepage_hero',  // 首頁 Hero 內容
-  PRICE_LIST: 'price_list'  // 價格列表
+  PRICE_LIST: 'price_list',  // 價格列表
+  CANNED_MESSAGES: 'canned_messages'  // 罐頭訊息
 } as const
 
 // 資料庫類型定義
@@ -203,6 +204,18 @@ export interface PriceList {
   hotSale: boolean  // 是否為熱銷商品
   product_sort: number  // 商品排序欄位
   show: boolean  // 是否在價目表中顯示
+  created_at: string  // 建立時間
+  updated_at: string  // 更新時間
+}
+
+// 罐頭訊息資料類型定義
+export interface CannedMessage {
+  id: string  // 罐頭訊息編號
+  category: string  // 分類
+  title: string  // 標題
+  content: string  // 內容
+  keyword: string | null  // 關鍵字（可為空）
+  usage_count: number  // 使用次數
   created_at: string  // 建立時間
   updated_at: string  // 更新時間
 }

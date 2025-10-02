@@ -160,9 +160,9 @@ export const pageConfig: PageConfig = {
       },
     },
     {
-      path: '/admin/login',
+      path: '/1105admin1123/login',
       name: `${brandName}-Admin-Login`,
-      component: () => import(`@/pages/admin/login.vue`),
+      component: () => import(`@/pages/1105admin1123/login.vue`),
       meta: {
         title: `管理員登入 | ${brandDisplayName}`,
         description:
@@ -182,9 +182,9 @@ export const pageConfig: PageConfig = {
       },
     },
     {
-      path: '/admin',
+      path: '/1105admin1123',
       name: `${brandName}-Admin`,
-      component: () => import(`@/pages/admin/index.vue`),
+      component: () => import(`@/pages/1105admin1123/index.vue`),
       meta: {
         title: `管理員 | ${brandDisplayName}`,
         description: '',
@@ -199,9 +199,9 @@ export const pageConfig: PageConfig = {
       },
     },
     {
-      path: '/admin/inventory',
+      path: '/1105admin1123/inventory',
       name: `${brandName}-Inventory`,
-      component: () => import(`@/pages/admin/inventory.vue`),
+      component: () => import(`@/pages/1105admin1123/inventory.vue`),
       meta: {
         title: `庫存管理 | ${brandDisplayName}`,
         description: '',
@@ -216,9 +216,9 @@ export const pageConfig: PageConfig = {
       },
     },
     {
-      path: '/admin/price-list',
+      path: '/1105admin1123/price-list',
       name: `${brandName}-Price-List`,
-      component: () => import(`@/pages/admin/price-list.vue`),
+      component: () => import(`@/pages/1105admin1123/price-list.vue`),
       meta: {
         title: `價目表 | ${brandDisplayName}`,
         description: '',
@@ -228,9 +228,9 @@ export const pageConfig: PageConfig = {
       },
     },
     {
-      path: '/admin/pages',
+      path: '/1105admin1123/pages',
       name: `${brandName}-Pages`,
-      component: () => import(`@/pages/admin/pages.vue`),
+      component: () => import(`@/pages/1105admin1123/pages.vue`),
       meta: {
         title: `頁面內容 | ${brandDisplayName}`,
         description: '',
@@ -240,9 +240,9 @@ export const pageConfig: PageConfig = {
       },
     },
     {
-      path: '/admin/news',
+      path: '/1105admin1123/news',
       name: `${brandName}-News`,
-      component: () => import(`@/pages/admin/news.vue`),
+      component: () => import(`@/pages/1105admin1123/news.vue`),
       meta: {
         title: `新聞管理 | ${brandDisplayName}`,
         description: '',
@@ -254,9 +254,9 @@ export const pageConfig: PageConfig = {
 
 
     {
-      path: '/admin/customers',
+      path: '/1105admin1123/customers',
       name: `${brandName}-Customers`,
-      component: () => import(`@/pages/admin/customers.vue`),
+      component: () => import(`@/pages/1105admin1123/customers.vue`),
       meta: {
         title: `用戶管理 | ${brandDisplayName}`,
         description: '',

@@ -118,14 +118,14 @@ export const useTransactions = () => {
     const account = accounts.value.find(acc => acc.id === transaction.accountId)
     if (account) {
       if (transaction.type === 'income') {
-        account.balance += transaction.amount
+        account.balance += transaction.totalAmount
       } else if (transaction.type === 'expense') {
-        account.balance -= transaction.amount
+        account.balance -= transaction.totalAmount
       } else if (transaction.type === 'transfer' && transaction.targetAccountId) {
-        account.balance -= transaction.amount
+        account.balance -= transaction.totalAmount
         const targetAccount = accounts.value.find(acc => acc.id === transaction.targetAccountId)
         if (targetAccount) {
-          targetAccount.balance += transaction.amount
+          targetAccount.balance += transaction.totalAmount
         }
       }
     }
@@ -234,11 +234,16 @@ export const useDebts = () => {
     return debts.value.reduce((total, debt) => total + debt.remainingBalance, 0)
   })
 
+  const getTotalMonthlyPayment = computed(() => {
+    return debts.value.reduce((total, debt) => total + debt.monthlyPayment, 0)
+  })
+
   return {
     debts: computed(() => debts.value),
     addDebt,
     makePayment,
-    getTotalDebt
+    getTotalDebt,
+    getTotalMonthlyPayment
   }
 }
 
@@ -268,11 +273,26 @@ export const useBudgets = () => {
     }))
   })
 
+  const getTotalBudget = computed(() => {
+    return budgets.value.reduce((total, budget) => total + budget.amount, 0)
+  })
+
+  const getTotalSpent = computed(() => {
+    return budgets.value.reduce((total, budget) => total + budget.spent, 0)
+  })
+
+  const getTotalRemaining = computed(() => {
+    return getTotalBudget.value - getTotalSpent.value
+  })
+
   return {
     budgets: computed(() => budgets.value),
     addBudget,
     updateBudgetSpent,
-    getBudgetStatus
+    getBudgetStatus,
+    getTotalBudget,
+    getTotalSpent,
+    getTotalRemaining
   }
 }
 

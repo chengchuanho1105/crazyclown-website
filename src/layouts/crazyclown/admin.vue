@@ -13,12 +13,12 @@ const toggleSidebar = () => {
 
 // 導航選單
 const menuItems = [
-  { name: '儀表板', icon: 'bi-speedometer2', path: '/admin' },
-  { name: '庫存管理', icon: 'bi-box', path: '/admin/inventory' },
-  { name: '用戶管理', icon: 'bi-people', path: '/admin/customers' },
-  { name: '價目表', icon: 'bi-table', path: '/admin/price-list' },
-  { name: '頁面內容', icon: 'bi-file-earmark-text', path: '/admin/pages' },
-  { name: '新聞管理', icon: 'bi-newspaper', path: '/admin/news' },
+  { name: '儀表板', icon: 'bi-speedometer2', path: '/1105admin1123' },
+  { name: '庫存管理', icon: 'bi-box', path: '/1105admin1123/inventory' },
+  { name: '用戶管理', icon: 'bi-people', path: '/1105admin1123/customers' },
+  { name: '價目表', icon: 'bi-table', path: '/1105admin1123/price-list' },
+  { name: '頁面內容', icon: 'bi-file-earmark-text', path: '/1105admin1123/pages' },
+  { name: '新聞管理', icon: 'bi-newspaper', path: '/1105admin1123/news' },
 ]
 
 </script>

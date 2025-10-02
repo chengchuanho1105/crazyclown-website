@@ -1,5 +1,12 @@
 // 記帳簿資料型別定義
 
+export interface Currency {
+  code: string
+  name: string
+  symbol: string
+  rate: number // 對TWD的匯率
+}
+
 export interface Account {
   id: string
   name: string
@@ -14,15 +21,29 @@ export interface Account {
 export interface Transaction {
   id: string
   type: 'income' | 'expense' | 'transfer'
-  amount: number
-  description: string
-  category: string
+  date: Date
+  time: string
+  items: TransactionItem[]
+  totalAmount: number
+  paymentMethod: string
+  notes?: string
   accountId: string
   targetAccountId?: string // 用於轉帳
-  date: Date
-  tags?: string[]
+  invoiceNumber?: string // 用於支出
   createdAt: Date
   updatedAt: Date
+}
+
+export interface TransactionItem {
+  id: string
+  lineNumber: string
+  itemName: string
+  unitPrice: number
+  quantity: number
+  discount: number
+  subtotal: number
+  currency: string
+  notes?: string
 }
 
 export interface Investment {
