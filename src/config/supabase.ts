@@ -214,7 +214,7 @@ export interface CannedMessage {
   category: string  // 分類
   title: string  // 標題
   content: string  // 內容
-  keyword: string | null  // 關鍵字（可為空）
+  keyword: string[] | null  // 關鍵字陣列（可為空）
   remark: string | null  // 備註（提醒客服注意事項）
   image: string[] | null  // 圖片 URL 陣列
   usage_count: number  // 使用次數

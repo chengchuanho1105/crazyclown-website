@@ -19,10 +19,13 @@ const formData = ref({
   category: '',
   title: '',
   content: '',
-  keyword: '',
+  keyword: [] as string[],
   remark: '',
   image: [] as string[]
 })
+
+// 關鍵字輸入
+const keywordInput = ref('')
 
 // 圖片相關狀態
 const imageInput = ref('')
@@ -97,7 +100,7 @@ const filteredMessages = computed(() => {
     filtered = filtered.filter(msg =>
       msg.title.toLowerCase().includes(query) ||
       msg.content.toLowerCase().includes(query) ||
-      (msg.keyword && msg.keyword.toLowerCase().includes(query)) ||
+      (msg.keyword && msg.keyword.some(kw => kw.toLowerCase().includes(query))) ||
       msg.category.toLowerCase().includes(query)
     )
   }
@@ -149,11 +152,12 @@ const resetForm = () => {
     category: '',
     title: '',
     content: '',
-    keyword: '',
+    keyword: [],
     remark: '',
     image: []
   }
   imageInput.value = ''
+  keywordInput.value = ''
   editingMessage.value = null
 }
 
@@ -170,7 +174,7 @@ const openEditForm = (message: CannedMessage) => {
     category: message.category,
     title: message.title,
     content: message.content,
-    keyword: message.keyword || '',
+    keyword: message.keyword ? [...message.keyword] : [],
     remark: message.remark || '',
     image: message.image ? [...message.image] : []
   }
@@ -198,7 +202,7 @@ const saveMessage = async () => {
         category: formData.value.category.trim(),
         title: formData.value.title.trim(),
         content: formData.value.content.trim(),
-        keyword: formData.value.keyword?.trim() || null,
+        keyword: formData.value.keyword.length > 0 ? formData.value.keyword : null,
         remark: formData.value.remark?.trim() || null,
         image: formData.value.image.length > 0 ? formData.value.image : null
       }
@@ -217,7 +221,7 @@ const saveMessage = async () => {
         category: formData.value.category.trim(),
         title: formData.value.title.trim(),
         content: formData.value.content.trim(),
-        keyword: formData.value.keyword?.trim() || null,
+        keyword: formData.value.keyword.length > 0 ? formData.value.keyword : null,
         remark: formData.value.remark?.trim() || null,
         image: formData.value.image.length > 0 ? formData.value.image : null,
         usage_count: 0  // 初始使用次數為 0
@@ -290,6 +294,20 @@ const addImageUrl = () => {
 // 移除圖片 URL
 const removeImageUrl = (index: number) => {
   formData.value.image.splice(index, 1)
+}
+
+// 添加關鍵字
+const addKeyword = () => {
+  const kw = keywordInput.value.trim()
+  if (kw && !formData.value.keyword.includes(kw)) {
+    formData.value.keyword.push(kw)
+    keywordInput.value = ''
+  }
+}
+
+// 移除關鍵字
+const removeKeyword = (index: number) => {
+  formData.value.keyword.splice(index, 1)
 }
 
 // 日期格式化
@@ -471,11 +489,17 @@ const getCategoryColor = (category: string) => {
                 </span>
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ message.title }}</h3>
               </div>
-              <div v-if="message.keyword" class="flex items-center gap-2 mb-3">
+              <div v-if="message.keyword && message.keyword.length > 0" class="flex items-center gap-2 mb-3 flex-wrap">
                 <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
-                <span class="text-sm text-gray-600 dark:text-gray-400">{{ message.keyword }}</span>
+                <span
+                  v-for="(kw, idx) in message.keyword"
+                  :key="idx"
+                  class="inline-flex px-2 py-0.5 text-xs font-medium rounded bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                >
+                  {{ kw }}
+                </span>
               </div>
             </div>
             <div class="flex items-center gap-2 ml-4">
@@ -637,14 +661,45 @@ const getCategoryColor = (category: string) => {
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  關鍵字
+                  關鍵字標籤
                 </label>
-                <input
-                  v-model="formData.keyword"
-                  type="text"
-                  placeholder="e.g. 發放、設定...等簡短單詞"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                />
+                <div class="space-y-2">
+                  <!-- 已添加的關鍵字標籤 -->
+                  <div v-if="formData.keyword.length > 0" class="flex flex-wrap gap-2">
+                    <span
+                      v-for="(kw, index) in formData.keyword"
+                      :key="index"
+                      class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                    >
+                      {{ kw }}
+                      <button
+                        type="button"
+                        @click="removeKeyword(index)"
+                        class="ml-1 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  </div>
+
+                  <!-- 添加關鍵字 -->
+                  <div class="flex gap-2">
+                    <input
+                      v-model="keywordInput"
+                      @keyup.enter="addKeyword"
+                      type="text"
+                      placeholder="輸入關鍵字後按 Enter"
+                      class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white text-sm"
+                    />
+                    <button
+                      type="button"
+                      @click="addKeyword"
+                      class="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm"
+                    >
+                      新增
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
