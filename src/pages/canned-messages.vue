@@ -5,6 +5,8 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { CannedMessageService } from '@/services/supabaseService'
 import type { CannedMessage } from '@/config/supabase'
 
+import howtocopymeeeurl from '@/assets/media/videos/howtocopymeeeurl.mp4'
+
 // 罐頭訊息資料狀態
 const messagesList = ref<CannedMessage[]>([])
 const loading = ref(false)
@@ -17,8 +19,14 @@ const formData = ref({
   category: '',
   title: '',
   content: '',
-  keyword: ''
+  keyword: '',
+  remark: '',
+  image: [] as string[]
 })
+
+// 圖片相關狀態
+const imageInput = ref('')
+const showVideoModal = ref(false)
 
 // 搜尋和篩選
 const searchQuery = ref('')
@@ -141,8 +149,11 @@ const resetForm = () => {
     category: '',
     title: '',
     content: '',
-    keyword: ''
+    keyword: '',
+    remark: '',
+    image: []
   }
+  imageInput.value = ''
   editingMessage.value = null
 }
 
@@ -159,7 +170,9 @@ const openEditForm = (message: CannedMessage) => {
     category: message.category,
     title: message.title,
     content: message.content,
-    keyword: message.keyword || ''
+    keyword: message.keyword || '',
+    remark: message.remark || '',
+    image: message.image ? [...message.image] : []
   }
   showForm.value = true
 }
@@ -185,7 +198,9 @@ const saveMessage = async () => {
         category: formData.value.category.trim(),
         title: formData.value.title.trim(),
         content: formData.value.content.trim(),
-        keyword: formData.value.keyword?.trim() || null
+        keyword: formData.value.keyword?.trim() || null,
+        remark: formData.value.remark?.trim() || null,
+        image: formData.value.image.length > 0 ? formData.value.image : null
       }
 
       const response = await CannedMessageService.updateCannedMessage(editingMessage.value.id, messageData)
@@ -203,6 +218,8 @@ const saveMessage = async () => {
         title: formData.value.title.trim(),
         content: formData.value.content.trim(),
         keyword: formData.value.keyword?.trim() || null,
+        remark: formData.value.remark?.trim() || null,
+        image: formData.value.image.length > 0 ? formData.value.image : null,
         usage_count: 0  // 初始使用次數為 0
       }
       const response = await CannedMessageService.createCannedMessage(newMessageData)
@@ -259,6 +276,20 @@ const copyToClipboard = async (content: string, id: string) => {
     console.error('複製失敗:', err)
     error.value = '複製到剪貼簿失敗'
   }
+}
+
+// 添加圖片 URL
+const addImageUrl = () => {
+  const url = imageInput.value.trim()
+  if (url && !formData.value.image.includes(url)) {
+    formData.value.image.push(url)
+    imageInput.value = ''
+  }
+}
+
+// 移除圖片 URL
+const removeImageUrl = (index: number) => {
+  formData.value.image.splice(index, 1)
 }
 
 // 日期格式化
@@ -486,8 +517,46 @@ const getCategoryColor = (category: string) => {
             </div>
           </div>
 
+          <!-- 備註提醒 -->
+          <div v-if="message.remark" class="bg-amber-50 dark:bg-amber-900/30 border-l-4 border-amber-500 p-3 mb-3">
+            <div class="flex items-start gap-2">
+              <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-amber-800 dark:text-amber-300 mb-1">注意事項</p>
+                <p class="text-sm text-amber-700 dark:text-amber-400 whitespace-pre-wrap">{{ message.remark }}</p>
+              </div>
+            </div>
+          </div>
+
           <div class="bg-gray-50 dark:bg-gray-900 rounded-md p-4 mb-3">
             <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ message.content }}</p>
+          </div>
+
+          <!-- 圖片預覽區 -->
+          <div v-if="message.image && message.image.length > 0" class="mb-3">
+            <div class="flex items-center gap-2 mb-2">
+              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="text-xs text-gray-600 dark:text-gray-400 font-medium">附加圖片 ({{ message.image.length }})</span><span class="text-xs text-amber-600 dark:text-amber-400 font-medium">電腦:右鍵>複製圖片；手機:長按>複製圖片</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+              <div
+                v-for="(imgUrl, idx) in message.image"
+                :key="idx"
+                class="relative rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 hover:border-indigo-500 transition-all"
+                style="aspect-ratio: 16 / 9;"
+              >
+                <img
+                  :src="imgUrl"
+                  :alt="`圖片 ${idx + 1}`"
+                  class="w-full h-full object-cover bg-gray-100 dark:bg-gray-800"
+                  @error="(e) => (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=圖片載入失敗'"
+                />
+              </div>
+            </div>
           </div>
 
           <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
@@ -594,6 +663,24 @@ const getCategoryColor = (category: string) => {
 
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                備註提醒
+              </label>
+              <textarea
+                v-model="formData.remark"
+                rows="2"
+                placeholder="輸入需要提醒客服注意的事項（選填）"
+                class="w-full px-3 py-2 border border-amber-300 dark:border-amber-600 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 bg-amber-50 dark:bg-amber-900/20 dark:text-white"
+              ></textarea>
+              <p class="mt-1 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                此欄位會以醒目的警告樣式顯示，提醒客服注意特殊事項
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 內容 <span class="text-red-500">*</span>
               </label>
               <textarea
@@ -606,6 +693,85 @@ const getCategoryColor = (category: string) => {
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 字數：{{ formData.content.length }} 字 <span class="text-red-500 dark:text-red-400 font-bold ml-1">Discord 限制 2,000 字</span>
               </p>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  附加圖片
+                </label>
+              </div>
+              <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 pt-2">
+                請將圖片上傳至
+                <a href="https://meee.com.tw" target="_blank" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline">
+                  meee 圖床
+                </a>
+                ，再將圖連結貼上。
+                <button
+                  type="button"
+                  @click="showVideoModal = true"
+                  class="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1 pt-1"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  如何 上傳圖片至 meee 並複製連結？
+                </button>
+              </p>
+
+              <div class="space-y-2">
+                <!-- 已添加的圖片列表 -->
+                <div v-if="formData.image.length > 0" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-2">
+                  <div
+                    v-for="(imgUrl, index) in formData.image"
+                    :key="index"
+                    class="relative group rounded-lg overflow-hidden border-2 border-gray-300 dark:border-gray-600"
+                    style="aspect-ratio: 16 / 9;"
+                  >
+                    <img
+                      :src="imgUrl"
+                      :alt="`圖片 ${index + 1}`"
+                      class="w-full h-full object-cover bg-gray-100 dark:bg-gray-800"
+                      @error="(e) => (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=無法載入'"
+                    />
+                    <button
+                      type="button"
+                      @click="removeImageUrl(index)"
+                      class="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                      title="移除圖片"
+                    >
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 添加圖片 URL -->
+                <div class="flex gap-2">
+                  <input
+                    v-model="imageInput"
+                    @keyup.enter="addImageUrl"
+                    type="url"
+                    placeholder="輸入圖片 URL 後按 Enter 或點擊新增"
+                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    @click="addImageUrl"
+                    class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                  >
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    新增
+                  </button>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  已添加 {{ formData.image.length }} 張圖片
+                </p>
+              </div>
             </div>
 
             <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -624,6 +790,66 @@ const getCategoryColor = (category: string) => {
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 教學影片彈出視窗 -->
+    <div v-if="showVideoModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4 overflow-y-auto" @click="showVideoModal = false">
+      <div class="relative w-full max-w-5xl max-h-[90vh] bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden flex flex-col" @click.stop>
+        <!-- 視窗標題 -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            如何上傳圖片至 <a href="https://meee.com.tw" target="_blank" class="text-blue-600 hover:text-blue-700 dark:text-blue-400">meee</a> 並複製連結？
+          </h3>
+          <button
+            @click="showVideoModal = false"
+            class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
+          >
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- 影片內容區 - 可滾動 -->
+        <div class="flex-1 overflow-y-auto">
+          <div class="p-6">
+            <div class="bg-gray-100 dark:bg-gray-900 rounded-lg overflow-hidden">
+              <video
+                :src="howtocopymeeeurl"
+                class="w-full h-auto max-h-[60vh]"
+                controls
+                autoplay
+                loop
+                playsinline
+              >
+                您的瀏覽器不支援影片播放
+              </video>
+            </div>
+
+            <div class="mt-4 text-sm text-gray-600 dark:text-gray-400">
+              <p class="mb-2">📝 步驟說明：</p>
+              <ol class="list-decimal list-inside space-y-1 ml-2">
+                <li>前往 <a href="https://meee.com.tw" target="_blank" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 underline">meee</a> > 點擊「圖片上傳」 > 拖入圖片 > 點擊「產生」</li>
+                <li>對圖片點擊一下「左鍵」再點擊一下「右鍵」 > 選擇「複製影像連結」</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <!-- 底部按鈕 -->
+        <div class="flex justify-end p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+          <button
+            @click="showVideoModal = false"
+            class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+          >
+            關閉
+          </button>
         </div>
       </div>
     </div>
