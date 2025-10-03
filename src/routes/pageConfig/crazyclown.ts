@@ -138,6 +138,28 @@ export const pageConfig: PageConfig = {
       },
     },
     {
+      path: '/yummy-canned',
+      name: `${brandName}-Canned-Messages`,
+      component: () => import(`@/pages/yummy-canned.vue`),
+      meta: {
+        title: `好吃的罐頭 | ${brandDisplayName}`,
+        description:
+          '好吃的罐頭',
+        layout: 'default',
+        requiresAuth: false,
+        roles: ['admin'],
+        seo: {
+          sitemap: true,
+          sitemapXml: true,
+          robots: true,
+        },
+        ui: {
+          navbar: false,
+          navbarOrder: 6,
+        },
+      },
+    },
+    {
       path: '/login',
       name: `${brandName}-Login`,
       component: () => import(`@/pages/login.vue`),
