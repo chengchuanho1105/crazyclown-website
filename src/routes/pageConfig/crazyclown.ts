@@ -139,7 +139,7 @@ export const pageConfig: PageConfig = {
     },
     {
       path: '/yummy-canned',
-      name: `${brandName}-Canned-Messages`,
+      name: `${brandName}-Yummy-Canned`,
       component: () => import(`@/pages/yummy-canned.vue`),
       meta: {
         title: `好吃的罐頭 | ${brandDisplayName}`,
@@ -149,9 +149,9 @@ export const pageConfig: PageConfig = {
         requiresAuth: false,
         roles: ['admin'],
         seo: {
-          sitemap: true,
-          sitemapXml: true,
-          robots: true,
+          sitemap: false,
+          sitemapXml: false,
+          robots: false,
         },
         ui: {
           navbar: false,
