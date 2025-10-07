@@ -7,6 +7,11 @@
   [build.environment]
     NODE_VERSION = "22"
 
+# Edge Functions 設定
+[[edge_functions]]
+  path = "/news/*"
+  function = "news-meta"
+
 # 重定向規則
 [[redirects]]
   from = "/*"

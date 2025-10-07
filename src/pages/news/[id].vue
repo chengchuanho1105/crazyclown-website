@@ -76,17 +76,17 @@ const ogImage = computed(() => {
 useHead({
   title: metaTitle,
   meta: [
-    { name: 'description', content: metaDescription },
-    { property: 'og:title', content: metaTitle },
-    { property: 'og:description', content: metaDescription },
-    { property: 'og:image', content: ogImage },
-    { property: 'og:url', content: `https://crazyclown.online/news/${newsId.value}` },
-    { property: 'og:type', content: 'article' },
-    { property: 'og:site_name', content: 'Crazy Clown' },
-    { name: 'twitter:title', content: metaTitle },
-    { name: 'twitter:description', content: metaDescription },
-    { name: 'twitter:image', content: ogImage },
-    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'description', content: metaDescription, tagDuplicateStrategy: 'replace' },
+    { property: 'og:title', content: metaTitle, tagDuplicateStrategy: 'replace' },
+    { property: 'og:description', content: metaDescription, tagDuplicateStrategy: 'replace' },
+    { property: 'og:image', content: ogImage, tagDuplicateStrategy: 'replace' },
+    { property: 'og:url', content: `https://crazyclown.online/news/${newsId.value}`, tagDuplicateStrategy: 'replace' },
+    { property: 'og:type', content: 'article', tagDuplicateStrategy: 'replace' },
+    { property: 'og:site_name', content: 'Crazy Clown', tagDuplicateStrategy: 'replace' },
+    { name: 'twitter:title', content: metaTitle, tagDuplicateStrategy: 'replace' },
+    { name: 'twitter:description', content: metaDescription, tagDuplicateStrategy: 'replace' },
+    { name: 'twitter:image', content: ogImage, tagDuplicateStrategy: 'replace' },
+    { name: 'twitter:card', content: 'summary_large_image', tagDuplicateStrategy: 'replace' },
   ],
 })
 

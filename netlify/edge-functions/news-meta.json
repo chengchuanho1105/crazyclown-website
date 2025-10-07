@@ -1,0 +1,7 @@
+{
+  "config": {
+    "path": "/news/*",
+    "cache": "manual"
+  }
+}
+

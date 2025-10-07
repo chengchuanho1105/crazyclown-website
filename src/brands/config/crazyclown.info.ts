@@ -16,7 +16,7 @@ export const brandInfoConfig: BrandInfoConfig = {
   secondaryColor: '#000000', // 品牌輔色
   accentColor: '#000000', // 品牌強調色
   slogan: '不瘋，不成團', // 品牌口號
-  websiteUrl: 'https://chuan.life/crazyclown', // 品牌網站
+  websiteUrl: 'https://crazyclown.online', // 品牌網站
   copyright: 'Chuan Life', // 版權方
   copyrightUrl: 'https://chuan.life', // 版權方Url
   contactEmail: 'pubg.crazyclown.2023@gmail.com', // 聯絡信箱
