@@ -66,6 +66,12 @@ const metaDescription = computed(() => {
   return combined.length > 160 ? combined.substring(0, 157) + '...' : combined
 })
 
+// 動態設定 OG 圖片
+const ogImage = computed(() => {
+  if (!news.value?.image) return ''
+  return news.value.image
+})
+
 // 使用 useHead 設定 meta
 useHead({
   title: metaTitle,
@@ -73,13 +79,13 @@ useHead({
     { name: 'description', content: metaDescription },
     { property: 'og:title', content: metaTitle },
     { property: 'og:description', content: metaDescription },
-    { property: 'og:image', content: news.value?.image || '' },
+    { property: 'og:image', content: ogImage },
     { property: 'og:url', content: `https://crazyclown.online/news/${newsId.value}` },
     { property: 'og:type', content: 'article' },
     { property: 'og:site_name', content: 'Crazy Clown' },
     { name: 'twitter:title', content: metaTitle },
     { name: 'twitter:description', content: metaDescription },
-    { name: 'twitter:image', content: news.value?.image || '' },
+    { name: 'twitter:image', content: ogImage },
     { name: 'twitter:card', content: 'summary_large_image' },
   ],
 })

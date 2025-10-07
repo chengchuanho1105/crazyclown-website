@@ -42,7 +42,6 @@ const loadHomeHeroData = async () => {
         return a.id.localeCompare(b.id)
       })
       homeHeroData.value = sortedData
-      console.log('成功獲取首頁 Hero 資料（已排序）:', sortedData)
     }
   } catch (err: unknown) {
     homeHeroError.value = err instanceof Error ? err.message : '未知錯誤'
