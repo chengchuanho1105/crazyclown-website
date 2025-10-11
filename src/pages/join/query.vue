@@ -197,10 +197,11 @@ const sendDiscordNotification = async (application: ClanApplication) => {
         },
         {
           name: '',
-          value: `[點擊查看完整審核進度](https://crazyclown.online/join/${application.steam_17_id})`,
+          value: `### 🔍[點擊查看完整審核進度](https://crazyclown.online/join/${application.steam_17_id})`,
           inline: false
         }
       ],
+      timestamp: new Date().toISOString(),
     }
 
     // 發送到指定的討論串
