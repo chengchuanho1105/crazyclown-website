@@ -118,11 +118,10 @@ export const pageConfig: PageConfig = {
     {
       path: '/join',
       name: `${brandName}-Join`,
-      component: () => import(`@/pages/join.vue`),
+      component: () => import(`@/pages/join/index.vue`),
       meta: {
         title: `加入我們 | ${brandDisplayName}`,
-        description:
-          '想在《PUBG》中找到並肩作戰的夥伴嗎？加入 Crazy_Clown 戰隊，與一群熱血玩家一起歡樂吃雞、互相支援，打造屬於我們的瘋狂戰場！現在就成為我們的一員！',
+        description: '',
         layout: 'default',
         requiresAuth: false,
         roles: ['admin', 'user', 'guest'],
@@ -133,9 +132,91 @@ export const pageConfig: PageConfig = {
         },
         ui: {
           navbar: true,
-          navbarOrder: 5,
+          navbarOrder: 4,
         },
       },
+      children: [
+        {
+          path: '/',
+          name: `${brandName}-Join`,
+          component: () => import(`@/pages/join/index.vue`),
+          meta: {
+            title: `加入我們 | ${brandDisplayName}`,
+            description: '',
+            layout: 'default',
+            requiresAuth: false,
+            roles: ['admin', 'user', 'guest'],
+            seo: {
+              sitemap: true,
+              sitemapXml: true,
+              robots: true,
+            },
+            ui: {
+              navbar: true,
+            },
+          },
+        },
+        {
+          path: 'status',
+          name: `${brandName}-Join-Status-Search`,
+          component: () => import(`@/pages/join/[id].vue`),
+          meta: {
+            title: `審核進度查詢 | ${brandDisplayName}`,
+            description: '查詢戰隊申請審核進度',
+            layout: 'default',
+            requiresAuth: false,
+            roles: ['admin', 'user', 'guest'],
+            seo: {
+              sitemap: true,
+              sitemapXml: true,
+              robots: true,
+            },
+            ui: {
+              navbar: true,
+            },
+          },
+        },
+        {
+          path: 'query',
+          name: `${brandName}-Join-Query`,
+          component: () => import(`@/pages/join/query.vue`),
+          meta: {
+            title: `審核進度管理 | ${brandDisplayName}`,
+            description: '管理戰隊申請審核進度',
+            layout: 'default',
+            requiresAuth: false,
+            roles: ['admin', 'user', 'guest'],
+            seo: {
+              sitemap: false,
+              sitemapXml: false,
+              robots: false,
+            },
+            ui: {
+              navbar: false,
+            },
+          },
+        },
+        {
+          path: ':id',
+          name: `${brandName}-Join-Status-Detail`,
+          component: () => import(`@/pages/join/[id].vue`),
+          meta: {
+            title: `審核進度 | ${brandDisplayName}`,
+            description: '查詢戰隊申請審核進度',
+            layout: 'default',
+            requiresAuth: false,
+            roles: ['admin', 'user', 'guest'],
+            seo: {
+              sitemap: false,
+              sitemapXml: false,
+              robots: false,
+            },
+            ui: {
+              navbar: false,
+            },
+          },
+        },
+      ],
     },
     {
       path: '/yummy-canned',

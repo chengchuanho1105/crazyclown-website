@@ -624,7 +624,7 @@ const getCategoryColor = (category: string) => {
 
     <!-- 表單模態框 -->
     <div v-if="showForm" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-      <div class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+      <div class="relative w-full max-w-5xl bg-white dark:bg-gray-800 rounded-lg shadow-xl">
         <div class="p-6">
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white">

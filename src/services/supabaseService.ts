@@ -1,4 +1,22 @@
-import { supabase, TABLES, type InventoryItem, type Transaction, type Customer, type Product, type ProductCategory, type PaymentMethod, type OurBankData, type InventoryItemWithDetails, type News, type HomepageHero, type PriceList, type CannedMessage } from '@/config/supabase'
+import {
+  supabase,
+  TABLES,
+  type InventoryItem,
+  type Transaction,
+  type Customer,
+  type Product,
+  type ProductCategory,
+  type PaymentMethod,
+  type OurBankData,
+  type InventoryItemWithDetails,
+  type News,
+  type HomepageHero,
+  type PriceList,
+  type CannedMessage,
+  type ClanApplication,
+  type ApplicationStatus,
+  type ApplicationStatusWithDetails,
+} from '@/config/supabase'
 
 // 錯誤處理類型
 export interface SupabaseError {
@@ -33,8 +51,8 @@ export class InventoryService {
         error: {
           message: error.message || '獲取庫存資料失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -55,8 +73,10 @@ export class InventoryService {
       }
 
       // 獲取所有相關的商品ID和分類ID
-      const productIds = [...new Set(inventoryItems.map(item => item.product_id).filter(Boolean))]
-      const categoryIds = [...new Set(inventoryItems.map(item => item.product_category_id).filter(Boolean))]
+      const productIds = [...new Set(inventoryItems.map((item) => item.product_id).filter(Boolean))]
+      const categoryIds = [
+        ...new Set(inventoryItems.map((item) => item.product_category_id).filter(Boolean)),
+      ]
 
       // 批量獲取商品資訊
       let products = []
@@ -85,14 +105,14 @@ export class InventoryService {
       }
 
       // 組合資料
-      const result = inventoryItems.map(item => {
-        const product = products.find(p => p.id === item.product_id)
-        const category = categories.find(c => c.id === item.product_category_id)
+      const result = inventoryItems.map((item) => {
+        const product = products.find((p) => p.id === item.product_id)
+        const category = categories.find((c) => c.id === item.product_category_id)
 
         return {
           ...item,
           product: product || undefined,
-          product_category: category || undefined
+          product_category: category || undefined,
         }
       })
 
@@ -103,20 +123,22 @@ export class InventoryService {
         error: {
           message: error.message || '獲取庫存詳細資料失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
-
-
   // 獲取單個庫存項目的完整詳細資料
-  static async getInventoryItemWithFullDetails(id: string): Promise<ApiResponse<InventoryItemWithDetails & {
-    transaction?: Transaction & {
-      customer?: Customer
-    }
-  }>> {
+  static async getInventoryItemWithFullDetails(id: string): Promise<
+    ApiResponse<
+      InventoryItemWithDetails & {
+        transaction?: Transaction & {
+          customer?: Customer
+        }
+      }
+    >
+  > {
     try {
       // 首先獲取庫存項目
       const { data: inventoryData, error: inventoryError } = await supabase
@@ -159,7 +181,7 @@ export class InventoryService {
         }
       }
 
-            // 嘗試獲取相關的交易資訊
+      // 嘗試獲取相關的交易資訊
       let { data: transactionData, error: transactionError } = await supabase
         .from(TABLES.TRANSACTIONS)
         .select('*')
@@ -185,10 +207,12 @@ export class InventoryService {
         ...inventoryData,
         product: productData || undefined,
         product_category: categoryData || undefined,
-        transaction: transactionData ? {
-          ...transactionData,
-          customer: customerData || undefined
-        } : undefined
+        transaction: transactionData
+          ? {
+              ...transactionData,
+              customer: customerData || undefined,
+            }
+          : undefined,
       }
 
       return { data: result, error: null }
@@ -198,8 +222,8 @@ export class InventoryService {
         error: {
           message: error.message || '獲取庫存完整詳細資料失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -222,14 +246,16 @@ export class InventoryService {
         error: {
           message: error.message || '篩選庫存資料失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
   // 新增庫存項目
-  static async createInventoryItem(item: Omit<InventoryItem, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<InventoryItem>> {
+  static async createInventoryItem(
+    item: Omit<InventoryItem, 'id' | 'created_at' | 'updated_at'>,
+  ): Promise<ApiResponse<InventoryItem>> {
     try {
       const { data, error } = await supabase
         .from(TABLES.INVENTORY_ITEMS)
@@ -246,14 +272,17 @@ export class InventoryService {
         error: {
           message: error.message || '新增庫存項目失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
   // 更新庫存項目
-  static async updateInventoryItem(id: string, updates: Partial<InventoryItem>): Promise<ApiResponse<InventoryItem>> {
+  static async updateInventoryItem(
+    id: string,
+    updates: Partial<InventoryItem>,
+  ): Promise<ApiResponse<InventoryItem>> {
     try {
       const { data, error } = await supabase
         .from(TABLES.INVENTORY_ITEMS)
@@ -271,8 +300,8 @@ export class InventoryService {
         error: {
           message: error.message || '更新庫存項目失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -280,10 +309,7 @@ export class InventoryService {
   // 刪除庫存項目
   static async deleteInventoryItem(id: string): Promise<ApiResponse<boolean>> {
     try {
-      const { error } = await supabase
-        .from(TABLES.INVENTORY_ITEMS)
-        .delete()
-        .eq('id', id)
+      const { error } = await supabase.from(TABLES.INVENTORY_ITEMS).delete().eq('id', id)
 
       if (error) throw error
 
@@ -294,8 +320,8 @@ export class InventoryService {
         error: {
           message: error.message || '刪除庫存項目失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -320,14 +346,16 @@ export class TransactionService {
         error: {
           message: error.message || '獲取交易記錄失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
   // 新增交易記錄
-  static async createTransaction(transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<Transaction>> {
+  static async createTransaction(
+    transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>,
+  ): Promise<ApiResponse<Transaction>> {
     try {
       const { data, error } = await supabase
         .from(TABLES.TRANSACTIONS)
@@ -344,14 +372,17 @@ export class TransactionService {
         error: {
           message: error.message || '新增交易記錄失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
   // 更新交易記錄
-  static async updateTransaction(id: string, updates: Partial<Transaction>): Promise<ApiResponse<Transaction>> {
+  static async updateTransaction(
+    id: string,
+    updates: Partial<Transaction>,
+  ): Promise<ApiResponse<Transaction>> {
     try {
       const { data, error } = await supabase
         .from(TABLES.TRANSACTIONS)
@@ -369,8 +400,8 @@ export class TransactionService {
         error: {
           message: error.message || '更新交易記錄失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -395,14 +426,16 @@ export class CustomerService {
         error: {
           message: error.message || '獲取客戶資料失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
   // 新增客戶
-  static async createCustomer(customer: Omit<Customer, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<Customer>> {
+  static async createCustomer(
+    customer: Omit<Customer, 'id' | 'created_at' | 'updated_at'>,
+  ): Promise<ApiResponse<Customer>> {
     try {
       // 過濾掉空值，避免約束檢查錯誤
       const cleanCustomer: Record<string, any> = {}
@@ -430,14 +463,17 @@ export class CustomerService {
         error: {
           message: error.message || '新增客戶失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
   // 更新客戶
-  static async updateCustomer(id: string, updates: Partial<Customer>): Promise<ApiResponse<Customer>> {
+  static async updateCustomer(
+    id: string,
+    updates: Partial<Customer>,
+  ): Promise<ApiResponse<Customer>> {
     try {
       // 過濾掉空值，避免約束檢查錯誤
       const cleanUpdates: Record<string, any> = {}
@@ -466,8 +502,8 @@ export class CustomerService {
         error: {
           message: error.message || '更新客戶失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -492,8 +528,8 @@ export class ProductService {
         error: {
           message: error.message || '獲取商品資料失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -518,8 +554,8 @@ export class ProductCategoryService {
         error: {
           message: error.message || '獲取商品分類失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -544,8 +580,8 @@ export class PaymentMethodService {
         error: {
           message: error.message || '獲取付款方式失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -570,8 +606,8 @@ export class OurBankDataService {
         error: {
           message: error.message || '獲取銀行資料失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -580,34 +616,34 @@ export class OurBankDataService {
 // 統計服務
 export class StatisticsService {
   // 獲取庫存統計
-  static async getInventoryStatistics(): Promise<ApiResponse<{
-    total: number
-    available: number
-    sold: number
-    reserved: number
-    personal: number
-    welfare: number
-    stolen: number
-    refunded: number
-    compensation: number
-  }>> {
+  static async getInventoryStatistics(): Promise<
+    ApiResponse<{
+      total: number
+      available: number
+      sold: number
+      reserved: number
+      personal: number
+      welfare: number
+      stolen: number
+      refunded: number
+      compensation: number
+    }>
+  > {
     try {
-      const { data, error } = await supabase
-        .from(TABLES.INVENTORY_ITEMS)
-        .select('status')
+      const { data, error } = await supabase.from(TABLES.INVENTORY_ITEMS).select('status')
 
       if (error) throw error
 
       const stats = {
         total: data.length,
-        available: data.filter(item => item.status === '未售').length,
-        sold: data.filter(item => item.status === '已售').length,
-        reserved: data.filter(item => item.status === '預訂中').length,
-        personal: data.filter(item => item.status === '自用').length,
-        welfare: data.filter(item => item.status === '福利').length,
-        stolen: data.filter(item => item.status === '被盜').length,
-        refunded: data.filter(item => item.status === '淘退').length,
-        compensation: data.filter(item => item.status === '補償').length
+        available: data.filter((item) => item.status === '未售').length,
+        sold: data.filter((item) => item.status === '已售').length,
+        reserved: data.filter((item) => item.status === '預訂中').length,
+        personal: data.filter((item) => item.status === '自用').length,
+        welfare: data.filter((item) => item.status === '福利').length,
+        stolen: data.filter((item) => item.status === '被盜').length,
+        refunded: data.filter((item) => item.status === '淘退').length,
+        compensation: data.filter((item) => item.status === '補償').length,
       }
 
       return { data: stats, error: null }
@@ -617,18 +653,20 @@ export class StatisticsService {
         error: {
           message: error.message || '獲取統計資料失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
   // 獲取營收統計
-  static async getRevenueStatistics(): Promise<ApiResponse<{
-    totalRevenue: number
-    monthlyRevenue: number
-    totalTransactions: number
-  }>> {
+  static async getRevenueStatistics(): Promise<
+    ApiResponse<{
+      totalRevenue: number
+      monthlyRevenue: number
+      totalTransactions: number
+    }>
+  > {
     try {
       const { data, error } = await supabase
         .from(TABLES.TRANSACTIONS)
@@ -639,15 +677,18 @@ export class StatisticsService {
       const now = new Date()
       const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
-      const totalRevenue = data.reduce((sum, transaction) => sum + (transaction.amount_received || 0), 0)
+      const totalRevenue = data.reduce(
+        (sum, transaction) => sum + (transaction.amount_received || 0),
+        0,
+      )
       const monthlyRevenue = data
-        .filter(transaction => new Date(transaction.created_at) >= thisMonth)
+        .filter((transaction) => new Date(transaction.created_at) >= thisMonth)
         .reduce((sum, transaction) => sum + (transaction.amount_received || 0), 0)
 
       const stats = {
         totalRevenue,
         monthlyRevenue,
-        totalTransactions: data.length
+        totalTransactions: data.length,
       }
 
       return { data: stats, error: null }
@@ -657,8 +698,8 @@ export class StatisticsService {
         error: {
           message: error.message || '獲取營收統計失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -673,8 +714,8 @@ export class NewsService {
         .from(TABLES.NEWS)
         .select('*')
         .eq('show', true)
-        .order('pin', { ascending: false })  // 置頂優先
-        .order('show_date', { ascending: false })  // 上架日期由新到舊
+        .order('pin', { ascending: false }) // 置頂優先
+        .order('show_date', { ascending: false }) // 上架日期由新到舊
 
       if (error) throw error
 
@@ -685,8 +726,8 @@ export class NewsService {
         error: {
           message: error.message || '獲取新聞資料失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -697,8 +738,8 @@ export class NewsService {
       const { data, error } = await supabase
         .from(TABLES.NEWS)
         .select('*')
-        .order('pin', { ascending: false })  // 置頂優先
-        .order('show_date', { ascending: false })  // 上架日期由新到舊
+        .order('pin', { ascending: false }) // 置頂優先
+        .order('show_date', { ascending: false }) // 上架日期由新到舊
 
       if (error) throw error
 
@@ -709,8 +750,8 @@ export class NewsService {
         error: {
           message: error.message || '獲取所有新聞資料失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -718,11 +759,7 @@ export class NewsService {
   // 根據 ID 獲取單個新聞
   static async getNewsById(id: string): Promise<ApiResponse<News>> {
     try {
-      const { data, error } = await supabase
-        .from(TABLES.NEWS)
-        .select('*')
-        .eq('id', id)
-        .single()
+      const { data, error } = await supabase.from(TABLES.NEWS).select('*').eq('id', id).single()
 
       if (error) throw error
 
@@ -733,8 +770,8 @@ export class NewsService {
         error: {
           message: error.message || '獲取新聞詳情失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -747,8 +784,8 @@ export class NewsService {
         .select('*')
         .eq('category', category)
         .eq('show', true)
-        .order('pin', { ascending: false })  // 置頂優先
-        .order('show_date', { ascending: false })  // 上架日期由新到舊
+        .order('pin', { ascending: false }) // 置頂優先
+        .order('show_date', { ascending: false }) // 上架日期由新到舊
 
       if (error) throw error
 
@@ -759,8 +796,8 @@ export class NewsService {
         error: {
           message: error.message || '獲取分類新聞失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -777,7 +814,7 @@ export class NewsService {
       if (error) throw error
 
       // 去重並返回唯一的分類列表
-      const uniqueCategories = [...new Set(data?.map(item => item.category) || [])]
+      const uniqueCategories = [...new Set(data?.map((item) => item.category) || [])]
       return { data: uniqueCategories, error: null }
     } catch (error: any) {
       return {
@@ -785,36 +822,36 @@ export class NewsService {
         error: {
           message: error.message || '獲取分類列表失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
-
   // 新增新聞
-  static async createNews(news: Omit<News, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<News>> {
+  static async createNews(
+    news: Omit<News, 'id' | 'created_at' | 'updated_at'>,
+  ): Promise<ApiResponse<News>> {
     try {
       console.log('嘗試新增新聞:', news)
 
-      const { data, error } = await supabase
-        .from(TABLES.NEWS)
-        .insert([news])
-        .select()
-        .single()
+      const { data, error } = await supabase.from(TABLES.NEWS).insert([news]).select().single()
 
       if (error) {
         console.error('Supabase 錯誤:', error)
 
         // 處理 ID 衝突錯誤
-        if (error.code === '23505' && error.message.includes('duplicate key value violates unique constraint "news_pkey"')) {
+        if (
+          error.code === '23505' &&
+          error.message.includes('duplicate key value violates unique constraint "news_pkey"')
+        ) {
           return {
             data: null,
             error: {
               message: '資料庫 ID 序列衝突，請聯繫管理員重置序列值',
               details: error.details,
-              code: error.code
-            }
+              code: error.code,
+            },
           }
         }
 
@@ -830,8 +867,8 @@ export class NewsService {
         error: {
           message: error.message || '新增新聞失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -855,8 +892,8 @@ export class NewsService {
         error: {
           message: error.message || '更新新聞失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -864,10 +901,7 @@ export class NewsService {
   // 刪除新聞
   static async deleteNews(id: string): Promise<ApiResponse<boolean>> {
     try {
-      const { error } = await supabase
-        .from(TABLES.NEWS)
-        .delete()
-        .eq('id', id)
+      const { error } = await supabase.from(TABLES.NEWS).delete().eq('id', id)
 
       if (error) throw error
 
@@ -878,8 +912,8 @@ export class NewsService {
         error: {
           message: error.message || '刪除新聞失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -912,8 +946,8 @@ export class NewsService {
         error: {
           message: error.message || '更新瀏覽次數失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -940,8 +974,8 @@ export class NewsService {
         error: {
           message: error.message || '獲取分類新聞失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -968,8 +1002,8 @@ export class NewsService {
         error: {
           message: error.message || '搜尋新聞失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -994,8 +1028,8 @@ export class HomepageHeroService {
         error: {
           message: error.message || '獲取首頁 Hero 資料失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -1018,14 +1052,16 @@ export class HomepageHeroService {
         error: {
           message: error.message || '獲取首頁 Hero 詳情失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
   // 新增首頁 Hero 內容
-  static async createHomepageHero(hero: Omit<HomepageHero, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<HomepageHero>> {
+  static async createHomepageHero(
+    hero: Omit<HomepageHero, 'id' | 'created_at' | 'updated_at'>,
+  ): Promise<ApiResponse<HomepageHero>> {
     try {
       const { data, error } = await supabase
         .from(TABLES.HOMEPAGE_HERO)
@@ -1042,14 +1078,17 @@ export class HomepageHeroService {
         error: {
           message: error.message || '新增首頁 Hero 內容失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
   // 更新首頁 Hero 內容
-  static async updateHomepageHero(id: string, updates: Partial<HomepageHero>): Promise<ApiResponse<HomepageHero>> {
+  static async updateHomepageHero(
+    id: string,
+    updates: Partial<HomepageHero>,
+  ): Promise<ApiResponse<HomepageHero>> {
     try {
       const { data, error } = await supabase
         .from(TABLES.HOMEPAGE_HERO)
@@ -1067,8 +1106,8 @@ export class HomepageHeroService {
         error: {
           message: error.message || '更新首頁 Hero 內容失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -1076,10 +1115,7 @@ export class HomepageHeroService {
   // 刪除首頁 Hero 內容
   static async deleteHomepageHero(id: string): Promise<ApiResponse<boolean>> {
     try {
-      const { error } = await supabase
-        .from(TABLES.HOMEPAGE_HERO)
-        .delete()
-        .eq('id', id)
+      const { error } = await supabase.from(TABLES.HOMEPAGE_HERO).delete().eq('id', id)
 
       if (error) throw error
 
@@ -1090,8 +1126,8 @@ export class HomepageHeroService {
         error: {
           message: error.message || '刪除首頁 Hero 內容失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -1117,8 +1153,8 @@ export class PriceListService {
         error: {
           message: error.message || '獲取價格列表資料失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -1141,8 +1177,8 @@ export class PriceListService {
         error: {
           message: error.message || '獲取價格列表項目詳情失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -1165,14 +1201,16 @@ export class PriceListService {
         error: {
           message: error.message || '獲取分類價格列表失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
   // 新增價格列表項目
-  static async createPriceListItem(item: Omit<PriceList, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<PriceList>> {
+  static async createPriceListItem(
+    item: Omit<PriceList, 'id' | 'created_at' | 'updated_at'>,
+  ): Promise<ApiResponse<PriceList>> {
     try {
       const { data, error } = await supabase
         .from(TABLES.PRICE_LIST)
@@ -1189,14 +1227,17 @@ export class PriceListService {
         error: {
           message: error.message || '新增價格列表項目失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
   // 更新價格列表項目
-  static async updatePriceListItem(id: string, updates: Partial<PriceList>): Promise<ApiResponse<PriceList>> {
+  static async updatePriceListItem(
+    id: string,
+    updates: Partial<PriceList>,
+  ): Promise<ApiResponse<PriceList>> {
     try {
       const { data, error } = await supabase
         .from(TABLES.PRICE_LIST)
@@ -1214,8 +1255,8 @@ export class PriceListService {
         error: {
           message: error.message || '更新價格列表項目失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -1223,10 +1264,7 @@ export class PriceListService {
   // 刪除價格列表項目
   static async deletePriceListItem(id: string): Promise<ApiResponse<boolean>> {
     try {
-      const { error } = await supabase
-        .from(TABLES.PRICE_LIST)
-        .delete()
-        .eq('id', id)
+      const { error } = await supabase.from(TABLES.PRICE_LIST).delete().eq('id', id)
 
       if (error) throw error
 
@@ -1237,8 +1275,8 @@ export class PriceListService {
         error: {
           message: error.message || '刪除價格列表項目失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -1254,7 +1292,7 @@ export class PriceListService {
       if (error) throw error
 
       // 去重並返回唯一的分類列表
-      const uniqueCategories = [...new Set(data?.map(item => item.category) || [])]
+      const uniqueCategories = [...new Set(data?.map((item) => item.category) || [])]
       return { data: uniqueCategories, error: null }
     } catch (error: any) {
       return {
@@ -1262,8 +1300,8 @@ export class PriceListService {
         error: {
           message: error.message || '獲取分類列表失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -1287,14 +1325,16 @@ export class PriceListService {
         error: {
           message: error.message || '獲取前台價格列表資料失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
   // 根據分類獲取前台顯示的價格列表項目
-  static async getPublicPriceListItemsByCategory(category: string): Promise<ApiResponse<PriceList[]>> {
+  static async getPublicPriceListItemsByCategory(
+    category: string,
+  ): Promise<ApiResponse<PriceList[]>> {
     try {
       const { data, error } = await supabase
         .from(TABLES.PRICE_LIST)
@@ -1312,8 +1352,8 @@ export class PriceListService {
         error: {
           message: error.message || '獲取前台分類價格列表失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -1331,8 +1371,11 @@ export class PriceListService {
 
       // 去重並按照 category_sort 排序
       const categoryMap = new Map<string, number>()
-      data?.forEach(item => {
-        if (!categoryMap.has(item.category) || categoryMap.get(item.category)! > item.category_sort) {
+      data?.forEach((item) => {
+        if (
+          !categoryMap.has(item.category) ||
+          categoryMap.get(item.category)! > item.category_sort
+        ) {
           categoryMap.set(item.category, item.category_sort)
         }
       })
@@ -1348,8 +1391,8 @@ export class PriceListService {
         error: {
           message: error.message || '獲取前台分類列表失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -1374,8 +1417,8 @@ export class CannedMessageService {
         error: {
           message: error.message || '獲取罐頭訊息資料失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -1398,14 +1441,16 @@ export class CannedMessageService {
         error: {
           message: error.message || '獲取罐頭訊息詳情失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
   // 根據分類獲取罐頭訊息
-  static async getCannedMessagesByCategory(category: string): Promise<ApiResponse<CannedMessage[]>> {
+  static async getCannedMessagesByCategory(
+    category: string,
+  ): Promise<ApiResponse<CannedMessage[]>> {
     try {
       const { data, error } = await supabase
         .from(TABLES.CANNED_MESSAGES)
@@ -1422,8 +1467,8 @@ export class CannedMessageService {
         error: {
           message: error.message || '獲取分類罐頭訊息失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -1446,14 +1491,16 @@ export class CannedMessageService {
         error: {
           message: error.message || '搜尋罐頭訊息失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
   // 新增罐頭訊息
-  static async createCannedMessage(message: Omit<CannedMessage, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<CannedMessage>> {
+  static async createCannedMessage(
+    message: Omit<CannedMessage, 'id' | 'created_at' | 'updated_at'>,
+  ): Promise<ApiResponse<CannedMessage>> {
     try {
       const { data, error } = await supabase
         .from(TABLES.CANNED_MESSAGES)
@@ -1470,14 +1517,17 @@ export class CannedMessageService {
         error: {
           message: error.message || '新增罐頭訊息失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
 
   // 更新罐頭訊息
-  static async updateCannedMessage(id: string, updates: Partial<CannedMessage>): Promise<ApiResponse<CannedMessage>> {
+  static async updateCannedMessage(
+    id: string,
+    updates: Partial<CannedMessage>,
+  ): Promise<ApiResponse<CannedMessage>> {
     try {
       // 移除 id, created_at 等系統欄位，但保留 updated_at
       const cleanUpdates = { ...updates }
@@ -1487,7 +1537,7 @@ export class CannedMessageService {
       // 手動添加 updated_at
       const updateData = {
         ...cleanUpdates,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       }
 
       const { data, error } = await supabase
@@ -1506,8 +1556,8 @@ export class CannedMessageService {
         error: {
           message: error.message || '更新罐頭訊息失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -1530,7 +1580,7 @@ export class CannedMessageService {
         .from(TABLES.CANNED_MESSAGES)
         .update({
           usage_count: newUsageCount,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', id)
         .select()
@@ -1545,8 +1595,8 @@ export class CannedMessageService {
         error: {
           message: error.message || '更新使用次數失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -1554,10 +1604,7 @@ export class CannedMessageService {
   // 刪除罐頭訊息
   static async deleteCannedMessage(id: string): Promise<ApiResponse<boolean>> {
     try {
-      const { error } = await supabase
-        .from(TABLES.CANNED_MESSAGES)
-        .delete()
-        .eq('id', id)
+      const { error } = await supabase.from(TABLES.CANNED_MESSAGES).delete().eq('id', id)
 
       if (error) throw error
 
@@ -1568,8 +1615,8 @@ export class CannedMessageService {
         error: {
           message: error.message || '刪除罐頭訊息失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }
@@ -1585,7 +1632,7 @@ export class CannedMessageService {
       if (error) throw error
 
       // 去重並返回唯一的分類列表
-      const uniqueCategories = [...new Set(data?.map(item => item.category) || [])]
+      const uniqueCategories = [...new Set(data?.map((item) => item.category) || [])]
       return { data: uniqueCategories, error: null }
     } catch (error: any) {
       return {
@@ -1593,8 +1640,360 @@ export class CannedMessageService {
         error: {
           message: error.message || '獲取分類列表失敗',
           details: error.details,
-          code: error.code
-        }
+          code: error.code,
+        },
+      }
+    }
+  }
+}
+
+// 戰隊申請服務
+export class ClanApplicationService {
+  // 創建新申請
+  static async createApplication(
+    application: Omit<ClanApplication, 'id' | 'created_at' | 'updated_at'>,
+  ): Promise<ApiResponse<ClanApplication>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.CLAN_APPLICATIONS)
+        .insert(application)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '提交申請失敗',
+          details: error.details,
+          code: error.code,
+        },
+      }
+    }
+  }
+
+  // 獲取所有申請
+  static async getAllApplications(): Promise<ApiResponse<ClanApplication[]>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.CLAN_APPLICATIONS)
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取申請列表失敗',
+          details: error.details,
+          code: error.code,
+        },
+      }
+    }
+  }
+
+  // 根據 ID 獲取單筆申請
+  static async getApplicationById(id: string): Promise<ApiResponse<ClanApplication>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.CLAN_APPLICATIONS)
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取申請失敗',
+          details: error.details,
+          code: error.code,
+        },
+      }
+    }
+  }
+
+  // 更新申請 (通用更新方法)
+  static async updateApplication(
+    id: string,
+    updates: Partial<Omit<ClanApplication, 'id' | 'created_at' | 'updated_at'>>,
+  ): Promise<ApiResponse<ClanApplication>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.CLAN_APPLICATIONS)
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '更新申請失敗',
+          details: error.details,
+          code: error.code,
+        },
+      }
+    }
+  }
+
+  // 刪除申請
+  static async deleteApplication(id: string): Promise<ApiResponse<boolean>> {
+    try {
+      const { error } = await supabase.from(TABLES.CLAN_APPLICATIONS).delete().eq('id', id)
+
+      if (error) throw error
+
+      return { data: true, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '刪除申請失敗',
+          details: error.details,
+          code: error.code,
+        },
+      }
+    }
+  }
+}
+
+// 審核進度服務
+export class ApplicationStatusService {
+  // 創建審核進度記錄（id 與申請的 id 相同）
+  static async createStatus(
+    status: Omit<ApplicationStatus, 'created_at' | 'updated_at'>,
+  ): Promise<ApiResponse<ApplicationStatus>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.APPLICATION_STATUS)
+        .insert(status)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '創建審核進度失敗',
+          details: error.details,
+          code: error.code,
+        },
+      }
+    }
+  }
+
+  // 根據 Steam ID 查詢審核進度（包含申請資料）
+  static async getStatusBySteamId(
+    steamId: string,
+  ): Promise<ApiResponse<ApplicationStatusWithDetails>> {
+    try {
+      // 1. 先查詢審核進度
+      const { data: statusData, error: statusError } = await supabase
+        .from(TABLES.APPLICATION_STATUS)
+        .select('*')
+        .eq('steam_17_id', steamId)
+        .single()
+
+      if (statusError) throw statusError
+
+      // 2. 使用 id 查詢對應的申請資料
+      const { data: applicationData, error: applicationError } = await supabase
+        .from(TABLES.CLAN_APPLICATIONS)
+        .select('*')
+        .eq('id', statusData.id)
+        .single()
+
+      if (applicationError) {
+        // 如果找不到申請資料，仍然返回審核進度
+        console.warn('找不到關聯的申請資料:', applicationError)
+      }
+
+      // 3. 組合資料
+      const result: ApplicationStatusWithDetails = {
+        ...statusData,
+        application: applicationData || undefined
+      }
+
+      return { data: result, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '查詢審核進度失敗',
+          details: error.details,
+          code: error.code,
+        },
+      }
+    }
+  }
+
+  // 獲取所有審核進度（含申請人資料）
+  static async getAllStatusWithDetails(): Promise<ApiResponse<ApplicationStatusWithDetails[]>> {
+    try {
+      // 1. 查詢所有審核進度
+      const { data: statusList, error: statusError } = await supabase
+        .from(TABLES.APPLICATION_STATUS)
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (statusError) throw statusError
+
+      if (!statusList || statusList.length === 0) {
+        return { data: [], error: null }
+      }
+
+      // 2. 獲取所有申請 ID
+      const applicationIds = statusList.map(status => status.id)
+
+      // 3. 批次查詢對應的申請資料
+      const { data: applications, error: applicationError } = await supabase
+        .from(TABLES.CLAN_APPLICATIONS)
+        .select('*')
+        .in('id', applicationIds)
+
+      if (applicationError) {
+        console.warn('查詢申請資料失敗:', applicationError)
+      }
+
+      // 4. 組合資料
+      const result: ApplicationStatusWithDetails[] = statusList.map(status => ({
+        ...status,
+        application: applications?.find(app => app.id === status.id) || undefined
+      }))
+
+      return { data: result, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '獲取審核進度列表失敗',
+          details: error.details,
+          code: error.code,
+        },
+      }
+    }
+  }
+
+  // 更新審核進度
+  static async updateStatus(
+    id: string,
+    updates: Partial<Omit<ApplicationStatus, 'id' | 'steam_17_id' | 'created_at' | 'updated_at'>>,
+  ): Promise<ApiResponse<ApplicationStatus>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLES.APPLICATION_STATUS)
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '更新審核進度失敗',
+          details: error.details,
+          code: error.code,
+        },
+      }
+    }
+  }
+
+  // 根據篩選條件獲取審核進度
+  static async getStatusByFilters(filters: {
+    crazy_clown_discord?: string
+    pubg_official_discord?: string
+    clan_review?: string
+    official_review?: string
+    in_game_application?: string
+    role_assignment?: string
+  }): Promise<ApiResponse<ApplicationStatusWithDetails[]>> {
+    try {
+      // 1. 建立查詢
+      let query = supabase.from(TABLES.APPLICATION_STATUS).select('*')
+
+      // 應用篩選條件
+      if (filters.crazy_clown_discord) {
+        query = query.eq('crazy_clown_discord', filters.crazy_clown_discord)
+      }
+      if (filters.pubg_official_discord) {
+        query = query.eq('pubg_official_discord', filters.pubg_official_discord)
+      }
+      if (filters.clan_review) {
+        query = query.eq('clan_review', filters.clan_review)
+      }
+      if (filters.official_review) {
+        query = query.eq('official_review', filters.official_review)
+      }
+      if (filters.in_game_application) {
+        query = query.eq('in_game_application', filters.in_game_application)
+      }
+      if (filters.role_assignment) {
+        query = query.eq('role_assignment', filters.role_assignment)
+      }
+
+      query = query.order('created_at', { ascending: false })
+
+      const { data: statusList, error: statusError } = await query
+
+      if (statusError) throw statusError
+
+      if (!statusList || statusList.length === 0) {
+        return { data: [], error: null }
+      }
+
+      // 2. 批次查詢對應的申請資料
+      const applicationIds = statusList.map(status => status.id)
+      const { data: applications, error: applicationError } = await supabase
+        .from(TABLES.CLAN_APPLICATIONS)
+        .select('*')
+        .in('id', applicationIds)
+
+      if (applicationError) {
+        console.warn('查詢申請資料失敗:', applicationError)
+      }
+
+      // 3. 組合資料
+      const result: ApplicationStatusWithDetails[] = statusList.map(status => ({
+        ...status,
+        application: applications?.find(app => app.id === status.id) || undefined
+      }))
+
+      return { data: result, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '篩選審核進度失敗',
+          details: error.details,
+          code: error.code,
+        },
       }
     }
   }
