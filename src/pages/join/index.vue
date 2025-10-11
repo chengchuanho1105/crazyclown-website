@@ -160,14 +160,10 @@ const sendToDiscord = async (
         },
         {
           name: '',
-          value: `[🔍 審核進度查詢](https://crazyclown.online/join/${steamId})`,
+          value: `### [🔍 審核進度查詢](https://crazyclown.online/join/${steamId})`,
           inline: false
         },
       ],
-      timestamp: new Date().toISOString(),
-      footer: {
-        text: 'Crazy Clown 戰隊申請系統'
-      }
     }
 
     // 發送到 Discord
