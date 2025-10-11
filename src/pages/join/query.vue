@@ -55,7 +55,8 @@ const filters = ref({
   clan_review: '',
   official_review: '',
   in_game_application: '',
-  role_assignment: ''
+  role_assignment: '',
+  is_closed: ''
 })
 
 // 搜尋
@@ -115,6 +116,9 @@ const filteredList = computed(() => {
   }
   if (filters.value.role_assignment) {
     filtered = filtered.filter(item => item.role_assignment === filters.value.role_assignment)
+  }
+  if (filters.value.is_closed !== '') {
+    filtered = filtered.filter(item => item.is_closed === (filters.value.is_closed === 'true'))
   }
 
   return filtered
@@ -188,7 +192,7 @@ const sendDiscordNotification = async (application: ClanApplication) => {
     const embed = {
       title: '📢 審核進度已更新',
       description: ``,
-      color: 0x3b82f6, // 藍色
+      color: 0xff4000, // #FF4000
       fields: [
         {
           name: '',
@@ -331,7 +335,8 @@ const clearFilters = () => {
     clan_review: '',
     official_review: '',
     in_game_application: '',
-    role_assignment: ''
+    role_assignment: '',
+    is_closed: ''
   }
   searchQuery.value = ''
 }
@@ -350,6 +355,15 @@ const statusOptions = {
   official_review: ['⚠️ 待前項完成', '👁️ 審核中', '⭕ 已通過', '❌ 未通過'],
   in_game_application: ['❌ 未申請', '⭕ 已申請', '⚠️ 審核未通過'],
   role_assignment: ['⚠️ 待前項完成', '❌ 未申請', '⚠️ 審核未通過', '⭕ 已發放']
+}
+
+// 根據狀態獲取背景顏色類別
+const getStatusBgClass = (status: string): string => {
+  if (status.includes('⭕')) return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
+  if (status.includes('⚠️')) return 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200'
+  if (status.includes('❌')) return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'
+  if (status.includes('👁️')) return 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200'
+  return ''
 }
 
 onMounted(() => {
@@ -392,7 +406,7 @@ onMounted(() => {
         <!-- 篩選器 -->
         <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
           <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">快速篩選</h3>
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
             <select
               v-model="filters.crazy_clown_discord"
               class="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
@@ -439,6 +453,15 @@ onMounted(() => {
             >
               <option value="">身分組發放 (全部)</option>
               <option v-for="opt in statusOptions.role_assignment" :key="opt" :value="opt">{{ opt }}</option>
+            </select>
+
+            <select
+              v-model="filters.is_closed"
+              class="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">是否結案 (全部)</option>
+              <option value="false">未結案</option>
+              <option value="true">已結案</option>
             </select>
           </div>
         </div>
@@ -616,8 +639,8 @@ onMounted(() => {
                     </select>
                   </div>
                   <div v-else>
-                    <div class="text-xs mb-1">{{ item.crazy_clown_discord }}</div>
-                    <div class="text-xs">{{ item.pubg_official_discord }}</div>
+                    <div class="text-xs mb-1 px-2 py-1 rounded inline-block" :class="getStatusBgClass(item.crazy_clown_discord)">{{ item.crazy_clown_discord }}</div>
+                    <div class="text-xs px-2 py-1 rounded inline-block" :class="getStatusBgClass(item.pubg_official_discord)">{{ item.pubg_official_discord }}</div>
                   </div>
                 </td>
 
@@ -640,7 +663,7 @@ onMounted(() => {
                     />
                   </div>
                   <div v-else>
-                    <div class="text-xs mb-1">{{ item.clan_review }}</div>
+                    <div class="text-xs mb-1 px-2 py-1 rounded inline-block" :class="getStatusBgClass(item.clan_review)">{{ item.clan_review }}</div>
                     <div v-if="item.clan_review_reason" class="text-xs text-red-600 dark:text-red-400">
                       {{ item.clan_review_reason }}
                     </div>
@@ -666,7 +689,7 @@ onMounted(() => {
                     />
                   </div>
                   <div v-else>
-                    <div class="text-xs mb-1">{{ item.official_review }}</div>
+                    <div class="text-xs mb-1 px-2 py-1 rounded inline-block" :class="getStatusBgClass(item.official_review)">{{ item.official_review }}</div>
                     <div v-if="item.official_review_reason" class="text-xs text-red-600 dark:text-red-400">
                       {{ item.official_review_reason }}
                     </div>
@@ -692,8 +715,8 @@ onMounted(() => {
                     </select>
                   </div>
                   <div v-else>
-                    <div class="text-xs mb-1">{{ item.in_game_application }}</div>
-                    <div class="text-xs">{{ item.role_assignment }}</div>
+                    <div class="text-xs mb-1 px-2 py-1 rounded inline-block" :class="getStatusBgClass(item.in_game_application)">{{ item.in_game_application }}</div>
+                    <div class="text-xs px-2 py-1 rounded inline-block" :class="getStatusBgClass(item.role_assignment)">{{ item.role_assignment }}</div>
                   </div>
                 </td>
 

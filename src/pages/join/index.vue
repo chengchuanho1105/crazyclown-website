@@ -146,7 +146,7 @@ const sendToDiscord = async (
     // 建立 Discord Embed 訊息
     const embed = {
       title: `📜 ${applicationData.nickName}[${applicationData.pubg_nickname}] 的戰隊申請`,
-      color: 0x5865F2, // Discord 藍色
+      color: 0xff4000, // #FF4000
       fields: [
         {
           name: '',
