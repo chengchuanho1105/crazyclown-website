@@ -228,6 +228,7 @@ export interface ClanApplication {
   id: string  // 申請編號 (UUID)
   nickName: string  // 暱稱 (注意：資料庫欄位為 nickName)
   discord_username: string  // Discord 使用者名稱
+  discord_uid: string | null  // Discord 用戶 ID (用於 @ 通知)
   clan_applied: string  // 申請的戰隊 (皆可/一軍/二軍)
   pubg_nickname: string  // 遊戲 ID
   steam_17_id: string  // Steam 17位數字ID
@@ -238,6 +239,7 @@ export interface ClanApplication {
   has_referrer: boolean  // 是否有介紹人
   introducer_pubg_nickname: string | null  // 介紹人姓名
   notes: string | null  // 備註
+  thread_id: string | null  // Discord 討論串 ID
 
   // 審核進度狀態
   crazy_clown_discord: '❌ 未加入' | '⚠️ 已加入，未完成報到' | '⭕ 已加入'
@@ -249,6 +251,7 @@ export interface ClanApplication {
   in_game_application: '❌ 未申請' | '⭕ 已申請' | '⚠️ 審核未通過'
   role_assignment: '⚠️ 待前項完成' | '❌ 未申請' | '⚠️ 審核未通過' | '⭕ 已發放'
 
+  is_closed: boolean  // 是否結案
   created_at: string  // 建立時間
   updated_at: string  // 更新時間
 }

@@ -199,6 +199,7 @@ const handleSubmit = async (event: Event) => {
     const applicationData = {
       nickName: nickName.value.value as string, // 注意：資料庫欄位為 nickName (駝峰式)
       discord_username: discordUsername.value.value as string,
+      discord_uid: null, // Discord UID，由管理員手動更新
       clan_applied: clan_applied.value.value as string,
       pubg_nickname: pubgGameNickname.value.value as string,
       steam_17_id: steam17Id.value.value as string,
@@ -212,6 +213,7 @@ const handleSubmit = async (event: Event) => {
       has_referrer: hasReferrer.value,
       introducer_pubg_nickname: hasReferrer.value ? (referrerPubgNickname.value.value as string) : null,
       notes: notes.value.value ? (notes.value.value as string) : null,
+      thread_id: null, // Discord 討論串 ID，由管理員手動更新
 
       // 審核進度欄位的默認值
       crazy_clown_discord: '❌ 未加入' as const,
@@ -221,7 +223,8 @@ const handleSubmit = async (event: Event) => {
       official_review: '⚠️ 待前項完成' as const,
       official_review_reason: null,
       in_game_application: '❌ 未申請' as const,
-      role_assignment: '⚠️ 待前項完成' as const
+      role_assignment: '⚠️ 待前項完成' as const,
+      is_closed: false  // 預設未結案
     }
 
     try {
