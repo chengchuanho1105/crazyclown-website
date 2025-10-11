@@ -98,6 +98,12 @@ const isSubmitting = ref(false) // 提交中狀態
 // Discord Webhook URL（建議放在環境變數中）
 const DISCORD_WEBHOOK_URL = import.meta.env.VITE_DISCORD_WEBHOOK_URL || ''
 
+// 在開發時顯示環境變數狀態
+console.log('環境變數檢查:', {
+  hasWebhookUrl: !!DISCORD_WEBHOOK_URL,
+  allEnvVars: Object.keys(import.meta.env).filter(key => key.startsWith('VITE_'))
+})
+
 // 計算表單是否有效
 const isFormValid = computed(() => {
   return (

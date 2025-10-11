@@ -61,15 +61,18 @@
   # 請在 Netlify Dashboard 中設定以下環境變數：
   # VITE_SUPABASE_URL = "your_production_supabase_url"
   # VITE_SUPABASE_ANON_KEY = "your_production_supabase_anon_key"
+  # VITE_DISCORD_WEBHOOK_URL = "your_discord_webhook_url"
 
 [context.deploy-preview.environment]
   VITE_APP_ENV = "staging"
   # 請在 Netlify Dashboard 中設定以下環境變數：
   # VITE_SUPABASE_URL = "your_staging_supabase_url"
   # VITE_SUPABASE_ANON_KEY = "your_staging_supabase_anon_key"
+  # VITE_DISCORD_WEBHOOK_URL = "your_discord_webhook_url"
 
 [context.branch-deploy.environment]
   VITE_APP_ENV = "development"
   # 請在 Netlify Dashboard 中設定以下環境變數：
   # VITE_SUPABASE_URL = "your_development_supabase_url"
-  # VITE_SUPABASE_ANON_KEY = "your_development_supabase_anon_key" 
+  # VITE_SUPABASE_ANON_KEY = "your_development_supabase_anon_key"
+  # VITE_DISCORD_WEBHOOK_URL = "your_discord_webhook_url" 

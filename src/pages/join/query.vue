@@ -174,8 +174,13 @@ const sendDiscordNotification = async (application: ClanApplication) => {
 
   try {
     const DISCORD_WEBHOOK_URL = import.meta.env.VITE_DISCORD_WEBHOOK_URL
+    console.log('環境變數檢查:', {
+      hasWebhookUrl: !!DISCORD_WEBHOOK_URL,
+      webhookUrlPrefix: DISCORD_WEBHOOK_URL ? DISCORD_WEBHOOK_URL.substring(0, 30) + '...' : 'undefined'
+    })
+
     if (!DISCORD_WEBHOOK_URL) {
-      console.warn('未設定 Discord Webhook URL')
+      console.warn('未設定 Discord Webhook URL (環境變數: VITE_DISCORD_WEBHOOK_URL)')
       return
     }
 
