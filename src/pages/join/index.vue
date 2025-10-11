@@ -146,11 +146,22 @@ const sendToDiscord = async (
     // 建立 Discord Embed 訊息
     const embed = {
       title: `📜 ${applicationData.nickName}[${applicationData.pubg_nickname}] 的戰隊申請`,
+      url: `https://crazyclown.online/join/${steamId}`,
       color: 0xff4000, // #FF4000
       fields: [
         {
           name: '',
+          value: `**暱稱：** \`${applicationData.nickName}\``,
+          inline: false
+        },
+        {
+          name: '',
           value: `**Discord 使用者名稱：** \`${applicationData.discord_username}\``,
+          inline: false
+        },
+        {
+          name: '',
+          value: `**遊戲 ID：** \`${applicationData.pubg_nickname}\``,
           inline: false
         },
         {
@@ -160,7 +171,7 @@ const sendToDiscord = async (
         },
         {
           name: '',
-          value: `### [🔍 審核進度查詢](https://crazyclown.online/join/${steamId})`,
+          value: `🔍[查看審核進度](https://crazyclown.online/join/${applicationData.steam_17_id})`,
           inline: false
         },
       ],
