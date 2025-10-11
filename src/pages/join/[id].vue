@@ -4,7 +4,7 @@ defineOptions({ name: 'ApplicationStatusQuery' })
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { ApplicationStatusService } from '@/services/supabaseService'
-import type { ApplicationStatusWithDetails } from '@/config/supabase'
+import type { ClanApplication } from '@/config/supabase'
 
 const route = useRoute()
 
@@ -22,7 +22,7 @@ const getInitialSteamId = () => {
 const steamId = ref(getInitialSteamId())
 const steamIdInput = ref(getInitialSteamId())
 
-const statusData = ref<ApplicationStatusWithDetails | null>(null)
+const statusData = ref<ClanApplication | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
 const showInputForm = ref(true)
@@ -297,7 +297,7 @@ onMounted(() => {
                 <i class="bi bi-person-circle text-2xl text-blue-600 dark:text-blue-400"></i>
                 <div>
                   <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">姓名/暱稱</p>
-                  <p class="font-semibold text-gray-900 dark:text-white">{{ statusData.application?.nickName }}</p>
+                  <p class="font-semibold text-gray-900 dark:text-white">{{ statusData.nickName }}</p>
                 </div>
               </div>
             </div>
@@ -308,7 +308,7 @@ onMounted(() => {
                 <div>
                   <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Discord 使用者名稱</p>
                   <p class="font-mono font-semibold text-gray-900 dark:text-white">{{
-                    statusData.application?.discord_username }}</p>
+                    statusData.discord_username }}</p>
                 </div>
               </div>
             </div>
@@ -318,7 +318,7 @@ onMounted(() => {
                 <i class="bi bi-controller text-2xl text-green-600 dark:text-green-400"></i>
                 <div>
                   <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">PUBG 暱稱</p>
-                  <p class="font-semibold text-gray-900 dark:text-white">{{ statusData.application?.pubg_nickname }}</p>
+                  <p class="font-semibold text-gray-900 dark:text-white">{{ statusData.pubg_nickname }}</p>
                 </div>
               </div>
             </div>
@@ -328,7 +328,7 @@ onMounted(() => {
                 <i class="bi bi-shield-check text-2xl text-indigo-600 dark:text-indigo-400"></i>
                 <div>
                   <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">申請戰隊</p>
-                  <p class="font-semibold text-blue-600 dark:text-blue-400">{{ statusData.application?.clan_applied }}
+                  <p class="font-semibold text-blue-600 dark:text-blue-400">{{ statusData.clan_applied }}
                   </p>
                 </div>
               </div>

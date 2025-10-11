@@ -3,18 +3,35 @@ defineOptions({ name: 'ApplicationStatusList' })
 
 import { ref, computed, onMounted } from 'vue'
 import { ApplicationStatusService } from '@/services/supabaseService'
-import type { ApplicationStatusWithDetails, ApplicationStatus } from '@/config/supabase'
+import type { ClanApplication } from '@/config/supabase'
 import DecorSection from '@/components/DecorSection.vue'
 
 // 資料狀態
-const statusList = ref<ApplicationStatusWithDetails[]>([])
+const statusList = ref<ClanApplication[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
 
 // 內聯編輯狀態
 const editingId = ref<string | null>(null)
-const editingField = ref<string | null>(null)
-const editingValue = ref<string>('')
+const editingValues = ref<{
+  crazy_clown_discord: '❌ 未加入' | '⚠️ 已加入，未完成報到' | '⭕ 已加入'
+  pubg_official_discord: '❌ 未加入' | '⭕ 已加入'
+  clan_review: '⚠️ 前二項未完成' | '👁️ 審核中' | '⭕ 已通過' | '❌ 未通過'
+  clan_review_reason: string | null
+  official_review: '⚠️ 待前項完成' | '👁️ 審核中' | '⭕ 已通過' | '❌ 未通過'
+  official_review_reason: string | null
+  in_game_application: '❌ 未申請' | '⭕ 已申請' | '⚠️ 審核未通過'
+  role_assignment: '⚠️ 待前項完成' | '❌ 未申請' | '⚠️ 審核未通過' | '⭕ 已發放'
+}>({
+  crazy_clown_discord: '❌ 未加入',
+  pubg_official_discord: '❌ 未加入',
+  clan_review: '⚠️ 前二項未完成',
+  clan_review_reason: null,
+  official_review: '⚠️ 待前項完成',
+  official_review_reason: null,
+  in_game_application: '❌ 未申請',
+  role_assignment: '⚠️ 待前項完成'
+})
 
 // 篩選狀態
 const filters = ref({
@@ -59,9 +76,9 @@ const filteredList = computed(() => {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(item =>
       item.steam_17_id.toLowerCase().includes(query) ||
-      item.application?.nickName?.toLowerCase().includes(query) ||
-      item.application?.discord_username?.toLowerCase().includes(query) ||
-      item.application?.pubg_nickname?.toLowerCase().includes(query)
+      item.nickName?.toLowerCase().includes(query) ||
+      item.discord_username?.toLowerCase().includes(query) ||
+      item.pubg_nickname?.toLowerCase().includes(query)
     )
   }
 
@@ -89,29 +106,41 @@ const filteredList = computed(() => {
 })
 
 // 開始編輯
-const startEditing = (id: string, field: string, currentValue: string) => {
-  editingId.value = id
-  editingField.value = field
-  editingValue.value = currentValue
+const startEditing = (item: ClanApplication) => {
+  editingId.value = item.id
+  editingValues.value = {
+    crazy_clown_discord: item.crazy_clown_discord,
+    pubg_official_discord: item.pubg_official_discord,
+    clan_review: item.clan_review,
+    clan_review_reason: item.clan_review_reason || '',
+    official_review: item.official_review,
+    official_review_reason: item.official_review_reason || '',
+    in_game_application: item.in_game_application,
+    role_assignment: item.role_assignment
+  }
 }
 
 // 取消編輯
 const cancelEditing = () => {
   editingId.value = null
-  editingField.value = null
-  editingValue.value = ''
+  editingValues.value = {
+    crazy_clown_discord: '❌ 未加入',
+    pubg_official_discord: '❌ 未加入',
+    clan_review: '⚠️ 前二項未完成',
+    clan_review_reason: null,
+    official_review: '⚠️ 待前項完成',
+    official_review_reason: null,
+    in_game_application: '❌ 未申請',
+    role_assignment: '⚠️ 待前項完成'
+  }
 }
 
 // 保存編輯
 const saveEditing = async () => {
-  if (!editingId.value || !editingField.value) return
+  if (!editingId.value) return
 
   try {
-    const updates: any = {
-      [editingField.value]: editingValue.value
-    }
-
-    const response = await ApplicationStatusService.updateStatus(editingId.value, updates)
+    const response = await ApplicationStatusService.updateStatus(editingId.value, editingValues.value)
 
     if (response.error) {
       error.value = response.error.message
@@ -126,15 +155,23 @@ const saveEditing = async () => {
   }
 }
 
-// 格式化時間
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('zh-TW', {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+// 刪除審核進度
+const deleteStatus = async (id: string) => {
+  if (!confirm('確定要刪除這筆審核進度嗎？')) return
+
+  try {
+    const response = await ApplicationStatusService.deleteStatus(id)
+
+    if (response.error) {
+      error.value = response.error.message
+    } else {
+      // 重新載入資料
+      await loadAllStatus()
+    }
+  } catch (err) {
+    error.value = '刪除審核進度時發生錯誤'
+    console.error('刪除錯誤:', err)
+  }
 }
 
 // 清除所有篩選
@@ -211,7 +248,7 @@ onMounted(() => {
               v-model="filters.crazy_clown_discord"
               class="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             >
-              <option value="">CC Discord (全部)</option>
+              <option value="">Crazy Clown Discord (全部)</option>
               <option v-for="opt in statusOptions.crazy_clown_discord" :key="opt" :value="opt">{{ opt }}</option>
             </select>
 
@@ -219,7 +256,7 @@ onMounted(() => {
               v-model="filters.pubg_official_discord"
               class="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             >
-              <option value="">PUBG Discord (全部)</option>
+              <option value="">PUBG 官方 Discord (全部)</option>
               <option v-for="opt in statusOptions.pubg_official_discord" :key="opt" :value="opt">{{ opt }}</option>
             </select>
 
@@ -330,10 +367,10 @@ onMounted(() => {
                   <div class="flex items-center">
                     <div>
                       <div class="text-sm font-medium text-gray-900 dark:text-white">
-                        {{ item.application?.nickName }}
+                        {{ item.nickName }}
                       </div>
                       <div class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ item.application?.pubg_nickname }}
+                        {{ item.pubg_nickname }}
                       </div>
                       <div class="text-xs text-gray-400 dark:text-gray-500 font-mono">
                         {{ item.steam_17_id }}
@@ -344,76 +381,52 @@ onMounted(() => {
 
                 <!-- 1. CC Discord -->
                 <td class="px-4 py-4">
-                  <div v-if="editingId === item.id && editingField === 'crazy_clown_discord'" class="flex gap-1">
+                  <div v-if="editingId === item.id">
                     <select
-                      v-model="editingValue"
-                      @keyup.enter="saveEditing"
-                      @keyup.escape="cancelEditing"
-                      class="text-xs px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                      autofocus
+                      v-model="editingValues.crazy_clown_discord"
+                      class="text-xs px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white w-full"
                     >
                       <option v-for="opt in statusOptions.crazy_clown_discord" :key="opt" :value="opt">{{ opt }}</option>
                     </select>
-                    <button @click="saveEditing" class="text-green-600 hover:text-green-700">
-                      <i class="bi bi-check-lg"></i>
-                    </button>
-                    <button @click="cancelEditing" class="text-red-600 hover:text-red-700">
-                      <i class="bi bi-x-lg"></i>
-                    </button>
                   </div>
-                  <div v-else @click="startEditing(item.id, 'crazy_clown_discord', item.crazy_clown_discord)"
-                    class="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors">
-                    <span class="text-xl">{{ item.crazy_clown_discord }}</span>
+                  <div v-else class="px-2 py-1">
+                    <span class="text-md">{{ item.crazy_clown_discord }}</span>
                   </div>
                 </td>
 
                 <!-- 2. PUBG Discord -->
                 <td class="px-4 py-4">
-                  <div v-if="editingId === item.id && editingField === 'pubg_official_discord'" class="flex gap-1">
+                  <div v-if="editingId === item.id">
                     <select
-                      v-model="editingValue"
-                      @keyup.enter="saveEditing"
-                      @keyup.escape="cancelEditing"
-                      class="text-xs px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                      autofocus
+                      v-model="editingValues.pubg_official_discord"
+                      class="text-xs px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white w-full"
                     >
                       <option v-for="opt in statusOptions.pubg_official_discord" :key="opt" :value="opt">{{ opt }}</option>
                     </select>
-                    <button @click="saveEditing" class="text-green-600 hover:text-green-700">
-                      <i class="bi bi-check-lg"></i>
-                    </button>
-                    <button @click="cancelEditing" class="text-red-600 hover:text-red-700">
-                      <i class="bi bi-x-lg"></i>
-                    </button>
                   </div>
-                  <div v-else @click="startEditing(item.id, 'pubg_official_discord', item.pubg_official_discord)"
-                    class="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors">
-                    <span class="text-xl">{{ item.pubg_official_discord }}</span>
+                  <div v-else class="px-2 py-1">
+                    <span class="text-md">{{ item.pubg_official_discord }}</span>
                   </div>
                 </td>
 
                 <!-- 3. 戰隊初審 -->
                 <td class="px-4 py-4">
-                  <div v-if="editingId === item.id && editingField === 'clan_review'" class="flex gap-1">
+                  <div v-if="editingId === item.id">
                     <select
-                      v-model="editingValue"
-                      @keyup.enter="saveEditing"
-                      @keyup.escape="cancelEditing"
-                      class="text-xs px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                      autofocus
+                      v-model="editingValues.clan_review"
+                      class="text-xs px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white w-full mb-2"
                     >
                       <option v-for="opt in statusOptions.clan_review" :key="opt" :value="opt">{{ opt }}</option>
                     </select>
-                    <button @click="saveEditing" class="text-green-600 hover:text-green-700">
-                      <i class="bi bi-check-lg"></i>
-                    </button>
-                    <button @click="cancelEditing" class="text-red-600 hover:text-red-700">
-                      <i class="bi bi-x-lg"></i>
-                    </button>
+                    <input
+                      v-model="editingValues.clan_review_reason"
+                      type="text"
+                      placeholder="原因（選填）"
+                      class="text-xs px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white w-full"
+                    />
                   </div>
-                  <div v-else @click="startEditing(item.id, 'clan_review', item.clan_review)"
-                    class="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors">
-                    <span class="text-xl">{{ item.clan_review }}</span>
+                  <div v-else class="px-2 py-1">
+                    <span class="text-md">{{ item.clan_review }}</span>
                     <div v-if="item.clan_review_reason" class="text-xs text-red-600 dark:text-red-400 mt-1">
                       {{ item.clan_review_reason }}
                     </div>
@@ -422,26 +435,22 @@ onMounted(() => {
 
                 <!-- 4. 官方複審 -->
                 <td class="px-4 py-4">
-                  <div v-if="editingId === item.id && editingField === 'official_review'" class="flex gap-1">
+                  <div v-if="editingId === item.id">
                     <select
-                      v-model="editingValue"
-                      @keyup.enter="saveEditing"
-                      @keyup.escape="cancelEditing"
-                      class="text-xs px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                      autofocus
+                      v-model="editingValues.official_review"
+                      class="text-xs px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white w-full mb-2"
                     >
                       <option v-for="opt in statusOptions.official_review" :key="opt" :value="opt">{{ opt }}</option>
                     </select>
-                    <button @click="saveEditing" class="text-green-600 hover:text-green-700">
-                      <i class="bi bi-check-lg"></i>
-                    </button>
-                    <button @click="cancelEditing" class="text-red-600 hover:text-red-700">
-                      <i class="bi bi-x-lg"></i>
-                    </button>
+                    <input
+                      v-model="editingValues.official_review_reason"
+                      type="text"
+                      placeholder="原因（選填）"
+                      class="text-xs px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white w-full"
+                    />
                   </div>
-                  <div v-else @click="startEditing(item.id, 'official_review', item.official_review)"
-                    class="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors">
-                    <span class="text-xl">{{ item.official_review }}</span>
+                  <div v-else class="px-2 py-1">
+                    <span class="text-md">{{ item.official_review }}</span>
                     <div v-if="item.official_review_reason" class="text-xs text-red-600 dark:text-red-400 mt-1">
                       {{ item.official_review_reason }}
                     </div>
@@ -450,84 +459,73 @@ onMounted(() => {
 
                 <!-- 5. 遊戲內申請 -->
                 <td class="px-4 py-4">
-                  <div v-if="editingId === item.id && editingField === 'in_game_application'" class="flex gap-1">
+                  <div v-if="editingId === item.id">
                     <select
-                      v-model="editingValue"
-                      @keyup.enter="saveEditing"
-                      @keyup.escape="cancelEditing"
-                      class="text-xs px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                      autofocus
+                      v-model="editingValues.in_game_application"
+                      class="text-xs px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white w-full"
                     >
                       <option v-for="opt in statusOptions.in_game_application" :key="opt" :value="opt">{{ opt }}</option>
                     </select>
-                    <button @click="saveEditing" class="text-green-600 hover:text-green-700">
-                      <i class="bi bi-check-lg"></i>
-                    </button>
-                    <button @click="cancelEditing" class="text-red-600 hover:text-red-700">
-                      <i class="bi bi-x-lg"></i>
-                    </button>
                   </div>
-                  <div v-else @click="startEditing(item.id, 'in_game_application', item.in_game_application)"
-                    class="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors">
-                    <span class="text-xl">{{ item.in_game_application }}</span>
+                  <div v-else class="px-2 py-1">
+                    <span class="text-md">{{ item.in_game_application }}</span>
                   </div>
                 </td>
 
                 <!-- 6. 身分組發放 -->
                 <td class="px-4 py-4">
-                  <div v-if="editingId === item.id && editingField === 'role_assignment'" class="flex gap-1">
+                  <div v-if="editingId === item.id">
                     <select
-                      v-model="editingValue"
-                      @keyup.enter="saveEditing"
-                      @keyup.escape="cancelEditing"
-                      class="text-xs px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                      autofocus
+                      v-model="editingValues.role_assignment"
+                      class="text-xs px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white w-full"
                     >
                       <option v-for="opt in statusOptions.role_assignment" :key="opt" :value="opt">{{ opt }}</option>
                     </select>
-                    <button @click="saveEditing" class="text-green-600 hover:text-green-700">
-                      <i class="bi bi-check-lg"></i>
-                    </button>
-                    <button @click="cancelEditing" class="text-red-600 hover:text-red-700">
-                      <i class="bi bi-x-lg"></i>
-                    </button>
                   </div>
-                  <div v-else @click="startEditing(item.id, 'role_assignment', item.role_assignment)"
-                    class="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors">
-                    <span class="text-xl">{{ item.role_assignment }}</span>
+                  <div v-else class="px-2 py-1">
+                    <span class="text-md">{{ item.role_assignment }}</span>
                   </div>
                 </td>
 
                 <!-- 操作 -->
                 <td class="px-4 py-4 whitespace-nowrap text-sm">
-                  <div class="flex gap-2">
-                    <a
-                      :href="`/join/${item.steam_17_id}`"
-                      target="_blank"
-                      class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                      title="查看詳情"
+                  <div v-if="editingId === item.id" class="flex gap-2">
+                    <button
+                      @click="saveEditing"
+                      class="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                      title="存檔"
                     >
-                      <i class="bi bi-eye"></i>
-                    </a>
+                      <i class="bi bi-check-lg"></i>
+                    </button>
+                    <button
+                      @click="cancelEditing"
+                      class="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                      title="取消"
+                    >
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                  <div v-else class="flex gap-2">
+                    <button
+                      @click="startEditing(item)"
+                      class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                      title="編輯"
+                    >
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button
+                      @click="deleteStatus(item.id)"
+                      class="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                      title="刪除"
+                    >
+                      <i class="bi bi-trash"></i>
+                    </button>
                   </div>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
-
-      <!-- 使用說明 -->
-      <div class="mt-6 bg-blue-50 dark:bg-blue-950 border-l-4 border-blue-500 p-4 rounded">
-        <h4 class="font-semibold text-blue-900 dark:text-blue-300 mb-2">
-          <i class="bi bi-info-circle"></i> 使用說明
-        </h4>
-        <ul class="list-disc list-inside space-y-1 text-sm text-blue-800 dark:text-blue-300">
-          <li><strong>內聯編輯</strong>：點擊任何狀態圖示即可編輯</li>
-          <li><strong>快速保存</strong>：按 Enter 保存，按 Esc 取消</li>
-          <li><strong>篩選功能</strong>：使用上方下拉選單快速篩選特定狀態</li>
-          <li><strong>搜尋功能</strong>：可搜尋 Steam ID、暱稱、Discord 名稱等</li>
-        </ul>
       </div>
 
     </DecorSection>

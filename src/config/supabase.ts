@@ -53,8 +53,7 @@ export const TABLES = {
   HOMEPAGE_HERO: 'homepage_hero',  // 首頁 Hero 內容
   PRICE_LIST: 'price_list',  // 價格列表
   CANNED_MESSAGES: 'canned_messages',  // 罐頭訊息
-  CLAN_APPLICATIONS: 'pubg_clan_applications',  // 戰隊申請表單
-  APPLICATION_STATUS: 'pubg_application_status'  // 審核進度表
+  CLAN_APPLICATIONS: 'pubg_clan_applications'  // 戰隊申請表單（含審核進度）
 } as const
 
 // 資料庫類型定義
@@ -224,7 +223,7 @@ export interface CannedMessage {
   updated_at: string  // 更新時間
 }
 
-// 戰隊申請表單資料類型定義
+// 戰隊申請表單資料類型定義（含審核進度）
 export interface ClanApplication {
   id: string  // 申請編號 (UUID)
   nickName: string  // 暱稱 (注意：資料庫欄位為 nickName)
@@ -239,14 +238,6 @@ export interface ClanApplication {
   has_referrer: boolean  // 是否有介紹人
   introducer_pubg_nickname: string | null  // 介紹人姓名
   notes: string | null  // 備註
-  created_at: string  // 建立時間
-  updated_at: string  // 更新時間
-}
-
-// 審核進度資料類型定義
-export interface ApplicationStatus {
-  id: string  // 主鍵，同時也是關聯的申請ID (UUID)
-  steam_17_id: string  // Steam 17位ID（唯一識別）
 
   // 審核進度狀態
   crazy_clown_discord: '❌ 未加入' | '⚠️ 已加入，未完成報到' | '⭕ 已加入'
@@ -262,7 +253,23 @@ export interface ApplicationStatus {
   updated_at: string  // 更新時間
 }
 
-// 審核進度（包含申請人資料）
+// @deprecated 已棄用：審核進度已合併到 ClanApplication，使用 ClanApplication 代替
+export interface ApplicationStatus {
+  id: string
+  steam_17_id: string
+  crazy_clown_discord: '❌ 未加入' | '⚠️ 已加入，未完成報到' | '⭕ 已加入'
+  pubg_official_discord: '❌ 未加入' | '⭕ 已加入'
+  clan_review: '⚠️ 前二項未完成' | '👁️ 審核中' | '⭕ 已通過' | '❌ 未通過'
+  clan_review_reason: string | null
+  official_review: '⚠️ 待前項完成' | '👁️ 審核中' | '⭕ 已通過' | '❌ 未通過'
+  official_review_reason: string | null
+  in_game_application: '❌ 未申請' | '⭕ 已申請' | '⚠️ 審核未通過'
+  role_assignment: '⚠️ 待前項完成' | '❌ 未申請' | '⚠️ 審核未通過' | '⭕ 已發放'
+  created_at: string
+  updated_at: string
+}
+
+// @deprecated 已棄用：審核進度已合併到 ClanApplication，直接使用 ClanApplication 代替
 export interface ApplicationStatusWithDetails extends ApplicationStatus {
-  application?: ClanApplication  // 通過 id 關聯查詢到的申請資料
+  application?: ClanApplication
 }

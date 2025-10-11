@@ -15,7 +15,6 @@ import {
   type CannedMessage,
   type ClanApplication,
   type ApplicationStatus,
-  type ApplicationStatusWithDetails,
 } from '@/config/supabase'
 
 // 錯誤處理類型
@@ -1776,13 +1775,13 @@ export class ClanApplicationService {
 
 // 審核進度服務
 export class ApplicationStatusService {
-  // 創建審核進度記錄（id 與申請的 id 相同）
+  // @deprecated 已棄用：審核進度已合併到申請表，使用 ClanApplicationsService.create 創建申請時會同時創建審核進度欄位
   static async createStatus(
     status: Omit<ApplicationStatus, 'created_at' | 'updated_at'>,
   ): Promise<ApiResponse<ApplicationStatus>> {
     try {
       const { data, error } = await supabase
-        .from(TABLES.APPLICATION_STATUS)
+        .from(TABLES.CLAN_APPLICATIONS)
         .insert(status)
         .select()
         .single()
@@ -1802,44 +1801,25 @@ export class ApplicationStatusService {
     }
   }
 
-  // 根據 Steam ID 查詢審核進度（包含申請資料）
+  // 根據 Steam ID 查詢申請（含審核進度）
   static async getStatusBySteamId(
     steamId: string,
-  ): Promise<ApiResponse<ApplicationStatusWithDetails>> {
+  ): Promise<ApiResponse<ClanApplication>> {
     try {
-      // 1. 先查詢審核進度
-      const { data: statusData, error: statusError } = await supabase
-        .from(TABLES.APPLICATION_STATUS)
+      const { data, error } = await supabase
+        .from(TABLES.CLAN_APPLICATIONS)
         .select('*')
         .eq('steam_17_id', steamId)
         .single()
 
-      if (statusError) throw statusError
+      if (error) throw error
 
-      // 2. 使用 id 查詢對應的申請資料
-      const { data: applicationData, error: applicationError } = await supabase
-        .from(TABLES.CLAN_APPLICATIONS)
-        .select('*')
-        .eq('id', statusData.id)
-        .single()
-
-      if (applicationError) {
-        // 如果找不到申請資料，仍然返回審核進度
-        console.warn('找不到關聯的申請資料:', applicationError)
-      }
-
-      // 3. 組合資料
-      const result: ApplicationStatusWithDetails = {
-        ...statusData,
-        application: applicationData || undefined
-      }
-
-      return { data: result, error: null }
+      return { data, error: null }
     } catch (error: any) {
       return {
         data: null,
         error: {
-          message: error.message || '查詢審核進度失敗',
+          message: error.message || '查詢申請失敗',
           details: error.details,
           code: error.code,
         },
@@ -1847,46 +1827,22 @@ export class ApplicationStatusService {
     }
   }
 
-  // 獲取所有審核進度（含申請人資料）
-  static async getAllStatusWithDetails(): Promise<ApiResponse<ApplicationStatusWithDetails[]>> {
+  // 獲取所有申請（含審核進度）
+  static async getAllStatusWithDetails(): Promise<ApiResponse<ClanApplication[]>> {
     try {
-      // 1. 查詢所有審核進度
-      const { data: statusList, error: statusError } = await supabase
-        .from(TABLES.APPLICATION_STATUS)
+      const { data, error } = await supabase
+        .from(TABLES.CLAN_APPLICATIONS)
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (statusError) throw statusError
+      if (error) throw error
 
-      if (!statusList || statusList.length === 0) {
-        return { data: [], error: null }
-      }
-
-      // 2. 獲取所有申請 ID
-      const applicationIds = statusList.map(status => status.id)
-
-      // 3. 批次查詢對應的申請資料
-      const { data: applications, error: applicationError } = await supabase
-        .from(TABLES.CLAN_APPLICATIONS)
-        .select('*')
-        .in('id', applicationIds)
-
-      if (applicationError) {
-        console.warn('查詢申請資料失敗:', applicationError)
-      }
-
-      // 4. 組合資料
-      const result: ApplicationStatusWithDetails[] = statusList.map(status => ({
-        ...status,
-        application: applications?.find(app => app.id === status.id) || undefined
-      }))
-
-      return { data: result, error: null }
+      return { data: data || [], error: null }
     } catch (error: any) {
       return {
         data: null,
         error: {
-          message: error.message || '獲取審核進度列表失敗',
+          message: error.message || '獲取申請列表失敗',
           details: error.details,
           code: error.code,
         },
@@ -1897,11 +1853,11 @@ export class ApplicationStatusService {
   // 更新審核進度
   static async updateStatus(
     id: string,
-    updates: Partial<Omit<ApplicationStatus, 'id' | 'steam_17_id' | 'created_at' | 'updated_at'>>,
-  ): Promise<ApiResponse<ApplicationStatus>> {
+    updates: Partial<Omit<ClanApplication, 'id' | 'steam_17_id' | 'created_at' | 'updated_at'>>,
+  ): Promise<ApiResponse<ClanApplication>> {
     try {
       const { data, error } = await supabase
-        .from(TABLES.APPLICATION_STATUS)
+        .from(TABLES.CLAN_APPLICATIONS)
         .update({
           ...updates,
           updated_at: new Date().toISOString(),
@@ -1925,7 +1881,7 @@ export class ApplicationStatusService {
     }
   }
 
-  // 根據篩選條件獲取審核進度
+  // 根據篩選條件獲取申請（含審核進度）
   static async getStatusByFilters(filters: {
     crazy_clown_discord?: string
     pubg_official_discord?: string
@@ -1933,10 +1889,9 @@ export class ApplicationStatusService {
     official_review?: string
     in_game_application?: string
     role_assignment?: string
-  }): Promise<ApiResponse<ApplicationStatusWithDetails[]>> {
+  }): Promise<ApiResponse<ClanApplication[]>> {
     try {
-      // 1. 建立查詢
-      let query = supabase.from(TABLES.APPLICATION_STATUS).select('*')
+      let query = supabase.from(TABLES.CLAN_APPLICATIONS).select('*')
 
       // 應用篩選條件
       if (filters.crazy_clown_discord) {
@@ -1960,37 +1915,36 @@ export class ApplicationStatusService {
 
       query = query.order('created_at', { ascending: false })
 
-      const { data: statusList, error: statusError } = await query
+      const { data, error } = await query
 
-      if (statusError) throw statusError
+      if (error) throw error
 
-      if (!statusList || statusList.length === 0) {
-        return { data: [], error: null }
-      }
-
-      // 2. 批次查詢對應的申請資料
-      const applicationIds = statusList.map(status => status.id)
-      const { data: applications, error: applicationError } = await supabase
-        .from(TABLES.CLAN_APPLICATIONS)
-        .select('*')
-        .in('id', applicationIds)
-
-      if (applicationError) {
-        console.warn('查詢申請資料失敗:', applicationError)
-      }
-
-      // 3. 組合資料
-      const result: ApplicationStatusWithDetails[] = statusList.map(status => ({
-        ...status,
-        application: applications?.find(app => app.id === status.id) || undefined
-      }))
-
-      return { data: result, error: null }
+      return { data: data || [], error: null }
     } catch (error: any) {
       return {
         data: null,
         error: {
-          message: error.message || '篩選審核進度失敗',
+          message: error.message || '篩選申請失敗',
+          details: error.details,
+          code: error.code,
+        },
+      }
+    }
+  }
+
+  // 刪除申請（含審核進度）
+  static async deleteStatus(id: string): Promise<ApiResponse<boolean>> {
+    try {
+      const { error } = await supabase.from(TABLES.CLAN_APPLICATIONS).delete().eq('id', id)
+
+      if (error) throw error
+
+      return { data: true, error: null }
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || '刪除申請失敗',
           details: error.details,
           code: error.code,
         },

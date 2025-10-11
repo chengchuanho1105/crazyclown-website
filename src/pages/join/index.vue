@@ -9,7 +9,7 @@ import { useRouter } from 'vue-router'
 import { useFormField, validators } from '@/composables/useFormField'
 
 // ---------- Services ----------
-import { ClanApplicationService, ApplicationStatusService } from '@/services/supabaseService'
+import { ClanApplicationService } from '@/services/supabaseService'
 import type { ClanApplication } from '@/config/supabase'
 
 // ---------- 組件引入區 ----------
@@ -144,7 +144,12 @@ const sendToDiscord = async (
       fields: [
         {
           name: '',
-          value: `**Steam 17位數字ID：** ${applicationData.steam_17_id}`,
+          value: `**Discord 使用者名稱：** \`${applicationData.discord_username}\``,
+          inline: false
+        },
+        {
+          name: '',
+          value: `**Steam ID：** \`${applicationData.steam_17_id}\``,
           inline: false
         },
         {
@@ -207,10 +212,20 @@ const handleSubmit = async (event: Event) => {
       has_referrer: hasReferrer.value,
       introducer_pubg_nickname: hasReferrer.value ? (referrerPubgNickname.value.value as string) : null,
       notes: notes.value.value ? (notes.value.value as string) : null,
+
+      // 審核進度欄位的默認值
+      crazy_clown_discord: '❌ 未加入' as const,
+      pubg_official_discord: '❌ 未加入' as const,
+      clan_review: '⚠️ 前二項未完成' as const,
+      clan_review_reason: null,
+      official_review: '⚠️ 待前項完成' as const,
+      official_review_reason: null,
+      in_game_application: '❌ 未申請' as const,
+      role_assignment: '⚠️ 待前項完成' as const
     }
 
     try {
-      // 1. 提交申請到資料庫
+      // 提交申請到資料庫（包含審核進度欄位）
       const response = await ClanApplicationService.createApplication(applicationData)
 
       if (response.error) {
@@ -221,28 +236,7 @@ const handleSubmit = async (event: Event) => {
         }, 5000)
         console.error('表單提交失敗:', response.error)
       } else if (response.data) {
-        // 2. 創建審核進度記錄（id 與申請的 id 相同）
-        const statusData = {
-          id: response.data.id,  // 使用申請的 id 作為審核進度的 id
-          steam_17_id: applicationData.steam_17_id,
-          crazy_clown_discord: '❌ 未加入' as const,
-          pubg_official_discord: '❌ 未加入' as const,
-          clan_review: '⚠️ 前二項未完成' as const,
-          clan_review_reason: null,
-          official_review: '⚠️ 待前項完成' as const,
-          official_review_reason: null,
-          in_game_application: '❌ 未申請' as const,
-          role_assignment: '⚠️ 待前項完成' as const
-        }
-
-        const statusResponse = await ApplicationStatusService.createStatus(statusData)
-
-        if (statusResponse.error) {
-          console.error('創建審核進度失敗:', statusResponse.error)
-          // 審核進度創建失敗不影響主流程
-        }
-
-        // 3. 發送到 Discord（包含查詢 URL）
+        // 發送到 Discord（包含查詢 URL）
         await sendToDiscord(applicationData, applicationData.steam_17_id)
 
         showSuccessModal.value = true
