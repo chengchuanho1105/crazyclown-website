@@ -589,7 +589,7 @@ const closeSuccessModalAndResetForm = () => {
               class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-3 bg-purple-700 text-base font-medium text-white hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:text-lg dark:bg-purple-600 dark:hover:bg-purple-700 transition-colors duration-200">
               立即加入 PUBG 官方 Discord 社群❗
             </a>
-            <a href="https://crazyclown.online/join/query" target="_blank" rel="noopener noreferrer"
+            <a href="https://crazyclown.online/join/manage" target="_blank" rel="noopener noreferrer"
               class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-3 bg-blue-700 text-base font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-lg dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors duration-200">
               查詢審核進度
             </a>

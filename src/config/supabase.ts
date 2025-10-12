@@ -232,6 +232,9 @@ export interface ClanApplication {
   clan_applied: string  // 申請的戰隊 (皆可/一軍/二軍)
   pubg_nickname: string  // 遊戲 ID
   steam_17_id: string  // Steam 17位數字ID
+  pubg_account_id: string | null  // PUBG Account ID
+  data_valid: '⚠️ 待驗證' | '⭕ 已驗證' | '❌ 未通過' | null  // 資料有效性
+  data_valid_reason: string | null  // 資料有效性原因
   tol_play_time: number  // 累計遊玩時數
   weekly_play_time: number  // 每週遊玩時數
   has_friends: boolean  // 是否有朋友一同加入

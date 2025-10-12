@@ -177,9 +177,9 @@ export const pageConfig: PageConfig = {
           },
         },
         {
-          path: 'query',
-          name: `${brandName}-Join-Query`,
-          component: () => import(`@/pages/join/query.vue`),
+          path: 'manage',
+          name: `${brandName}-Join-Manage`,
+          component: () => import(`@/pages/join/manage.vue`),
           meta: {
             title: `審核進度管理 | ${brandDisplayName}`,
             description: '管理戰隊申請審核進度',

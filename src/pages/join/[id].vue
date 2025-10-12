@@ -106,6 +106,16 @@ const reviewSteps = computed(() => {
   return [
     {
       id: 1,
+      title: '填寫資料是否正確',
+      subtitle: '資料完整性與正確性驗證',
+      status: statusData.value.data_valid || '⚠️ 待驗證',
+      reason: statusData.value.data_valid_reason,
+      link: null,
+      icon: 'bi-file-text',
+      color: 'teal'
+    },
+    {
+      id: 2,
       title: '加入 Crazy_Clown Discord 社群',
       subtitle: '加入 Crazy_Clown Discord 社群，並完成報到',
       status: statusData.value.crazy_clown_discord,
@@ -115,7 +125,7 @@ const reviewSteps = computed(() => {
       color: 'blue'
     },
     {
-      id: 2,
+      id: 3,
       title: '加入 PUBG 官方 Discord 社群',
       subtitle: '加入 PUBG 官方 Discord 社群',
       status: statusData.value.pubg_official_discord,
@@ -125,7 +135,7 @@ const reviewSteps = computed(() => {
       color: 'purple'
     },
     {
-      id: 3,
+      id: 4,
       title: '戰隊初審',
       subtitle: '資格審核',
       status: statusData.value.clan_review,
@@ -135,7 +145,7 @@ const reviewSteps = computed(() => {
       color: 'green'
     },
     {
-      id: 4,
+      id: 5,
       title: '官方複審',
       subtitle: '最終審核',
       status: statusData.value.official_review,
@@ -145,7 +155,7 @@ const reviewSteps = computed(() => {
       color: 'indigo'
     },
     {
-      id: 5,
+      id: 6,
       title: '遊戲內申請',
       subtitle: '送出入隊申請',
       status: statusData.value.in_game_application,
@@ -155,7 +165,7 @@ const reviewSteps = computed(() => {
       color: 'yellow'
     },
     {
-      id: 6,
+      id: 7,
       title: '身分組發放',
       subtitle: '完成加入',
       status: statusData.value.role_assignment,
@@ -171,7 +181,7 @@ const reviewSteps = computed(() => {
 const overallProgress = computed(() => {
   if (!statusData.value) return 0
   const completed = reviewSteps.value.filter(step => step.status.includes('⭕')).length
-  return Math.round((completed / 6) * 100)
+  return Math.round((completed / 7) * 100)
 })
 
 // 獲取步驟狀態類型
@@ -360,7 +370,7 @@ onMounted(() => {
           </div>
           <div class="mt-4 flex items-center gap-2 text-sm text-white/90">
             <i class="bi bi-info-circle-fill"></i>
-            <span>{{reviewSteps.filter(s => s.status.includes('⭕')).length}} / 6 步驟已完成</span>
+            <span>{{reviewSteps.filter(s => s.status.includes('⭕')).length}} / 7 步驟已完成</span>
           </div>
         </div>
 
