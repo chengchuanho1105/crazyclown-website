@@ -195,7 +195,7 @@ const createDiscordPost = async (webhookUrl: string, postTitle: string, postCont
       },
       body: JSON.stringify({
         content: fullContent,
-        username: 'Crazy Clown 戰隊申請系統',
+        username: 'Crazy_Clown - 精英招募官',
         avatar_url: 'https://crazyclown.online/media/favicon/crazyclown/favicon-light.png',
         thread_name: postTitle // 論壇貼文需要 thread_name
       })
