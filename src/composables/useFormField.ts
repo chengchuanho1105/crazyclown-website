@@ -98,10 +98,10 @@ export const validators = {
   },
 
   /** Steam 17位數字ID */
-  steam17Id: (value: string | null | undefined): boolean => {
+  steamId: (value: string | null | undefined): boolean => {
     if (isStringEmpty(value)) return false
-    const steam17IdRegex = /^\d{17}$/
-    return steam17IdRegex.test(value as string)
+    const steamIdRegex = /^\d{17}$/
+    return steamIdRegex.test(value as string)
   },
 
   /** 正數驗證 */

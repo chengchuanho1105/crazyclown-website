@@ -118,7 +118,7 @@ export const pageConfig: PageConfig = {
     {
       path: '/join',
       name: `${brandName}-Join`,
-      component: () => import(`@/pages/join/index.vue`),
+      component: () => import(`@/pages/join/index_old.vue`),
       meta: {
         title: `加入我們 | ${brandDisplayName}`,
         description: '',
@@ -139,7 +139,7 @@ export const pageConfig: PageConfig = {
         {
           path: '/',
           name: `${brandName}-Join`,
-          component: () => import(`@/pages/join/index.vue`),
+          component: () => import(`@/pages/join/index_old.vue`),
           meta: {
             title: `加入我們 | ${brandDisplayName}`,
             description: '',
@@ -157,12 +157,12 @@ export const pageConfig: PageConfig = {
           },
         },
         {
-          path: 'status',
-          name: `${brandName}-Join-Status-Search`,
-          component: () => import(`@/pages/join/[id].vue`),
+          path: '/query',
+          name: `${brandName}-Join-Query`,
+          component: () => import(`@/pages/join/query.vue`),
           meta: {
             title: `審核進度查詢 | ${brandDisplayName}`,
-            description: '查詢戰隊申請審核進度',
+            description: '',
             layout: 'default',
             requiresAuth: false,
             roles: ['admin', 'user', 'guest'],
@@ -173,46 +173,6 @@ export const pageConfig: PageConfig = {
             },
             ui: {
               navbar: true,
-            },
-          },
-        },
-        {
-          path: 'manage',
-          name: `${brandName}-Join-Manage`,
-          component: () => import(`@/pages/join/manage.vue`),
-          meta: {
-            title: `審核進度管理 | ${brandDisplayName}`,
-            description: '管理戰隊申請審核進度',
-            layout: 'default',
-            requiresAuth: false,
-            roles: ['admin', 'user', 'guest'],
-            seo: {
-              sitemap: false,
-              sitemapXml: false,
-              robots: false,
-            },
-            ui: {
-              navbar: false,
-            },
-          },
-        },
-        {
-          path: ':id',
-          name: `${brandName}-Join-Status-Detail`,
-          component: () => import(`@/pages/join/[id].vue`),
-          meta: {
-            title: `審核進度 | ${brandDisplayName}`,
-            description: '查詢戰隊申請審核進度',
-            layout: 'default',
-            requiresAuth: false,
-            roles: ['admin', 'user', 'guest'],
-            seo: {
-              sitemap: false,
-              sitemapXml: false,
-              robots: false,
-            },
-            ui: {
-              navbar: false,
             },
           },
         },

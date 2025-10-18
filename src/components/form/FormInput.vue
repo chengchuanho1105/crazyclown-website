@@ -21,7 +21,7 @@ const props = withDefaults(defineProps<Props>(), {
   placeholder: '',
   required: false,
   autocomplete: 'off',
-  errorMessage: '請填寫此欄位',
+  errorMessage: '此欄位為必填',
 })
 
 const emit = defineEmits<{
