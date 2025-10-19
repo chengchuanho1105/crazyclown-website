@@ -244,8 +244,8 @@ const handleSubmit = async () => {
 
   // 檢查參與意願是否為 TRUE
   if (formData.value.clan_task_willingness !== 'TRUE' ||
-      formData.value.discord_activity_willingness !== 'TRUE' ||
-      formData.value.pubg_activity_willingness !== 'TRUE') {
+    formData.value.discord_activity_willingness !== 'TRUE' ||
+    formData.value.pubg_activity_willingness !== 'TRUE') {
     alert('所有參與意願都必須選擇「願意」才能提交申請')
     return
   }
@@ -442,7 +442,7 @@ const resetForm = () => {
                       <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">遊戲貢獻</p>
                       <p class="text-base text-gray-600 dark:text-zinc-400">週<span
                           class="text-amber-600 dark:text-amber-400">不&lt;1萬XP</span>、賽季場次<span
-                              class="text-amber-600 dark:text-amber-400">不&lt;300場</span></p>
+                          class="text-amber-600 dark:text-amber-400">不&lt;300場</span></p>
                     </div>
                   </div>
                 </div>
@@ -639,13 +639,20 @@ const resetForm = () => {
             </div>
 
             <!-- 開始申請按鈕 -->
-            <div class="col-span-12 text-center pt-6">
-              <button type="button"
-                class="px-12 py-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold text-xl rounded-2xl transition-all transform hover:scale-105 shadow-lg"
-                @click="startApplication">
-                <i class="bi bi-arrow-right mr-3"></i>
-                我知道了，開始申請
-              </button>
+            <div class="col-span-12 text-center pt-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 items-center justify-center gap-4">
+                <a href="https://crazyclown.online/dc" target="_blank" type="button"
+                  class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold text-lg rounded-2xl transition-all transform hover:scale-105 shadow-lg">
+                  <i class="bi bi-discord mr-2"></i>
+                  先點我加入DC再申請
+                </a>
+                <button type="button"
+                  class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold text-lg rounded-2xl transition-all transform hover:scale-105 shadow-lg"
+                  @click="startApplication">
+                  <i class="bi bi-check-lg mr-2"></i>
+                  準備好了，開始申請
+                </button>
+              </div>
             </div>
           </div>
         </div>

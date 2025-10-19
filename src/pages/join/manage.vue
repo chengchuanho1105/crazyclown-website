@@ -79,7 +79,7 @@ const statusOptions = [
   { value: 'approved', label: '✅ 已通過' },
   { value: 'rejected', label: '❌ 未通過' },
   { value: 'revoked', label: '↩️ 已撤銷' },
-  { value: 'error', label: '⚠️ 錯誤' }
+  { value: 'error', label: '⚠️ 資料異常' }
 ]
 
 // 載入申請列表
@@ -233,6 +233,11 @@ const sendDiscordNotification = async (webhookUrl: string, content: string, thre
   }
 }
 
+// 將狀態值轉換為對應的標籤
+const getStatusLabel = (status: string) => {
+  return statusOptions.find(option => option.value === status)?.label || status || '未設定'
+}
+
 // 檢查欄位是否有變動
 const checkFieldChanges = (oldData: ApplicationData, newData: ApplicationData) => {
   const changes: Array<{ field: string, oldValue: string, newValue: string, reason: string }> = []
@@ -277,8 +282,8 @@ const checkFieldChanges = (oldData: ApplicationData, newData: ApplicationData) =
 
       changes.push({
         field: fieldName,
-        oldValue: String(oldValue),
-        newValue: String(newValue),
+        oldValue: getStatusLabel(String(oldValue)),
+        newValue: getStatusLabel(String(newValue)),
         reason: String(reason)
       })
     }
@@ -306,7 +311,7 @@ const sendStatusChangeNotification = async (application: ApplicationData, change
     console.log(`   原因是否為空: ${!change.reason || !change.reason.trim()}`)
     console.log(`   原因類型: ${typeof change.reason}`)
 
-    changesText += `**${change.field}** 更新為 **${change.newValue}**`
+    let changeText = `**${change.field}** 更新為 **${change.newValue}**`
 
     // 檢查原因是否存在且不為空
     const hasReason = change.reason &&
@@ -315,9 +320,12 @@ const sendStatusChangeNotification = async (application: ApplicationData, change
       change.reason.trim() !== ''
 
     if (hasReason) {
-      changesText += `，原因：${change.reason}`
+      changeText += `，原因：${change.reason}`
     }
-    changesText += '。\n'
+    changeText += '。'
+
+    // 添加引用格式
+    changesText += `> ${changeText}\n`
   })
 
   // 使用模板構建通知內容
@@ -381,17 +389,6 @@ const cancelEdit = () => {
   editingApplication.value = null
 }
 
-// 格式化時間
-const formatDateTime = (dateString: string) => {
-  const date = new Date(dateString)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  const seconds = String(date.getSeconds()).padStart(2, '0')
-  return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`
-}
 
 // 狀態文字
 const getStatusText = (status: string | null | undefined) => {
