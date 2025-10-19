@@ -19,7 +19,7 @@ export const DISCORD_CONFIG = {
 // Discord 通知範本
 export const DISCORD_TEMPLATES = {
   // 申請提交成功通知標題
-  APPLICATION_SUBMITTED_TITLE: '🔔 {nickname}[{pubg_nickname}] 的專屬通知串',
+  APPLICATION_SUBMITTED_TITLE: '🔔 {nickname}[{pubg_nickname}] 的專屬審核通知串',
 
   // 初始通知訊息
   INITIAL_NOTIFICATION: `嗨！<@{discord_user_id}>，您已正式進入審核/考核流程👀。
