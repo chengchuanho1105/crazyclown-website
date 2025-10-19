@@ -288,11 +288,10 @@ onMounted(async () => {
     <!-- 搜尋 -->
     <div class="bg-white dark:bg-amber-900 rounded-lg shadow-sm border border-amber-200 dark:border-amber-700 p-6">
       <div>
-        <label class="block text-sm font-medium text-amber-900 dark:text-amber-100 mb-2">搜尋客戶</label>
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="搜尋姓名、暱稱、電話、遊戲暱稱..."
+          placeholder="搜尋客戶(姓名、暱稱、電話、遊戲暱稱、ID)..."
           class="w-full px-3 py-2 border border-amber-300 dark:border-amber-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white dark:bg-amber-800 text-amber-900 dark:text-amber-100"
         />
       </div>

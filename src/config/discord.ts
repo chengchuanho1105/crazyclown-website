@@ -24,7 +24,7 @@ export const DISCORD_TEMPLATES = {
   // 初始通知訊息
   INITIAL_NOTIFICATION: `嗨！<@{discord_user_id}>，您已正式進入審核/考核流程👀。
 ✅ 請立即完成指定要求，以確保審核/考核順利通過。
-📜 考核包括：戰隊DC報到、社群活躍、遊戲內活躍等。
+📜 考核要求：戰隊DC報到、社群活躍、遊戲內活躍等。
 🔔 審核/考核狀態有任何變動，將會在通知串內更新。
 🔍 可前往「[您的審核進度](https://crazyclown.online/join/query?steam_id={steam_id})」頁面查看最新狀態與說明。
 ❔ 若有任何疑問，可於此通知串內留言詢問。`,

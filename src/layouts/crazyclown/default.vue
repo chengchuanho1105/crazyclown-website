@@ -26,71 +26,47 @@ const isHomePage = computed(() => path.value === '/' || path.value === '')
         <template v-if="isHomePage">
           <section id="home-hero">
             <div class="bg-white dark:bg-indigo-950 grid h-screen place-content-center">
-              <div
-                class="mx-auto w-screen max-w-screen-xl px-5 md:grid md:grid-cols-2 md:items-center md:gap-5"
-              >
-                <div
-                  class="w-full flex items-center justify-center mb-10 md:mb-0 rounded-xl"
-                  data-aos="zoom-in"
-                >
-                  <img
-                    class="h-[25svh] md:h-[50svh] rounded-xl"
-                    src="@/assets/media/logo/crazyclown/logo-light.png"
-                    alt=""
-                  />
+
+              <div class="px-5 grid grid-cols-1 md:grid-cols-2 items-center justify-center md:gap-5">
+
+                <div class="flex items-center justify-center mb-10 md:mb-0 rounded-xl" data-aos="zoom-in">
+                  <img class="h-[25svh] lg:h-[35svh] rounded-xl" src="@/assets/media/logo/crazyclown/logo-light.png"
+                    alt="" />
                 </div>
 
-                <div class="max-w-prose text-left" data-aos="zoom-in">
-                  <h3 class="font-bold text-gray-800 dark:text-gray-400 sm:text-5xl">
-                    <span class="text-2xl md:text-4xl text-indigo-800 dark:text-gray-100"
-                      >PUBG官方戰隊·強者集結</span
-                    >
+                <div class="flex flex-col max-w-[75vw] lg:max-w-full justify-center" data-aos="zoom-in">
+                  <h2 class="text-gray-800 dark:text-gray-400">
+                    <span class="font-bold text-2xl md:text-3xl lg:text-4xl text-indigo-800 dark:text-gray-100">官方戰隊．強者集結</span>
                     <br />
-                    <span class="text-3xl md:text-5xl text-indigo-800 dark:text-gray-100"
-                      >Crazy_Clown</span
-                    >
-                    <span class="text-3xl md:text-5xl text-gray-800 dark:text-gray-300"
-                      >與您並肩而戰</span
-                    >
-                  </h3>
+                    <span class="font-bold text-3xl md:text-4xl lg:text-5xl text-indigo-800 dark:text-gray-100">PUBG: Crazy_Clown</span>
+                  </h2>
 
                   <p class="mt-4 text-xl text-pretty text-gray-700 dark:text-gray-300">
-                    <strong class="text-indigo-700 dark:text-gray-100"
-                      >PUBG:Crazy_Clown是你最佳的戰友陣線！</strong
-                    ><br />
+                    <strong class="text-indigo-700 dark:text-gray-100">Crazy_Clown 是最佳的戰友陣線！</strong><br />
                     無論你是剛起步的新手，還是久經沙場的老兵，只要你是高活躍玩家，要的就是你！<br />
                   </p>
 
                   <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 sm:mt-6">
                     <router-link
                       class="inline-block py-3 rounded-lg shadow-sm font-medium text-center border border-yellow-200 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-50 hover:text-yellow-900 transition-colors"
-                      :to="{ name: 'store' }"
-                      data-aos="fade-up"
-                    >
+                      :to="{ name: 'store' }" data-aos="fade-up">
                       🛒 戰隊特惠
                     </router-link>
 
                     <router-link
                       class="inline-block py-3 rounded-lg shadow-sm font-medium text-center border border-indigo-200 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 hover:text-indigo-900 transition-colors"
-                      :to="{ name: 'news' }"
-                      data-aos="fade-up"
-                    >
+                      :to="{ name: 'news' }" data-aos="fade-up">
                       🔥 最新消息
                     </router-link>
 
                     <router-link
                       class="inline-block py-3 rounded-lg shadow-sm font-medium text-center border border-blue-200 text-blue-700 dark:text-blue-300 hover:bg-blue-50 hover:text-blue-900 transition-colors"
-                      :to="{ name: 'join' }"
-                      data-aos="fade-up"
-                    >
+                      :to="{ name: 'join' }" data-aos="fade-up">
                       ✒️ 入隊申請
                     </router-link>
 
-                    <a
-                      class="inline-block py-3 rounded-lg shadow-sm font-medium text-center border border-indigo-200 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 hover:text-indigo-900 transition-colors"
-                      href="https://crazyclown.online/dc"
-                      data-aos="fade-up"
-                    >
+                    <a class="inline-block py-3 rounded-lg shadow-sm font-medium text-center border border-indigo-200 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 hover:text-indigo-900 transition-colors"
+                      href="https://crazyclown.online/dc" data-aos="fade-up">
                       <i class="bi bi-discord"></i> Discord 社群
                     </a>
                   </div>
@@ -101,10 +77,8 @@ const isHomePage = computed(() => path.value === '/' || path.value === '')
         </template>
         <template v-else>
           <div class="relative w-full h-full bg-black">
-            <img
-              src="/src/assets/media/og-img/crazyclown/og-img.png"
-              class="absolute inset-0 w-full h-full object-cover"
-            />
+            <img src="/src/assets/media/og-img/crazyclown/og-img.png"
+              class="absolute inset-0 w-full h-full object-cover" />
             <div class="absolute inset-0 bg-black/40"></div>
             <div class="relative z-10 flex flex-col items-center justify-center h-full">
               <h1 class="text-4xl md:text-6xl font-extrabold text-white"></h1>
