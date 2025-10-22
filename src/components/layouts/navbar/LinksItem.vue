@@ -98,20 +98,13 @@ const getMobileMenuItemsClasses = () => {
           <div class="py-1">
             <MenuItem v-for="child in link.children" :key="child.name" v-slot="{ active, close }">
               <button
-                class="w-full text-left px-4 py-3 text-sm text-gray-900 dark:text-gray-100 cursor-pointer transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                class="w-full text-left text-sm text-gray-900 dark:text-gray-100 cursor-pointer transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-800"
                 :class="[
                   active ? 'bg-gray-100 dark:bg-gray-800' : '',
                   child.isActive ? 'bg-gray-50 dark:bg-gray-900 font-medium' : '',
                 ]"
-                @click="
-                  () => {
-                    close()
-                    $router.push(child.path)
-                    handleClick()
-                  }
-                "
               >
-                <span>{{ child.title.replace(/\s*\|\s*[^|]+$/, '') }}</span>
+                <a :href="child.path" class="block px-4 py-3">{{ child.title.replace(/\s*\|\s*[^|]+$/, '') }}</a>
               </button>
             </MenuItem>
           </div>

@@ -240,7 +240,7 @@ const checkFieldChanges = (oldData: ApplicationData, newData: ApplicationData) =
     'discord_role_status', 'case_status'
   ]
 
-  // 檢查狀態欄位變動
+  // 檢查狀態欄位變動，並同時檢查對應的 reasons 欄位
   mainFields.forEach(fieldKey => {
     const fieldName = FIELD_NAMES[fieldKey as keyof typeof FIELD_NAMES]
     if (!fieldName) return
@@ -248,52 +248,28 @@ const checkFieldChanges = (oldData: ApplicationData, newData: ApplicationData) =
     const oldValue = oldData[fieldKey as keyof ApplicationData] || ''
     const newValue = newData[fieldKey as keyof ApplicationData] || ''
 
-    if (oldValue !== newValue) {
-      // 獲取對應的說明欄位
-      let reasonKey: keyof ApplicationData
-      let reason = ''
+    // 獲取對應的說明欄位
+    let reasonKey: keyof ApplicationData
+    if (fieldKey === 'case_status') {
+      reasonKey = 'case_note' as keyof ApplicationData
+    } else {
+      // 將 _status 替換為 _reasons
+      reasonKey = fieldKey.replace('_status', '_reasons') as keyof ApplicationData
+    }
 
-      // 根據欄位類型獲取對應的原因欄位
-      if (fieldKey === 'case_status') {
-        reasonKey = 'case_note' as keyof ApplicationData
-      } else {
-        // 將 _status 替換為 _reasons
-        reasonKey = fieldKey.replace('_status', '_reasons') as keyof ApplicationData
-      }
+    const oldReason = oldData[reasonKey as keyof ApplicationData] || ''
+    const newReason = newData[reasonKey as keyof ApplicationData] || ''
 
-      reason = String(newData[reasonKey] || '')
+    // 檢查狀態或說明是否有變動
+    const statusChanged = oldValue !== newValue
+    const reasonChanged = oldReason !== newReason
 
+    if (statusChanged || reasonChanged) {
       changes.push({
         field: fieldName,
         oldValue: getStatusLabel(String(oldValue)),
         newValue: getStatusLabel(String(newValue)),
-        reason: String(reason)
-      })
-    }
-  })
-
-  // 檢查 reasons 欄位變動
-  const reasonFields = [
-    'basic_reasons', 'game_reasons', 'supplement_reasons',
-    'joined_clan_dc_reasons', 'clan_dc_checkin_reasons', 'joined_official_dc_reasons',
-    'discord_active_reasons', 'game_active_reasons', 'clan_review_reasons',
-    'official_review_reasons', 'game_apply_reasons', 'join_reasons',
-    'discord_role_reasons', 'case_note'
-  ]
-
-  reasonFields.forEach(fieldKey => {
-    const fieldName = FIELD_NAMES[fieldKey as keyof typeof FIELD_NAMES]
-    if (!fieldName) return
-
-    const oldValue = oldData[fieldKey as keyof ApplicationData] || ''
-    const newValue = newData[fieldKey as keyof ApplicationData] || ''
-
-    if (oldValue !== newValue) {
-      changes.push({
-        field: fieldName,
-        oldValue: String(oldValue),
-        newValue: String(newValue),
-        reason: '' // reasons 欄位本身不需要額外的 reason
+        reason: String(newReason)
       })
     }
   })
@@ -315,11 +291,8 @@ const sendStatusChangeNotification = async (application: ApplicationData, change
   // 構建變動內容
   let changesText = ''
   changes.forEach(change => {
-    // 統一格式：> [欄位名稱]更新為 👉 [status] - [reasons]
-    const changeText = `**${change.field}**更新為 👉 **${change.newValue}**${change.reason ? ` - ${change.reason}` : ''}。`
-
-    // 添加引用格式
-    changesText += `> ${changeText}\n`
+    // 格式：> [欄位名稱]更新為：[status] ([reasons])
+    changesText += `> ${change.field}更新為：${change.newValue}${change.reason ? ` (${change.reason})` : ''}。\n`
   })
 
   // 使用模板構建通知內容
@@ -626,7 +599,7 @@ onMounted(() => {
                   <div class="grid grid-cols-1 gap-1">
                     <i @click="editApplication(app)" title="編輯"
                       class="bi bi-pencil-square text-blue-500 hover:text-blue-700 transition-all cursor-pointer" />
-                    <i @click="viewDetails(app)" title="查看詳情"
+                    <a @click="viewDetails(app)" title="查看詳情"
                       class="bi bi-eye text-gray-500 hover:text-gray-700 transition-all cursor-pointer" />
                     <i @click="deleteApplication(app)" title="刪除"
                       class="bi bi-trash text-red-500 hover:text-red-700 transition-all cursor-pointer" />
