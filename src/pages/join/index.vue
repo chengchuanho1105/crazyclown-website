@@ -2,7 +2,7 @@
 defineOptions({ name: 'JoinNew' })
 
 // ---------- 組件引入區 ----------
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import DecorSection from '@/components/DecorSection.vue'
 import { searchSinglePlayer } from '@/services/pubgService'
 import { supabase } from '@/config/supabase'
@@ -147,7 +147,6 @@ const checkPubgAccount = async () => {
       formData.value.pubg_account_id = result.data.id
       pubgAccountError.value = ''
       pubgQueryAttempts.value = 0 // 重置查詢次數
-      console.log('✅ 查詢成功：', result.data)
     } else {
       // 查詢失敗處理
       const errorMessage = 'account.Error'
@@ -179,15 +178,9 @@ const checkPubgAccount = async () => {
 // Discord 通知相關函數
 const createDiscordPost = async (webhookUrl: string, postTitle: string, postContent: string) => {
   try {
-    console.log('🚀 開始建立 Discord 論壇貼文...')
-    console.log('🔗 Webhook URL:', webhookUrl)
-    console.log('📝 貼文標題:', postTitle)
-    console.log('💬 貼文內容:', postContent)
-
     // 建立完整的貼文內容（標題 + 內容）
     const fullContent = `**${postTitle}**\n\n${postContent}`
 
-    // 發送貼文到論壇頻道需要 thread_name 參數
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
@@ -197,12 +190,9 @@ const createDiscordPost = async (webhookUrl: string, postTitle: string, postCont
         content: fullContent,
         username: 'Crazy_Clown - 精英招募官',
         avatar_url: 'https://crazyclown.online/media/favicon/crazyclown/favicon-light.png',
-        thread_name: postTitle // 論壇貼文需要 thread_name
+        thread_name: postTitle
       })
     })
-
-    console.log('📡 Discord API 回應狀態:', response.status)
-    console.log('📡 Discord API 回應標頭:', Object.fromEntries(response.headers.entries()))
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -210,10 +200,6 @@ const createDiscordPost = async (webhookUrl: string, postTitle: string, postCont
       console.error('❌ 錯誤詳情:', errorText)
       return null
     }
-
-    const message = await response.json()
-    console.log('✅ Discord 貼文發送成功:', message)
-    return message.id // 返回訊息 ID 作為貼文 ID
   } catch (error) {
     console.error('❌ Discord 貼文建立錯誤：', error)
     return null
@@ -292,9 +278,6 @@ const handleSubmit = async () => {
     // 提交成功後，建立 Discord 通知串
     if (data && data.length > 0) {
       const applicationId = data[0].id
-      console.log('📝 申請 ID:', applicationId)
-      console.log('🔧 Discord 通知啟用狀態:', DISCORD_CONFIG.NOTIFICATION.ENABLED)
-      console.log('🔗 Discord Webhook URL:', DISCORD_CONFIG.WEBHOOK_URL ? '已設定' : '未設定')
 
       if (DISCORD_CONFIG.NOTIFICATION.ENABLED && DISCORD_CONFIG.WEBHOOK_URL) {
         try {
@@ -307,10 +290,6 @@ const handleSubmit = async () => {
           const postContent = DISCORD_TEMPLATES.INITIAL_NOTIFICATION
             .replace('{discord_user_id}', formData.value.discord_user_id)
             .replace('{steam_id}', formData.value.steam_id)
-
-          console.log('📤 準備發送 Discord 論壇貼文...')
-          console.log('📝 貼文標題:', postTitle)
-          console.log('💬 貼文內容:', postContent)
 
           // 建立 Discord 論壇貼文
           const postId = await createDiscordPost(DISCORD_CONFIG.WEBHOOK_URL, postTitle, postContent)
@@ -378,11 +357,28 @@ const resetForm = () => {
   pubgAccountError.value = ''
   pubgQueryAttempts.value = 0
 }
+
+// 組件掛載時檢查 URL hash 並滾動到對應位置
+onMounted(() => {
+  // 延遲執行，確保 DOM 已完全渲染
+  setTimeout(() => {
+    const hash = window.location.hash
+    if (hash) {
+      const element = document.querySelector(hash)
+      if (element) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        })
+      }
+    }
+  }, 100)
+})
 </script>
 
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-800">
-    <div class="max-w-7xl m-auto px-4 py-8">
+    <div  id="gamer" class="max-w-7xl m-auto px-4 py-8">
       <DecorSection mainTitle="🎮 戰隊加入申請表" enTitle="Clan Application Form">
 
         <!-- ========== 說明頁面 ========== -->
@@ -414,18 +410,23 @@ const resetForm = () => {
                     <i class="bi bi-trophy text-yellow-500 text-lg mt-1"></i>
                     <div>
                       <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">積極參與社群任務</p>
-                      <p class="text-base text-gray-600 dark:text-zinc-400">須參與每週戰隊 DC 社群任務</p>
+                      <p class="text-base text-gray-600 dark:text-zinc-400">須參與每週
+                        <a href="https://discord.com/channels/490129931808931840/1416247790098583583" target="_blank"
+                          class="text-blue-500 dark:text-blue-400">戰隊 DC 社群任務</a>
+                        <br />
+                        <span class="text-amber-600 dark:text-amber-400 text-sm">任務都很簡單，請務必完成。</span>
+                      </p>
                     </div>
                   </div>
                   <div class="flex items-start gap-3">
                     <i class="bi bi-discord text-indigo-500 text-lg mt-1"></i>
                     <div>
                       <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">Discord 活躍</p>
-                      <p class="text-base text-gray-600 dark:text-zinc-400">須活躍於戰隊 DC
-                        <a href="https://discord.com/channels/490129931808931840/1182326857027289178" target="_blank"
-                          class="text-blue-500 dark:text-blue-400">文字</a>/
-                        <a href="https://discord.com/channels/490129931808931840/1355225363592122621" target="_blank"
-                          class="text-blue-500 dark:text-blue-400">語音</a>頻道
+                      <p class="text-base text-gray-600 dark:text-zinc-400">須活躍於
+                        <a href="https://crazyclown.online/dc" target="_blank"
+                          class="text-blue-500 dark:text-blue-400">戰隊</a> / <a href="https://kraftontw.info/Discord"
+                          target="_blank" class="text-blue-500 dark:text-blue-400">官方 DC</a><br />
+                        <span class="text-amber-600 dark:text-amber-400 text-sm">每週聊天/語音至少各3次，語音每次30分鐘以上。</span>
                       </p>
                     </div>
                   </div>
@@ -433,16 +434,19 @@ const resetForm = () => {
                     <i class="bi bi-heart text-red-500 text-lg mt-1"></i>
                     <div>
                       <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">積極參與社群活動</p>
-                      <p class="text-base text-gray-600 dark:text-zinc-400">須參與戰隊 DC 社群活動</p>
+                      <p class="text-base text-gray-600 dark:text-zinc-400">須參與
+                        <a href="https://discord.com/channels/490129931808931840/1416247790098583583" target="_blank"
+                          class="text-blue-500 dark:text-blue-400">戰隊 DC 社群活動</a>
+                      </p>
+                      <span class="text-amber-600 dark:text-amber-400 text-sm">頻率不高、獎勵豐厚，請積極參與。</span>
                     </div>
                   </div>
                   <div class="flex items-start gap-3">
                     <i class="bi bi-clock text-orange-500 text-lg mt-1"></i>
                     <div>
                       <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">遊戲貢獻</p>
-                      <p class="text-base text-gray-600 dark:text-zinc-400">週<span
-                          class="text-amber-600 dark:text-amber-400">不&lt;1萬XP</span>、賽季場次<span
-                          class="text-amber-600 dark:text-amber-400">不&lt;300場</span></p>
+                      <p class="text-base text-gray-600 dark:text-zinc-400">須積極遊玩，提升遊戲貢獻度。</p>
+                      <span class="text-amber-600 dark:text-amber-400 text-sm">每週遊玩10小時以上、每週XP 1萬以上、賽季場次至少300場。</span>
                     </div>
                   </div>
                 </div>
@@ -459,42 +463,42 @@ const resetForm = () => {
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div class="flex items-start gap-3">
-                    <i class="bi bi-trophy text-yellow-500 text-lg mt-1"></i>
+                    <i class="bi bi-currency-exchange text-yellow-500 text-lg mt-1"></i>
                     <div>
                       <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">社群獎勵</p>
                       <p class="text-base text-gray-600 dark:text-zinc-400">完成戰隊專屬社群任務，可獲得獎勵</p>
                     </div>
                   </div>
                   <div class="flex items-start gap-3">
-                    <i class="bi bi-people text-blue-500 text-lg mt-1"></i>
+                    <i class="bi bi-controller text-blue-500 text-lg mt-1"></i>
                     <div>
                       <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">社群活動</p>
                       <p class="text-base text-gray-600 dark:text-zinc-400">定期舉辦內部競賽，參與可獲得獎勵</p>
                     </div>
                   </div>
                   <div class="flex items-start gap-3">
-                    <i class="bi bi-people text-blue-500 text-lg mt-1"></i>
+                    <i class="bi bi-fire text-pink-500 text-lg mt-1"></i>
                     <div>
                       <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">活躍度獎勵</p>
                       <p class="text-base text-gray-600 dark:text-zinc-400">每週高活躍度成員可獲得獎勵</p>
                     </div>
                   </div>
                   <div class="flex items-start gap-3">
-                    <i class="bi bi-chat-dots text-green-500 text-lg mt-1"></i>
+                    <i class="bi bi-cart4 text-green-500 text-lg mt-1"></i>
                     <div>
                       <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">專屬商城</p>
                       <p class="text-base text-gray-600 dark:text-zinc-400">專屬商城，可優惠購買G幣、套裝等</p>
                     </div>
                   </div>
                   <div class="flex items-start gap-3">
-                    <i class="bi bi-star text-purple-500 text-lg mt-1"></i>
+                    <i class="bi bi-gift-fill text-purple-500 text-lg mt-1"></i>
                     <div>
                       <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">寶箱提供/序號空投</p>
                       <p class="text-base text-gray-600 dark:text-zinc-400">每週隨機發送寶箱，不定時於DC空投序號</p>
                     </div>
                   </div>
                   <div class="flex items-start gap-3">
-                    <i class="bi bi-star text-purple-500 text-lg mt-1"></i>
+                    <i class="bi bi-star text-yellow-500 text-lg mt-1"></i>
                     <div>
                       <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">特殊權益</p>
                       <p class="text-base text-gray-600 dark:text-zinc-400">可參與官方活動與獲得特殊獎勵</p>

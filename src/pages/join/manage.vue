@@ -175,12 +175,6 @@ const deleteApplication = async (application: ApplicationData) => {
 // Discord 通知相關函數
 const sendDiscordNotification = async (webhookUrl: string, content: string, threadId?: string) => {
   try {
-    console.log('🚀 開始發送 Discord 狀態變動通知...')
-    console.log('🔗 Webhook URL:', webhookUrl)
-    console.log('🧵 Thread ID:', threadId)
-    console.log('💬 通知內容:', content)
-
-    // 對於論壇頻道，我們需要構建特殊的 Webhook URL
     let targetUrl = webhookUrl
 
     // 如果有 thread_id，構建發送到特定討論串的 URL
@@ -191,7 +185,6 @@ const sendDiscordNotification = async (webhookUrl: string, content: string, thre
         const [, webhookId, webhookToken] = urlMatch
         // 構建發送到特定討論串的 URL
         targetUrl = `https://discord.com/api/webhooks/${webhookId}/${webhookToken}?thread_id=${threadId}`
-        console.log('🔗 構建的 Thread URL:', targetUrl)
       }
     }
 
@@ -206,7 +199,6 @@ const sendDiscordNotification = async (webhookUrl: string, content: string, thre
       avatar_url: 'https://crazyclown.online/media/favicon/crazyclown/favicon-light.png'
     }
 
-    // 如果有 thread_id，在 payload 中也加入 thread_id
     if (threadId) {
       payload.thread_id = threadId
     }
@@ -219,15 +211,12 @@ const sendDiscordNotification = async (webhookUrl: string, content: string, thre
       body: JSON.stringify(payload)
     })
 
-    console.log('📡 Discord API 回應狀態:', response.status)
-
     if (!response.ok) {
       const errorText = await response.text()
       console.error('❌ Discord 通知發送失敗：', response.status, response.statusText)
       console.error('❌ 錯誤詳情:', errorText)
-    } else {
-      console.log('✅ Discord 狀態變動通知發送成功')
     }
+
   } catch (error) {
     console.error('❌ Discord 通知發送錯誤：', error)
   }
@@ -251,6 +240,7 @@ const checkFieldChanges = (oldData: ApplicationData, newData: ApplicationData) =
     'discord_role_status', 'case_status'
   ]
 
+  // 檢查狀態欄位變動
   mainFields.forEach(fieldKey => {
     const fieldName = FIELD_NAMES[fieldKey as keyof typeof FIELD_NAMES]
     if (!fieldName) return
@@ -273,18 +263,37 @@ const checkFieldChanges = (oldData: ApplicationData, newData: ApplicationData) =
 
       reason = String(newData[reasonKey] || '')
 
-      console.log(`🔍 欄位變動檢查: ${fieldName}`)
-      console.log(`   舊值: ${oldValue}`)
-      console.log(`   新值: ${newValue}`)
-      console.log(`   原因欄位: ${reasonKey}`)
-      console.log(`   原因值: "${reason}"`)
-      console.log(`   原因長度: ${String(reason).length}`)
-
       changes.push({
         field: fieldName,
         oldValue: getStatusLabel(String(oldValue)),
         newValue: getStatusLabel(String(newValue)),
         reason: String(reason)
+      })
+    }
+  })
+
+  // 檢查 reasons 欄位變動
+  const reasonFields = [
+    'basic_reasons', 'game_reasons', 'supplement_reasons',
+    'joined_clan_dc_reasons', 'clan_dc_checkin_reasons', 'joined_official_dc_reasons',
+    'discord_active_reasons', 'game_active_reasons', 'clan_review_reasons',
+    'official_review_reasons', 'game_apply_reasons', 'join_reasons',
+    'discord_role_reasons', 'case_note'
+  ]
+
+  reasonFields.forEach(fieldKey => {
+    const fieldName = FIELD_NAMES[fieldKey as keyof typeof FIELD_NAMES]
+    if (!fieldName) return
+
+    const oldValue = oldData[fieldKey as keyof ApplicationData] || ''
+    const newValue = newData[fieldKey as keyof ApplicationData] || ''
+
+    if (oldValue !== newValue) {
+      changes.push({
+        field: fieldName,
+        oldValue: String(oldValue),
+        newValue: String(newValue),
+        reason: '' // reasons 欄位本身不需要額外的 reason
       })
     }
   })
@@ -306,23 +315,8 @@ const sendStatusChangeNotification = async (application: ApplicationData, change
   // 構建變動內容
   let changesText = ''
   changes.forEach(change => {
-    console.log(`📝 構建變動內容: ${change.field}`)
-    console.log(`   原因: "${change.reason}"`)
-    console.log(`   原因是否為空: ${!change.reason || !change.reason.trim()}`)
-    console.log(`   原因類型: ${typeof change.reason}`)
-
-    let changeText = `**${change.field}** 更新為 **${change.newValue}**`
-
-    // 檢查原因是否存在且不為空
-    const hasReason = change.reason &&
-      change.reason !== 'null' &&
-      change.reason !== 'undefined' &&
-      change.reason.trim() !== ''
-
-    if (hasReason) {
-      changeText += `，原因：${change.reason}`
-    }
-    changeText += '。'
+    // 統一格式：> [欄位名稱]更新為 👉 [status] - [reasons]
+    const changeText = `**${change.field}**更新為 👉 **${change.newValue}**${change.reason ? ` - ${change.reason}` : ''}。`
 
     // 添加引用格式
     changesText += `> ${changeText}\n`
@@ -333,9 +327,6 @@ const sendStatusChangeNotification = async (application: ApplicationData, change
     .replace('{discord_user_id}', application.discord_user_id)
     .replace('{changes}', changesText)
     .replace('{steam_id}', application.steam_id)
-
-  console.log('📤 準備發送狀態變動通知到 thread_id:', application.thread_id)
-  console.log('💬 通知內容:', notificationContent)
 
   await sendDiscordNotification(DISCORD_CONFIG.WEBHOOK_URL, notificationContent, application.thread_id)
 }
