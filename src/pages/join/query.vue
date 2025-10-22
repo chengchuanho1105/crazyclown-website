@@ -144,9 +144,18 @@ const getStatusColor = (status: string | null | undefined) => {
 const getProgressPercentage = () => {
   const steps = [
     queryResult.value?.basic_status,
+    queryResult.value?.game_status,
+    queryResult.value?.supplement_status,
     queryResult.value?.joined_clan_dc_status,
+    queryResult.value?.clan_dc_checkin_status,
+    queryResult.value?.joined_official_dc_status,
+    queryResult.value?.discord_active_status,
+    queryResult.value?.game_active_status,
     queryResult.value?.clan_review_status,
-    queryResult.value?.game_apply_status
+    queryResult.value?.official_review_status,
+    queryResult.value?.game_apply_status,
+    queryResult.value?.join_status,
+    queryResult.value?.discord_role_status
   ]
 
   let completedSteps = 0
