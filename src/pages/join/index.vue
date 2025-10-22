@@ -403,13 +403,13 @@ onMounted(() => {
                 class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border-l-4 border-blue-500">
                 <h3 class="text-2xl font-bold text-blue-800 dark:text-blue-300 mb-4 flex items-end gap-2">
                   <i class="bi bi-check-circle-fill"></i>
-                  加入要求 <span class="text-base text-amber-600 dark:text-amber-400">完成皆有機會獲得獎勵</span>
+                  入隊要求 <span class="text-base text-amber-600 dark:text-amber-400">完成皆有機會獲得獎勵</span>
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div class="flex items-start gap-3">
                     <i class="bi bi-trophy text-yellow-500 text-lg mt-1"></i>
                     <div>
-                      <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">積極參與社群任務</p>
+                      <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">積極參與 Discord 社群任務</p>
                       <p class="text-base text-gray-600 dark:text-zinc-400">須參與每週
                         <a href="https://discord.com/channels/490129931808931840/1416247790098583583" target="_blank"
                           class="text-blue-500 dark:text-blue-400">戰隊 DC 社群任務</a>
@@ -421,7 +421,7 @@ onMounted(() => {
                   <div class="flex items-start gap-3">
                     <i class="bi bi-discord text-indigo-500 text-lg mt-1"></i>
                     <div>
-                      <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">Discord 活躍</p>
+                      <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">積極於 Discord 社群活躍</p>
                       <p class="text-base text-gray-600 dark:text-zinc-400">須活躍於
                         <a href="https://crazyclown.online/dc" target="_blank"
                           class="text-blue-500 dark:text-blue-400">戰隊</a> / <a href="https://kraftontw.info/Discord"
@@ -433,7 +433,7 @@ onMounted(() => {
                   <div class="flex items-start gap-3">
                     <i class="bi bi-heart text-red-500 text-lg mt-1"></i>
                     <div>
-                      <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">積極參與社群活動</p>
+                      <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">積極參與 Discord 社群活動</p>
                       <p class="text-base text-gray-600 dark:text-zinc-400">須參與
                         <a href="https://discord.com/channels/490129931808931840/1416247790098583583" target="_blank"
                           class="text-blue-500 dark:text-blue-400">戰隊 DC 社群活動</a>
