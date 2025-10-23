@@ -19,7 +19,9 @@ export default defineConfig({
       },
     }),
     vueJsx(),
-    vueDevTools(),
+    vueDevTools({
+      launchEditor: 'cursor'
+    }),
     Pages({
       dirs: [{ dir: 'src/pages', baseRoute: '' }],
       extensions: ['vue'],

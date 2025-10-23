@@ -576,7 +576,7 @@ const getCategoryColor = (category: string) => {
                 <img
                   :src="imgUrl"
                   :alt="`圖片 ${idx + 1}`"
-                  class="w-full h-full object-cover bg-gray-100 dark:bg-gray-800"
+                  class="w-full h-full object-contain bg-gray-100 dark:bg-gray-800"
                   @error="(e) => (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=圖片載入失敗'"
                 />
               </div>
@@ -787,7 +787,7 @@ const getCategoryColor = (category: string) => {
                     <img
                       :src="imgUrl"
                       :alt="`圖片 ${index + 1}`"
-                      class="w-full h-full object-cover bg-gray-100 dark:bg-gray-800"
+                      class="w-full h-full object-contain bg-gray-100 dark:bg-gray-800"
                       @error="(e) => (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=無法載入'"
                     />
                     <button
