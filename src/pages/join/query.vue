@@ -11,6 +11,7 @@ interface ApplicationData {
   nickname: string
   discord_user_id: string
   discord_username: string
+  thread_id: string
   pubg_nickname: string
   pubg_account_id: string
   steam_id: string
@@ -227,9 +228,8 @@ onMounted(() => {
                     <label for="steam_id" class="block text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">
                       Steam ID <span class="text-red-500">*</span>
                     </label>
-                    <p class="text-xs text-gray-500 dark:text-zinc-400 mb-3">請輸入您申請時填寫的 Steam ID</p>
                     <div class="flex gap-3">
-                      <input id="steam_id" v-model="steamId" type="text" placeholder="請輸入 Steam ID"
+                      <input id="steam_id" v-model="steamId" type="text" placeholder="請輸入您申請時填寫的 Steam ID"
                         class="flex-1 px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 border-gray-300 dark:border-zinc-600 rounded-2xl focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500"
                         :disabled="isQuerying" @keyup.enter="queryApplication" />
                       <button type="button" @click="queryApplication" :disabled="isQuerying || !steamId.trim()"
@@ -256,104 +256,150 @@ onMounted(() => {
             <!-- 查詢結果 -->
             <div v-if="queryResult" class="col-span-12 space-y-6">
               <!-- 第0：審核流程進度條 -->
-              <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
-                <div class="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4">
-                  <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i class="bi bi-diagram-3"></i>
-                    審核流程進度
-                  </h3>
-                </div>
-                <div class="p-6">
-                  <!-- 整體進度 -->
-                  <div class="p-6 bg-gray-50 dark:bg-zinc-700 rounded-lg">
-                    <div class="flex justify-between items-center mb-4">
-                      <span class="text-lg font-semibold text-gray-800 dark:text-zinc-200">整體進度</span>
-                      <span class="text-2xl font-bold text-gray-800 dark:text-zinc-200">{{ getProgressPercentage() }}%</span>
+              <div
+                class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
+                <div
+                  class="flex flex-row items-center justify-between bg-gradient-to-r from-indigo-500 to-purple-500 px-4 py-3 gap-8">
+                  <div>
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                      <i class="bi bi-diagram-3" />
+                      審核進度
+                    </h3>
+                  </div>
+                  <div class="w-[0%] sm:w-[55%] md:w-[60%] lg:w-[70%] xl:w-[75%] bg-gray-200 dark:bg-zinc-600 rounded-full h-3">
+                    <div
+                      class="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500"
+                      :style="{ width: getProgressPercentage() + '%' }">
                     </div>
-                    <div class="w-full bg-gray-200 dark:bg-zinc-600 rounded-full h-3">
-                      <div class="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500"
-                           :style="{ width: getProgressPercentage() + '%' }"></div>
-                    </div>
+                  </div>
+                  <div class="flex items-center">
+                    <span class="text-2xl font-bold text-gray-800 dark:text-zinc-200">
+                      {{ getProgressPercentage() }}%
+                    </span>
                   </div>
                 </div>
               </div>
 
               <!-- 第1：表單資料 -->
-              <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
-                <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+              <div
+                class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-3">
                   <h3 class="text-xl font-bold text-white flex items-center gap-2">
                     <i class="bi bi-file-text"></i>
                     表單資料
                   </h3>
                 </div>
-                <div class="p-6">
+                <div class="px-6 py-3">
                   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- 個人資料 -->
-                    <div class="space-y-4">
-                      <h4 class="text-lg font-semibold text-gray-800 dark:text-zinc-200 border-b border-gray-200 dark:border-zinc-700 pb-2">個人資料</h4>
-                      <div class="space-y-3">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
+                    <div class="space-y-2">
+                      <h4
+                        class="text-lg font-semibold text-gray-800 dark:text-zinc-200 border-b border-gray-200 dark:border-zinc-700 pb-2">
+                        個人資料
+                      </h4>
+                      <div class="space-y-2">
+                        <div
+                          class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
                           <span class="text-gray-600 dark:text-zinc-400">暱稱</span>
-                          <span class="font-semibold text-gray-800 dark:text-zinc-200">{{ queryResult.nickname }}</span>
+                          <span class="text-gray-800 dark:text-zinc-200 select-all">
+                            {{ queryResult.nickname }}
+                          </span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
+                        <div
+                          class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
                           <span class="text-gray-600 dark:text-zinc-400">Discord ID</span>
-                          <span class="font-mono text-sm text-gray-800 dark:text-zinc-200">{{ queryResult.discord_user_id }}</span>
+                          <span class="text-gray-800 dark:text-zinc-200 select-all">
+                            {{ queryResult.discord_user_id }}
+                          </span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
+                        <div
+                          class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
                           <span class="text-gray-600 dark:text-zinc-400">Discord 名稱</span>
-                          <span class="font-semibold text-gray-800 dark:text-zinc-200">{{ queryResult.discord_username }}</span>
+                          <span class="text-gray-800 dark:text-zinc-200 select-all">
+                            {{ queryResult.discord_username }}
+                          </span>
+                        </div>
+                        <div
+                          class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
+                          <span class="text-gray-600 dark:text-zinc-400">通知串 ID</span>
+                          <span class="text-gray-800 dark:text-zinc-200 select-all">
+                            {{ queryResult.thread_id }}
+                          </span>
                         </div>
                       </div>
                     </div>
 
                     <!-- 遊戲資料 -->
-                    <div class="space-y-4">
-                      <h4 class="text-lg font-semibold text-gray-800 dark:text-zinc-200 border-b border-gray-200 dark:border-zinc-700 pb-2">遊戲資料</h4>
-                      <div class="space-y-3">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
+                    <div class="space-y-2">
+                      <h4
+                        class="text-lg font-semibold text-gray-800 dark:text-zinc-200 border-b border-gray-200 dark:border-zinc-700 pb-2">
+                        遊戲資料
+                      </h4>
+                      <div class="space-y-2">
+                        <div
+                          class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
                           <span class="text-gray-600 dark:text-zinc-400">PUBG 暱稱</span>
-                          <span class="font-semibold text-gray-800 dark:text-zinc-200">{{ queryResult.pubg_nickname }}</span>
+                          <span class="text-gray-800 dark:text-zinc-200 select-all">
+                            {{ queryResult.pubg_nickname }}
+                          </span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
+                        <div
+                          class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
                           <span class="text-gray-600 dark:text-zinc-400">PUBG Account ID</span>
-                          <span class="font-mono text-sm text-gray-800 dark:text-zinc-200">{{ queryResult.pubg_account_id }}</span>
+                          <span class="text-gray-800 dark:text-zinc-200 select-all">
+                            {{ queryResult.pubg_account_id }}
+                          </span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
+                        <div
+                          class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
                           <span class="text-gray-600 dark:text-zinc-400">Steam ID</span>
-                          <span class="font-mono text-sm text-gray-800 dark:text-zinc-200">{{ queryResult.steam_id }}</span>
+                          <span class="text-gray-800 dark:text-zinc-200 select-all">
+                            {{ queryResult.steam_id }}
+                          </span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
-                          <span class="text-gray-600 dark:text-zinc-400">總遊戲時間</span>
-                          <span class="font-semibold text-gray-800 dark:text-zinc-200">{{ queryResult.total_play_time }} 小時</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
-                          <span class="text-gray-600 dark:text-zinc-400">每週遊戲時間</span>
-                          <span class="font-semibold text-gray-800 dark:text-zinc-200">{{ queryResult.weekly_play_time }} 小時</span>
+                        <div
+                          class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-zinc-700">
+                          <span class="text-gray-600 dark:text-zinc-400">總遊戲時間 & 每週遊戲時間</span>
+                          <span class="text-gray-800 dark:text-zinc-200 select-all">
+                            {{ queryResult.total_play_time }} 小時 / {{ queryResult.weekly_play_time }} 小時
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <!-- 參與意願 -->
-                  <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <div
+                    class="mt-6 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                     <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-3">參與意願</h4>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div class="flex items-center space-x-2">
                         <span class="text-blue-700 dark:text-blue-400">戰隊任務</span>
-                        <span :class="isWilling(queryResult.clan_task_willingness) ? 'text-green-600 dark:text-green-400 border border-green-600 dark:border-green-400 rounded-full px-2 py-1' : 'text-red-600 dark:text-red-400 border border-red-600 dark:border-red-400 rounded-full px-2 py-1'" class="font-semibold">
+                        <span
+                          :class="isWilling(queryResult.clan_task_willingness) ?
+                            'text-green-600 dark:text-green-400 border border-green-600 dark:border-green-400 rounded-full px-2 py-0.25' :
+                            'text-red-600 dark:text-red-400 border border-red-600 dark:border-red-400 rounded-full px-2 py-0.25'"
+                          class="font-semibold">
                           {{ isWilling(queryResult.clan_task_willingness) ? '願意' : '不願意' }}
                         </span>
                       </div>
                       <div class="flex items-center space-x-2">
                         <span class="text-blue-700 dark:text-blue-400">Discord 活躍</span>
-                        <span :class="isWilling(queryResult.discord_activity_willingness) ? 'text-green-600 dark:text-green-400 border border-green-600 dark:border-green-400 rounded-full px-2 py-1' : 'text-red-600 dark:text-red-400 border border-red-600 dark:border-red-400 rounded-full px-2 py-1'" class="font-semibold">
+                        <span
+                          :class="isWilling(queryResult.discord_activity_willingness) ?
+                            'text-green-600 dark:text-green-400 border border-green-600 dark:border-green-400 rounded-full px-2 py-0.25' :
+                            'text-red-600 dark:text-red-400 border border-red-600 dark:border-red-400 rounded-full px-2 py-0.25'"
+                          class="font-semibold">
                           {{ isWilling(queryResult.discord_activity_willingness) ? '願意' : '不願意' }}
                         </span>
                       </div>
                       <div class="flex items-center space-x-2">
                         <span class="text-blue-700 dark:text-blue-400">PUBG 活躍</span>
-                        <span :class="isWilling(queryResult.pubg_activity_willingness) ? 'text-green-600 dark:text-green-400 border border-green-600 dark:border-green-400 rounded-full px-2 py-1' : 'text-red-600 dark:text-red-400 border border-red-600 dark:border-red-400 rounded-full px-2 py-1'" class="font-semibold">
+                        <span
+                          :class="isWilling(queryResult.pubg_activity_willingness) ?
+                            'text-green-600 dark:text-green-400 border border-green-600 dark:border-green-400 rounded-full px-2 py-0.25' :
+                            'text-red-600 dark:text-red-400 border border-red-600 dark:border-red-400 rounded-full px-2 py-0.25'"
+                          class="font-semibold">
                           {{ isWilling(queryResult.pubg_activity_willingness) ? '願意' : '不願意' }}
                         </span>
                       </div>
@@ -361,12 +407,14 @@ onMounted(() => {
                   </div>
 
                   <!-- 推薦資訊 -->
-                  <div class="mt-4 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+                  <div
+                    class="mt-4 px-4 py-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
                     <h4 class="font-semibold text-purple-800 dark:text-purple-300 mb-3">推薦資訊</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div class="flex items-center space-x-2">
                         <span class="text-purple-700 dark:text-purple-400">好友</span>
-                        <span class="font-semibold text-gray-800 dark:text-zinc-200 border border-purple-600 dark:border-purple-400 rounded-full px-2 py-1">
+                        <span
+                          class="font-semibold text-gray-800 dark:text-zinc-200 border border-purple-600 dark:border-purple-400 rounded-full px-2 py-0.25">
                           {{ queryResult.friend_pubg_nickname && queryResult.friend_pubg_nickname.length > 0
                             ? queryResult.friend_pubg_nickname.join(', ')
                             : '無' }}
@@ -374,7 +422,8 @@ onMounted(() => {
                       </div>
                       <div class="flex items-center space-x-2">
                         <span class="text-purple-700 dark:text-purple-400">介紹人</span>
-                        <span class="font-semibold text-gray-800 dark:text-zinc-200 border border-purple-600 dark:border-purple-400 rounded-full px-2 py-1">
+                        <span
+                          class="font-semibold text-gray-800 dark:text-zinc-200 border border-purple-600 dark:border-purple-400 rounded-full px-2 py-0.25">
                           {{ queryResult.inviter_pubg_nickname && queryResult.inviter_pubg_nickname.length > 0
                             ? queryResult.inviter_pubg_nickname.join(', ')
                             : '無' }}
@@ -384,7 +433,8 @@ onMounted(() => {
                   </div>
 
                   <!-- 備註 -->
-                  <div class="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <div
+                    class="mt-4 px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                     <div class="flex items-start gap-3">
                       <i class="bi bi-chat-dots-fill text-amber-600 dark:text-amber-500 text-xl mt-0.5"></i>
                       <div>
@@ -399,223 +449,267 @@ onMounted(() => {
               </div>
 
               <!-- 第2：資料審核 -->
-              <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
-                <div class="bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-4">
+              <div
+                class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-3">
                   <h3 class="text-xl font-bold text-white flex items-center gap-2">
                     <i class="bi bi-clipboard-data"></i>
                     資料審核
                   </h3>
                 </div>
-                <div class="p-6">
+                <div class="px-6 py-3">
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                      <div class="flex justify-between items-center mb-2">
+                    <div
+                      class="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                      <div class="flex justify-between items-center">
                         <span class="font-medium text-gray-700 dark:text-zinc-300">基本資料審核</span>
                         <span :class="getStatusColor(queryResult.basic_status)" class="font-semibold">
                           {{ getStatusText(queryResult.basic_status) }}
                         </span>
                       </div>
-                      <p v-if="queryResult.basic_reasons" class="text-sm text-gray-600 dark:text-zinc-400">{{ queryResult.basic_reasons }}</p>
+                      <p v-if="queryResult.basic_reasons" class="mt-2 text-sm text-gray-600 dark:text-zinc-400">
+                        {{ queryResult.basic_reasons }}
+                      </p>
                     </div>
-                    <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                      <div class="flex justify-between items-center mb-2">
+                    <div
+                      class="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                      <div class="flex justify-between items-center">
                         <span class="font-medium text-gray-700 dark:text-zinc-300">遊戲資料審核</span>
                         <span :class="getStatusColor(queryResult.game_status)" class="font-semibold">
                           {{ getStatusText(queryResult.game_status) }}
                         </span>
                       </div>
-                      <p v-if="queryResult.game_reasons" class="text-sm text-gray-600 dark:text-zinc-400">{{ queryResult.game_reasons }}</p>
+                      <p v-if="queryResult.game_reasons" class="mt-2 text-sm text-gray-600 dark:text-zinc-400">{{
+                        queryResult.game_reasons }}</p>
                     </div>
-                    <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                      <div class="flex justify-between items-center mb-2">
+                    <div
+                      class="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                      <div class="flex justify-between items-center">
                         <span class="font-medium text-gray-700 dark:text-zinc-300">補充資料審核</span>
                         <span :class="getStatusColor(queryResult.supplement_status)" class="font-semibold">
                           {{ getStatusText(queryResult.supplement_status) }}
                         </span>
                       </div>
-                      <p v-if="queryResult.supplement_reasons" class="text-sm text-gray-600 dark:text-zinc-400">{{ queryResult.supplement_reasons }}</p>
+                      <p v-if="queryResult.supplement_reasons" class="mt-2 text-sm text-gray-600 dark:text-zinc-400">{{
+                        queryResult.supplement_reasons }}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               <!-- 第3：活躍考核 -->
-              <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
-                <div class="bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-4">
+              <div
+                class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
+                <div class="bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-3">
                   <h3 class="text-xl font-bold text-white flex items-center gap-2">
                     <i class="bi bi-people"></i>
                     活躍考核
                   </h3>
                 </div>
-                <div class="p-6">
+                <div class="px-6 py-3">
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                      <div class="flex justify-between items-center mb-2">
+                    <div
+                      class="px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <div class="flex justify-between items-center">
                         <span class="font-medium text-gray-700 dark:text-zinc-300">加入戰隊DC</span>
                         <span :class="getStatusColor(queryResult.joined_clan_dc_status)" class="font-semibold">
                           {{ getStatusText(queryResult.joined_clan_dc_status) }}
                         </span>
                       </div>
-                      <p v-if="queryResult.joined_clan_dc_reasons" class="text-sm text-gray-600 dark:text-zinc-400">{{ queryResult.joined_clan_dc_reasons }}</p>
+                      <p v-if="queryResult.joined_clan_dc_reasons"
+                        class="mt-2 text-sm text-gray-600 dark:text-zinc-400">{{
+                          queryResult.joined_clan_dc_reasons }}</p>
                     </div>
-                    <div class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                      <div class="flex justify-between items-center mb-2">
+                    <div
+                      class="px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <div class="flex justify-between items-center">
                         <span class="font-medium text-gray-700 dark:text-zinc-300">戰隊DC報到</span>
                         <span :class="getStatusColor(queryResult.clan_dc_checkin_status)" class="font-semibold">
                           {{ getStatusText(queryResult.clan_dc_checkin_status) }}
                         </span>
                       </div>
-                      <p v-if="queryResult.clan_dc_checkin_reasons" class="text-sm text-gray-600 dark:text-zinc-400">{{ queryResult.clan_dc_checkin_reasons }}</p>
+                      <p v-if="queryResult.clan_dc_checkin_reasons"
+                        class="mt-2 text-sm text-gray-600 dark:text-zinc-400">{{
+                          queryResult.clan_dc_checkin_reasons }}</p>
                     </div>
-                    <div class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                      <div class="flex justify-between items-center mb-2">
+                    <div
+                      class="px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <div class="flex justify-between items-center">
                         <span class="font-medium text-gray-700 dark:text-zinc-300">加入官方DC</span>
                         <span :class="getStatusColor(queryResult.joined_official_dc_status)" class="font-semibold">
                           {{ getStatusText(queryResult.joined_official_dc_status) }}
                         </span>
                       </div>
-                      <p v-if="queryResult.joined_official_dc_reasons" class="text-sm text-gray-600 dark:text-zinc-400">{{ queryResult.joined_official_dc_reasons }}</p>
+                      <p v-if="queryResult.joined_official_dc_reasons"
+                        class="mt-2 text-sm text-gray-600 dark:text-zinc-400">
+                        {{ queryResult.joined_official_dc_reasons }}</p>
                     </div>
-                    <div class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                      <div class="flex justify-between items-center mb-2">
+                    <div
+                      class="px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <div class="flex justify-between items-center">
                         <span class="font-medium text-gray-700 dark:text-zinc-300">社群活躍審核</span>
                         <span :class="getStatusColor(queryResult.discord_active_status)" class="font-semibold">
                           {{ getStatusText(queryResult.discord_active_status) }}
                         </span>
                       </div>
-                      <p v-if="queryResult.discord_active_reasons" class="text-sm text-gray-600 dark:text-zinc-400">{{ queryResult.discord_active_reasons }}</p>
+                      <p v-if="queryResult.discord_active_reasons"
+                        class="mt-2 text-sm text-gray-600 dark:text-zinc-400">{{
+                          queryResult.discord_active_reasons }}</p>
                     </div>
-                    <div class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                      <div class="flex justify-between items-center mb-2">
+                    <div
+                      class="px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <div class="flex justify-between items-center">
                         <span class="font-medium text-gray-700 dark:text-zinc-300">遊戲內活躍審核</span>
                         <span :class="getStatusColor(queryResult.game_active_status)" class="font-semibold">
                           {{ getStatusText(queryResult.game_active_status) }}
                         </span>
                       </div>
-                      <p v-if="queryResult.game_active_reasons" class="text-sm text-gray-600 dark:text-zinc-400">{{ queryResult.game_active_reasons }}</p>
+                      <p v-if="queryResult.game_active_reasons" class="mt-2 text-sm text-gray-600 dark:text-zinc-400">{{
+                        queryResult.game_active_reasons }}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               <!-- 第4：正式審核 -->
-              <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
-                <div class="bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-4">
+              <div
+                class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-3">
                   <h3 class="text-xl font-bold text-white flex items-center gap-2">
                     <i class="bi bi-shield-check"></i>
                     正式審核
                   </h3>
                 </div>
-                <div class="p-6">
+                <div class="px-6 py-3">
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
-                      <div class="flex justify-between items-center mb-2">
+                    <div
+                      class="px-4 py-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+                      <div class="flex justify-between items-center">
                         <span class="font-medium text-gray-700 dark:text-zinc-300">戰隊初審</span>
                         <span :class="getStatusColor(queryResult.clan_review_status)" class="font-semibold">
                           {{ getStatusText(queryResult.clan_review_status) }}
                         </span>
                       </div>
-                      <p v-if="queryResult.clan_review_reasons" class="text-sm text-gray-600 dark:text-zinc-400">{{ queryResult.clan_review_reasons }}</p>
+                      <p v-if="queryResult.clan_review_reasons" class="mt-2 text-sm text-gray-600 dark:text-zinc-400">{{
+                        queryResult.clan_review_reasons }}</p>
                     </div>
-                    <div class="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
-                      <div class="flex justify-between items-center mb-2">
+                    <div
+                      class="px-4 py-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+                      <div class="flex justify-between items-center">
                         <span class="font-medium text-gray-700 dark:text-zinc-300">官方複審</span>
                         <span :class="getStatusColor(queryResult.official_review_status)" class="font-semibold">
                           {{ getStatusText(queryResult.official_review_status) }}
                         </span>
                       </div>
-                      <p v-if="queryResult.official_review_reasons" class="text-sm text-gray-600 dark:text-zinc-400">{{ queryResult.official_review_reasons }}</p>
+                      <p v-if="queryResult.official_review_reasons"
+                        class="mt-2 text-sm text-gray-600 dark:text-zinc-400">{{
+                          queryResult.official_review_reasons }}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               <!-- 第5：加入作業 -->
-              <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
-                <div class="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-4">
+              <div
+                class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
+                <div class="bg-gradient-to-r from-orange-500 to-red-500 px-4 py-3">
                   <h3 class="text-xl font-bold text-white flex items-center gap-2">
                     <i class="bi bi-gear"></i>
                     加入作業
                   </h3>
                 </div>
-                <div class="p-6">
+                <div class="px-6 py-3">
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
-                      <div class="flex justify-between items-center mb-2">
+                    <div
+                      class="px-4 py-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                      <div class="flex justify-between items-center">
                         <span class="font-medium text-gray-700 dark:text-zinc-300">是否完成遊戲內申請加入？</span>
                         <span :class="getStatusColor(queryResult.game_apply_status)" class="font-semibold">
                           {{ getStatusText(queryResult.game_apply_status) }}
                         </span>
                       </div>
-                      <p v-if="queryResult.game_apply_reasons" class="text-sm text-gray-600 dark:text-zinc-400">{{ queryResult.game_apply_reasons }}</p>
+                      <p v-if="queryResult.game_apply_reasons" class="mt-2 text-sm text-gray-600 dark:text-zinc-400">{{
+                        queryResult.game_apply_reasons }}</p>
                     </div>
-                    <div class="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
-                      <div class="flex justify-between items-center mb-2">
+                    <div
+                      class="px-4 py-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                      <div class="flex justify-between items-center">
                         <span class="font-medium text-gray-700 dark:text-zinc-300">是否完成加入作業？</span>
                         <span :class="getStatusColor(queryResult.join_status)" class="font-semibold">
                           {{ getStatusText(queryResult.join_status) }}
                         </span>
                       </div>
-                      <p v-if="queryResult.join_reasons" class="text-sm text-gray-600 dark:text-zinc-400">{{ queryResult.join_reasons }}</p>
+                      <p v-if="queryResult.join_reasons" class="mt-2 text-sm text-gray-600 dark:text-zinc-400">{{
+                        queryResult.join_reasons }}</p>
                     </div>
-                    <div class="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
-                      <div class="flex justify-between items-center mb-2">
+                    <div
+                      class="px-4 py-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                      <div class="flex justify-between items-center">
                         <span class="font-medium text-gray-700 dark:text-zinc-300">是否獲得DC身分組？</span>
                         <span :class="getStatusColor(queryResult.discord_role_status)" class="font-semibold">
                           {{ getStatusText(queryResult.discord_role_status) }}
                         </span>
                       </div>
-                      <p v-if="queryResult.discord_role_reasons" class="text-sm text-gray-600 dark:text-zinc-400">{{ queryResult.discord_role_reasons }}</p>
+                      <p v-if="queryResult.discord_role_reasons" class="mt-2 text-sm text-gray-600 dark:text-zinc-400">
+                        {{
+                          queryResult.discord_role_reasons }}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               <!-- 第6：案件狀態 -->
-              <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
-                <div class="bg-gradient-to-r from-gray-500 to-gray-600 px-6 py-4">
+              <div
+                class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-700 overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-500 to-gray-600 px-4 py-3">
                   <h3 class="text-xl font-bold text-white flex items-center gap-2">
                     <i class="bi bi-info-circle"></i>
                     案件狀態
                   </h3>
                 </div>
-                <div class="p-6">
-                  <!-- 整體狀態 -->
-                  <div class="mb-6 p-4 bg-gray-50 dark:bg-zinc-700 rounded-lg border border-gray-200 dark:border-zinc-600">
-                    <div class="flex justify-between items-center">
-                      <span class="text-lg font-semibold text-gray-800 dark:text-zinc-200">整體狀態</span>
-                      <span :class="getStatusColor(queryResult.case_status)" class="text-xl font-bold">
-                        {{ getStatusText(queryResult.case_status) }}
-                      </span>
+                <div class="px-6 py-3">
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div
+                      class="px-4 py-2 bg-gray-50 dark:bg-zinc-700 rounded-lg border border-gray-200 dark:border-zinc-600">
+                      <div class="flex justify-between items-center">
+                        <span class="text-lg font-semibold text-gray-800 dark:text-zinc-200">整體狀態</span>
+                        <span :class="getStatusColor(queryResult.case_status)" class="text-xl font-bold">
+                          {{ getStatusText(queryResult.case_status) }}
+                        </span>
+                      </div>
+                      <p v-if="queryResult.case_note" class="mt-2 text-sm text-gray-600 dark:text-zinc-400">
+                        {{ queryResult.case_note }}
+                      </p>
                     </div>
-                    <p v-if="queryResult.case_note" class="text-sm text-gray-600 dark:text-zinc-400 mt-2">{{ queryResult.case_note }}</p>
-                  </div>
-
-                  <!-- 時間資訊 -->
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="p-4 bg-gray-50 dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg">
+                    <div
+                      class="px-4 py-2 bg-gray-50 dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg">
                       <div class="flex justify-between items-center">
                         <span class="text-gray-600 dark:text-zinc-400">申請時間</span>
-                        <span class="text-sm text-gray-800 dark:text-zinc-200">{{ formatDateTime(queryResult.created_at) }}</span>
+                        <span class="text-sm text-gray-800 dark:text-zinc-200">
+                          {{ formatDateTime(queryResult.created_at) }}
+                        </span>
                       </div>
                     </div>
-                    <div class="p-4 bg-gray-50 dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg">
+                    <div
+                      class="px-4 py-2 bg-gray-50 dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded-lg">
                       <div class="flex justify-between items-center">
                         <span class="text-gray-600 dark:text-zinc-400">更新時間</span>
-                        <span class="text-sm text-gray-800 dark:text-zinc-200">{{ formatDateTime(queryResult.updated_at) }}</span>
+                        <span class="text-sm text-gray-800 dark:text-zinc-200">
+                          {{ formatDateTime(queryResult.updated_at) }}
+                        </span>
                       </div>
                     </div>
                   </div>
-
-                  <!-- 操作按鈕 -->
-                  <div class="mt-6 flex justify-center">
-                    <button type="button" @click="resetQuery"
-                      class="px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-gray-800 dark:text-zinc-100 font-bold rounded-2xl transition-all transform hover:scale-105">
-                      <i class="bi bi-arrow-clockwise mr-2"></i>
-                      重新查詢
-                    </button>
-                  </div>
                 </div>
+              </div>
+
+              <!-- 操作按鈕 -->
+              <div class="mt-6 flex justify-center">
+                <button type="button" @click="resetQuery"
+                  class="px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-gray-800 dark:text-zinc-100 font-bold rounded-2xl transition-all transform hover:scale-105">
+                  <i class="bi bi-arrow-clockwise mr-2"></i>
+                  重新查詢
+                </button>
               </div>
             </div>
 
