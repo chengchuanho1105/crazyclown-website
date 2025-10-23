@@ -40,6 +40,10 @@ const showDiscordUsernameHelp = ref(false)
 const showSteamIdHelp = ref(false)
 const isSubmitting = ref(false)
 
+// ---------- 表單驗證 ----------
+const validationErrors = ref<Record<string, string>>({})
+const showValidationErrors = ref(false)
+
 // 新增人員相關
 const newFriendName = ref('')
 const newInviterName = ref('')
@@ -73,6 +77,9 @@ const openDiscordIdHelp = () => {
 const closeDiscordIdHelp = () => {
   showDiscordIdHelp.value = false
   hasViewedDiscordIdHelp.value = true
+  setTimeout(() => {
+    document.getElementById('discord_user_id')?.focus()
+  }, 1)
 }
 
 const openDiscordUsernameHelp = () => {
@@ -82,6 +89,9 @@ const openDiscordUsernameHelp = () => {
 const closeDiscordUsernameHelp = () => {
   showDiscordUsernameHelp.value = false
   hasViewedDiscordUsernameHelp.value = true
+  setTimeout(() => {
+    document.getElementById('discord_username')?.focus()
+  }, 1)
 }
 
 const openSteamIdHelp = () => {
@@ -91,6 +101,9 @@ const openSteamIdHelp = () => {
 const closeSteamIdHelp = () => {
   showSteamIdHelp.value = false
   hasViewedSteamIdHelp.value = true
+  setTimeout(() => {
+    document.getElementById('steam_id')?.focus()
+  }, 1)
 }
 
 // 新增好友
@@ -206,33 +219,112 @@ const createDiscordPost = async (webhookUrl: string, postTitle: string, postCont
   }
 }
 
+// ---------- 驗證函數 ----------
+const validateForm = () => {
+  const errors: Record<string, string> = {}
+
+  // 基本資料驗證
+  if (!formData.value.nickname?.trim()) {
+    errors.nickname = '請輸入暱稱'
+  } else if (formData.value.nickname.trim().length < 1) {
+    errors.nickname = '暱稱至少需要1個字元'
+  }
+
+  if (!formData.value.discord_user_id?.trim()) {
+    errors.discord_user_id = '請輸入 Discord 使用者 ID'
+  } else if (!/^\d{17,19}$/.test(formData.value.discord_user_id.trim())) {
+    errors.discord_user_id = 'Discord ID 格式不正確（應為17-19位數字）'
+  }
+
+  if (!formData.value.discord_username?.trim()) {
+    errors.discord_username = '請輸入 Discord 使用者名稱'
+  } else if (!/^[a-zA-Z0-9._]+$/.test(formData.value.discord_username.trim())) {
+    errors.discord_username = 'Discord 使用者名稱只能包含英文、數字、底線(_)、英文句號(.)'
+  }
+
+  // 遊戲資料驗證
+  if (!formData.value.pubg_nickname?.trim()) {
+    errors.pubg_nickname = '請輸入 PUBG 暱稱'
+  } else if (!/^[a-zA-Z0-9_]+$/.test(formData.value.pubg_nickname.trim())) {
+    errors.pubg_nickname = 'PUBG 暱稱只能包含英文、數字、底線(_)'
+  }
+
+  if (!formData.value.pubg_account_id?.trim()) {
+    errors.pubg_account_id = '請查詢 PUBG Account ID'
+  } else if (formData.value.pubg_account_id === 'account.Error') {
+    errors.pubg_account_id = 'PUBG 帳號查詢失敗，請檢查暱稱是否正確'
+  }
+
+  if (!formData.value.steam_id?.trim()) {
+    errors.steam_id = '請輸入 Steam ID'
+  } else if (!/^\d{17}$/.test(formData.value.steam_id.trim())) {
+    errors.steam_id = 'Steam ID 格式不正確（應為17位數字）'
+  }
+
+  // 遊戲時間驗證
+  const totalPlayTime = parseFloat(formData.value.total_play_time)
+  if (!formData.value.total_play_time || isNaN(totalPlayTime)) {
+    errors.total_play_time = '請輸入有效的總遊戲時間'
+  } else if (totalPlayTime < 0) {
+    errors.total_play_time = '遊戲時間不能為負數'
+  }
+
+  const weeklyPlayTime = parseFloat(formData.value.weekly_play_time)
+  if (!formData.value.weekly_play_time || isNaN(weeklyPlayTime)) {
+    errors.weekly_play_time = '請輸入有效的每週遊戲時間'
+  } else if (weeklyPlayTime < 0) {
+    errors.weekly_play_time = '每週遊戲時間不能為負數'
+  } else if (weeklyPlayTime > 144) {
+    errors.weekly_play_time = '每週遊戲時間不能超過144小時'
+  }
+
+  // 參與意願驗證
+  if (!formData.value.clan_task_willingness) {
+    errors.clan_task_willingness = '請選擇是否願意參與戰隊任務'
+  } else if (formData.value.clan_task_willingness !== 'TRUE') {
+    errors.clan_task_willingness = '必須選擇「願意」參與戰隊任務'
+  }
+
+  if (!formData.value.discord_activity_willingness) {
+    errors.discord_activity_willingness = '請選擇是否願意活躍於 Discord'
+  } else if (formData.value.discord_activity_willingness !== 'TRUE') {
+    errors.discord_activity_willingness = '必須選擇「願意」活躍於 Discord'
+  }
+
+  if (!formData.value.pubg_activity_willingness) {
+    errors.pubg_activity_willingness = '請選擇是否願意活躍於 PUBG'
+  } else if (formData.value.pubg_activity_willingness !== 'TRUE') {
+    errors.pubg_activity_willingness = '必須選擇「願意」活躍於 PUBG'
+  }
+
+  return errors
+}
+
+const clearValidationError = (field: string) => {
+  if (validationErrors.value[field]) {
+    delete validationErrors.value[field]
+  }
+}
+
 const handleSubmit = async () => {
-  // 基本驗證
-  if (!formData.value.nickname || !formData.value.discord_user_id || !formData.value.discord_username) {
-    alert('請填寫所有基本資料欄位')
-    return
-  }
+  // 清除之前的驗證錯誤
+  validationErrors.value = {}
+  showValidationErrors.value = false
 
-  if (!formData.value.pubg_nickname || !formData.value.pubg_account_id || !formData.value.steam_id) {
-    alert('請填寫所有遊戲資料欄位')
-    return
-  }
+  // 執行表單驗證
+  const errors = validateForm()
 
-  if (!formData.value.total_play_time || !formData.value.weekly_play_time) {
-    alert('請填寫遊戲時間資料')
-    return
-  }
+  if (Object.keys(errors).length > 0) {
+    validationErrors.value = errors
+    showValidationErrors.value = true
 
-  if (!formData.value.clan_task_willingness || !formData.value.discord_activity_willingness || !formData.value.pubg_activity_willingness) {
-    alert('請選擇所有參與意願')
-    return
-  }
-
-  // 檢查參與意願是否為 TRUE
-  if (formData.value.clan_task_willingness !== 'TRUE' ||
-    formData.value.discord_activity_willingness !== 'TRUE' ||
-    formData.value.pubg_activity_willingness !== 'TRUE') {
-    alert('所有參與意願都必須選擇「願意」才能提交申請')
+    // 滾動到第一個錯誤欄位
+    const firstErrorField = Object.keys(errors)[0]
+    const errorElement = document.getElementById(firstErrorField)
+    if (errorElement) {
+      errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      errorElement.focus()
+    }
     return
   }
 
@@ -268,7 +360,7 @@ const handleSubmit = async () => {
     if (error) {
       console.error('提交失敗：', error)
       if (error.message.includes('row-level security policy')) {
-        alert('提交失敗：權限不足，請聯繫管理員或稍後再試')
+        alert('提交失敗：請聯繫管理員或稍後再試')
       } else {
         alert(`提交失敗：${error.message}`)
       }
@@ -356,6 +448,10 @@ const resetForm = () => {
   isQueryingPubg.value = false
   pubgAccountError.value = ''
   pubgQueryAttempts.value = 0
+
+  // 清除驗證錯誤
+  validationErrors.value = {}
+  showValidationErrors.value = false
 }
 
 // 組件掛載時檢查 URL hash 並滾動到對應位置
@@ -679,9 +775,17 @@ onMounted(() => {
               <label for="nickname" class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 暱稱 <span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs text-gray-500/0 dark:text-zinc-400/0">.</p>
+              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.nickname ? 'text-red-500 dark:text-red-400' : 'text-gray-500/0 dark:text-zinc-400/0'">
+                {{ validationErrors.nickname || '.' }}
+              </p>
               <input id="nickname" v-model="formData.nickname" type="text" placeholder="請輸入暱稱" required
-                class="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 border-gray-300 dark:border-zinc-600 rounded-2xl focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500" />
+                @input="clearValidationError('nickname')"
+                :class="[
+                  'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500',
+                  validationErrors.nickname
+                    ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
+                    : 'border-gray-300 dark:border-zinc-600 focus:border-blue-500 dark:focus:border-blue-400'
+                ]" />
             </div>
 
             <!-- Discord 使用者 ID -->
@@ -689,17 +793,22 @@ onMounted(() => {
               <label for="discord_user_id" class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 Discord 使用者 ID <span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs text-red-500 dark:text-red-400" v-if="!hasViewedDiscordIdHelp">
-                請先點擊<i class="bi bi-question-circle" />，查看說明後才能填寫
-              </p>
-              <p class="ml-2 mb-0.5 text-xs text-green-600 dark:text-green-400" v-else>
-                ✅ 已查看說明，可以填寫
+              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.discord_user_id ? 'text-red-500 dark:text-red-400' : (!hasViewedDiscordIdHelp ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400')">
+                <span v-if="validationErrors.discord_user_id">{{ validationErrors.discord_user_id }}</span>
+                <span v-else-if="!hasViewedDiscordIdHelp">請先點擊<i class="bi bi-question-circle" />，查看說明後才能填寫</span>
+                <span v-else>✅ 已查看說明，可以填寫</span>
               </p>
               <div class="relative">
                 <input id="discord_user_id" v-model="formData.discord_user_id" type="text"
                   :placeholder="hasViewedDiscordIdHelp ? '請輸入 Discord ID' : '請先查看說明👉'" required
                   :disabled="!hasViewedDiscordIdHelp"
-                  class="w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-zinc-700 border-2 border-gray-300 dark:border-zinc-600 rounded-2xl focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed" />
+                  @input="clearValidationError('discord_user_id')"
+                  :class="[
+                    'w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed',
+                    validationErrors.discord_user_id
+                      ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
+                      : 'border-gray-300 dark:border-zinc-600 focus:border-blue-500 dark:focus:border-blue-400'
+                  ]" />
                 <button type="button"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200 text-xs"
                   @click="openDiscordIdHelp">
@@ -713,17 +822,22 @@ onMounted(() => {
               <label for="discord_username" class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 Discord 使用者名稱 <span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs text-red-500 dark:text-red-400" v-if="!hasViewedDiscordUsernameHelp">
-                請先點擊<i class="bi bi-question-circle" />，查看說明後才能填寫
-              </p>
-              <p class="ml-2 mb-0.5 text-xs text-green-600 dark:text-green-400" v-else>
-                ✅ 已查看說明，可以填寫
+              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.discord_username ? 'text-red-500 dark:text-red-400' : (!hasViewedDiscordUsernameHelp ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400')">
+                <span v-if="validationErrors.discord_username">{{ validationErrors.discord_username }}</span>
+                <span v-else-if="!hasViewedDiscordUsernameHelp">請先點擊<i class="bi bi-question-circle" />，查看說明後才能填寫</span>
+                <span v-else>✅ 已查看說明，可以填寫</span>
               </p>
               <div class="relative">
                 <input id="discord_username" v-model="formData.discord_username" type="text"
                   :placeholder="hasViewedDiscordUsernameHelp ? '請輸入 Discord 名稱' : '請先查看說明👉'" required
                   :disabled="!hasViewedDiscordUsernameHelp"
-                  class="w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-zinc-700 border-2 border-gray-300 dark:border-zinc-600 rounded-2xl focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed" />
+                  @input="clearValidationError('discord_username')"
+                  :class="[
+                    'w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed',
+                    validationErrors.discord_username
+                      ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
+                      : 'border-gray-300 dark:border-zinc-600 focus:border-blue-500 dark:focus:border-blue-400'
+                  ]" />
                 <button type="button"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200 text-xs"
                   @click="openDiscordUsernameHelp">
@@ -746,9 +860,17 @@ onMounted(() => {
               <label for="pubg_nickname" class="block ml-2 mb-1 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 PUBG 暱稱 <span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs text-gray-500/0 dark:text-zinc-400/0">.</p>
+              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.pubg_nickname ? 'text-red-500 dark:text-red-400' : 'text-gray-500/0 dark:text-zinc-400/0'">
+                {{ validationErrors.pubg_nickname || '.' }}
+              </p>
               <input id="pubg_nickname" v-model="formData.pubg_nickname" type="text" placeholder="請輸入 PUBG 暱稱" required
-                class="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 border-gray-300 dark:border-zinc-600 rounded-2xl focus:border-green-500 dark:focus:border-green-400 focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500" />
+                @input="clearValidationError('pubg_nickname')"
+                :class="[
+                  'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500',
+                  validationErrors.pubg_nickname
+                    ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
+                    : 'border-gray-300 dark:border-zinc-600 focus:border-green-500 dark:focus:border-green-400'
+                ]" />
             </div>
 
             <!-- PUBG Account ID -->
@@ -757,21 +879,22 @@ onMounted(() => {
                 class="block ml-2 mb-1 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 PUBG Account ID <span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs text-gray-500 dark:text-zinc-400" v-if="!formData.pubg_nickname">
-                請先填寫 PUBG 暱稱，才能查詢
-              </p>
-              <p class="ml-2 mb-0.5 text-xs text-green-600 dark:text-green-400" v-else-if="!pubgAccountError">
-                ✅ 已填寫 PUBG 暱稱，可以查詢
-              </p>
-              <p class="ml-2 mb-0.5 text-xs text-red-500 dark:text-red-400" v-else>
-                ❌ {{ pubgAccountError }}
+              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.pubg_account_id ? 'text-red-500 dark:text-red-400' : (!formData.pubg_nickname ? 'text-gray-500 dark:text-zinc-400' : (!pubgAccountError ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'))">
+                <span v-if="validationErrors.pubg_account_id">{{ validationErrors.pubg_account_id }}</span>
+                <span v-else-if="!formData.pubg_nickname">請先填寫 PUBG 暱稱，才能查詢</span>
+                <span v-else-if="!pubgAccountError">✅ 已填寫 PUBG 暱稱，可以查詢</span>
+                <span v-else>❌ {{ pubgAccountError }}</span>
               </p>
               <div class="relative">
                 <input id="pubg_account_id" v-model="formData.pubg_account_id" type="text"
                   :placeholder="!formData.pubg_nickname ? '👈請先填PUBG暱稱' : '點我查詢👉'" :readonly="!pubgAccountError"
-                  required :class="[
-                    'w-full px-4 py-3 pr-12 bg-gray-50 dark:bg-zinc-700 border-2 border-gray-300 dark:border-zinc-600 rounded-2xl focus:border-green-500 dark:focus:border-green-400 focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500',
-                    pubgAccountError ? 'cursor-text' : 'cursor-not-allowed'
+                  required
+                  @input="clearValidationError('pubg_account_id')"
+                  :class="[
+                    'w-full px-4 py-3 pr-12 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500',
+                    validationErrors.pubg_account_id
+                      ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
+                      : (pubgAccountError ? 'cursor-text border-gray-300 dark:border-zinc-600 focus:border-green-500 dark:focus:border-green-400' : 'cursor-not-allowed border-gray-300 dark:border-zinc-600 focus:border-green-500 dark:focus:border-green-400')
                   ]" />
                 <button type="button"
                   class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -787,17 +910,22 @@ onMounted(() => {
               <label for="steam_id" class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 Steam ID <span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs text-red-500 dark:text-red-400" v-if="!hasViewedSteamIdHelp">
-                請先點擊<i class="bi bi-question-circle" />，查看說明後才能填寫
-              </p>
-              <p class="ml-2 mb-0.5 text-xs text-green-600 dark:text-green-400" v-else>
-                ✅ 已查看說明，可以填寫
+              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.steam_id ? 'text-red-500 dark:text-red-400' : (!hasViewedSteamIdHelp ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400')">
+                <span v-if="validationErrors.steam_id">{{ validationErrors.steam_id }}</span>
+                <span v-else-if="!hasViewedSteamIdHelp">請先點擊<i class="bi bi-question-circle" />，查看說明後才能填寫</span>
+                <span v-else>✅ 已查看說明，可以填寫</span>
               </p>
               <div class="relative">
                 <input id="steam_id" v-model="formData.steam_id" type="text"
                   :placeholder="hasViewedSteamIdHelp ? '請輸入 Steam ID' : '請先查看說明👉'" required maxlength="17"
                   :disabled="!hasViewedSteamIdHelp"
-                  class="w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-zinc-700 border-2 border-gray-300 dark:border-zinc-600 rounded-2xl focus:border-green-500 dark:focus:border-green-400 focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed" />
+                  @input="clearValidationError('steam_id')"
+                  :class="[
+                    'w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed',
+                    validationErrors.steam_id
+                      ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
+                      : 'border-gray-300 dark:border-zinc-600 focus:border-green-500 dark:focus:border-green-400'
+                  ]" />
                 <button type="button"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200 text-xs"
                   @click="openSteamIdHelp">
@@ -812,10 +940,18 @@ onMounted(() => {
                 class="block ml-2 mb-1 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 總遊戲時間（小時）<span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs text-gray-500/0 dark:text-zinc-400/0">.</p>
+              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.total_play_time ? 'text-red-500 dark:text-red-400' : 'text-gray-500/0 dark:text-zinc-400/0'">
+                {{ validationErrors.total_play_time || '.' }}
+              </p>
               <input id="total_play_time" v-model="formData.total_play_time" type="number" min="0"
                 placeholder="請輸入總遊戲時間" required
-                class="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 border-gray-300 dark:border-zinc-600 rounded-2xl focus:border-green-500 dark:focus:border-green-400 focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500" />
+                @input="clearValidationError('total_play_time')"
+                :class="[
+                  'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500',
+                  validationErrors.total_play_time
+                    ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
+                    : 'border-gray-300 dark:border-zinc-600 focus:border-green-500 dark:focus:border-green-400'
+                ]" />
             </div>
 
             <!-- 每週遊戲時間 -->
@@ -823,10 +959,19 @@ onMounted(() => {
               <label for="weekly_play_time" class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 每週遊戲時間（小時）<span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs text-gray-500 dark:text-zinc-400">最多 144 小時，請合理填寫，列為往後考績目標</p>
+              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.weekly_play_time ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-zinc-400'">
+                <span v-if="validationErrors.weekly_play_time">{{ validationErrors.weekly_play_time }}</span>
+                <span v-else>最多 144 小時，請合理填寫，列為往後考績目標</span>
+              </p>
               <input id="weekly_play_time" v-model="formData.weekly_play_time" type="number" min="0" max="144"
                 placeholder="請輸入每週遊戲時間" required
-                class="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 border-gray-300 dark:border-zinc-600 rounded-2xl focus:border-green-500 dark:focus:border-green-400 focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500" />
+                @input="clearValidationError('weekly_play_time')"
+                :class="[
+                  'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500',
+                  validationErrors.weekly_play_time
+                    ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
+                    : 'border-gray-300 dark:border-zinc-600 focus:border-green-500 dark:focus:border-green-400'
+                ]" />
             </div>
 
             <!-- ========== 補充資料 ========== -->
@@ -844,13 +989,23 @@ onMounted(() => {
                 class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 是否願意參與戰隊任務？<span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs text-gray-500 dark:text-zinc-400">每週會有簡單的任務需要完成</p>
+              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.clan_task_willingness ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-zinc-400'">
+                <span v-if="validationErrors.clan_task_willingness">{{ validationErrors.clan_task_willingness }}</span>
+                <span v-else>每週會有簡單的任務需要完成</span>
+              </p>
               <div class="relative">
                 <select id="clan_task_willingness" v-model="formData.clan_task_willingness" required
-                  class="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 border-gray-300 dark:border-zinc-600 rounded-2xl focus:border-orange-500 dark:focus:border-orange-400 focus:outline-none transition-colors appearance-none cursor-pointer">
+                  @change="clearValidationError('clan_task_willingness')"
+                  :class="[
+                    'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors appearance-none cursor-pointer',
+                    validationErrors.clan_task_willingness
+                      ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
+                      : 'border-gray-300 dark:border-zinc-600 focus:border-orange-500 dark:focus:border-orange-400'
+                  ]">
                   <option value="" disabled>請選擇</option>
                   <option value=TRUE>願意</option>
                   <option value=FALSE>不願意</option>
+                  <option value="" disabled>不願意者將無法加入戰隊</option>
                 </select>
                 <i class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
               </div>
@@ -862,13 +1017,23 @@ onMounted(() => {
                 class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 是否願意活躍於 Discord？<span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs text-gray-500 dark:text-zinc-400">經常使用文字及語音頻道聊天</p>
+              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.discord_activity_willingness ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-zinc-400'">
+                <span v-if="validationErrors.discord_activity_willingness">{{ validationErrors.discord_activity_willingness }}</span>
+                <span v-else>經常使用文字及語音頻道聊天</span>
+              </p>
               <div class="relative">
                 <select id="discord_activity_willingness" v-model="formData.discord_activity_willingness" required
-                  class="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 border-gray-300 dark:border-zinc-600 rounded-2xl focus:border-orange-500 dark:focus:border-orange-400 focus:outline-none transition-colors appearance-none cursor-pointer">
+                  @change="clearValidationError('discord_activity_willingness')"
+                  :class="[
+                    'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors appearance-none cursor-pointer',
+                    validationErrors.discord_activity_willingness
+                      ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
+                      : 'border-gray-300 dark:border-zinc-600 focus:border-orange-500 dark:focus:border-orange-400'
+                  ]">
                   <option value="" disabled>請選擇</option>
                   <option value=TRUE>願意</option>
                   <option value=FALSE>不願意</option>
+                  <option value="" disabled>不願意者將無法加入戰隊</option>
                 </select>
                 <i class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
               </div>
@@ -880,13 +1045,23 @@ onMounted(() => {
                 class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 是否願意活躍於 PUBG？<span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs text-red-500 dark:text-red-400">此三項未達標者，將影響考績分數</p>
+              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.pubg_activity_willingness ? 'text-red-500 dark:text-red-400' : 'text-red-500 dark:text-red-400'">
+                <span v-if="validationErrors.pubg_activity_willingness">{{ validationErrors.pubg_activity_willingness }}</span>
+                <span v-else>此三項未達標者，將影響考績分數</span>
+              </p>
               <div class="relative">
                 <select id="pubg_activity_willingness" v-model="formData.pubg_activity_willingness" required
-                  class="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 border-gray-300 dark:border-zinc-600 rounded-2xl focus:border-orange-500 dark:focus:border-orange-400 focus:outline-none transition-colors appearance-none cursor-pointer">
+                  @change="clearValidationError('pubg_activity_willingness')"
+                  :class="[
+                    'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors appearance-none cursor-pointer',
+                    validationErrors.pubg_activity_willingness
+                      ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
+                      : 'border-gray-300 dark:border-zinc-600 focus:border-orange-500 dark:focus:border-orange-400'
+                  ]">
                   <option value="" disabled>請選擇</option>
                   <option value=TRUE>願意</option>
                   <option value=FALSE>不願意</option>
+                  <option value="" disabled>不願意者將無法加入戰隊</option>
                 </select>
                 <i class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
               </div>
