@@ -249,12 +249,6 @@ const validateForm = () => {
     errors.pubg_nickname = 'PUBG 暱稱只能包含英文、數字、底線(_)'
   }
 
-  if (!formData.value.pubg_account_id?.trim()) {
-    errors.pubg_account_id = '請查詢 PUBG Account ID'
-  } else if (formData.value.pubg_account_id === 'account.Error') {
-    errors.pubg_account_id = 'PUBG 帳號查詢失敗，請檢查暱稱是否正確'
-  }
-
   if (!formData.value.steam_id?.trim()) {
     errors.steam_id = '請輸入 Steam ID'
   } else if (!/^\d{17}$/.test(formData.value.steam_id.trim())) {
@@ -474,7 +468,7 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-800">
-    <div  id="gamer" class="max-w-7xl m-auto px-4 py-8">
+    <div id="gamer" class="max-w-7xl m-auto px-4 py-8">
       <DecorSection mainTitle="🎮 戰隊加入申請表" enTitle="Clan Application Form">
 
         <!-- ========== 說明頁面 ========== -->
@@ -775,12 +769,12 @@ onMounted(() => {
               <label for="nickname" class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 暱稱 <span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.nickname ? 'text-red-500 dark:text-red-400' : 'text-gray-500/0 dark:text-zinc-400/0'">
+              <p class="ml-2 mb-0.5 text-xs"
+                :class="validationErrors.nickname ? 'text-red-500 dark:text-red-400' : 'text-gray-500/0 dark:text-zinc-400/0'">
                 {{ validationErrors.nickname || '.' }}
               </p>
               <input id="nickname" v-model="formData.nickname" type="text" placeholder="請輸入暱稱" required
-                @input="clearValidationError('nickname')"
-                :class="[
+                @input="clearValidationError('nickname')" :class="[
                   'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500',
                   validationErrors.nickname
                     ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
@@ -793,7 +787,8 @@ onMounted(() => {
               <label for="discord_user_id" class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 Discord 使用者 ID <span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.discord_user_id ? 'text-red-500 dark:text-red-400' : (!hasViewedDiscordIdHelp ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400')">
+              <p class="ml-2 mb-0.5 text-xs"
+                :class="validationErrors.discord_user_id ? 'text-red-500 dark:text-red-400' : (!hasViewedDiscordIdHelp ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400')">
                 <span v-if="validationErrors.discord_user_id">{{ validationErrors.discord_user_id }}</span>
                 <span v-else-if="!hasViewedDiscordIdHelp">請先點擊<i class="bi bi-question-circle" />，查看說明後才能填寫</span>
                 <span v-else>✅ 已查看說明，可以填寫</span>
@@ -801,9 +796,7 @@ onMounted(() => {
               <div class="relative">
                 <input id="discord_user_id" v-model="formData.discord_user_id" type="text"
                   :placeholder="hasViewedDiscordIdHelp ? '請輸入 Discord ID' : '請先查看說明👉'" required
-                  :disabled="!hasViewedDiscordIdHelp"
-                  @input="clearValidationError('discord_user_id')"
-                  :class="[
+                  :disabled="!hasViewedDiscordIdHelp" @input="clearValidationError('discord_user_id')" :class="[
                     'w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed',
                     validationErrors.discord_user_id
                       ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
@@ -822,7 +815,8 @@ onMounted(() => {
               <label for="discord_username" class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 Discord 使用者名稱 <span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.discord_username ? 'text-red-500 dark:text-red-400' : (!hasViewedDiscordUsernameHelp ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400')">
+              <p class="ml-2 mb-0.5 text-xs"
+                :class="validationErrors.discord_username ? 'text-red-500 dark:text-red-400' : (!hasViewedDiscordUsernameHelp ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400')">
                 <span v-if="validationErrors.discord_username">{{ validationErrors.discord_username }}</span>
                 <span v-else-if="!hasViewedDiscordUsernameHelp">請先點擊<i class="bi bi-question-circle" />，查看說明後才能填寫</span>
                 <span v-else>✅ 已查看說明，可以填寫</span>
@@ -830,9 +824,7 @@ onMounted(() => {
               <div class="relative">
                 <input id="discord_username" v-model="formData.discord_username" type="text"
                   :placeholder="hasViewedDiscordUsernameHelp ? '請輸入 Discord 名稱' : '請先查看說明👉'" required
-                  :disabled="!hasViewedDiscordUsernameHelp"
-                  @input="clearValidationError('discord_username')"
-                  :class="[
+                  :disabled="!hasViewedDiscordUsernameHelp" @input="clearValidationError('discord_username')" :class="[
                     'w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed',
                     validationErrors.discord_username
                       ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
@@ -860,12 +852,12 @@ onMounted(() => {
               <label for="pubg_nickname" class="block ml-2 mb-1 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 PUBG 暱稱 <span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.pubg_nickname ? 'text-red-500 dark:text-red-400' : 'text-gray-500/0 dark:text-zinc-400/0'">
+              <p class="ml-2 mb-0.5 text-xs"
+                :class="validationErrors.pubg_nickname ? 'text-red-500 dark:text-red-400' : 'text-gray-500/0 dark:text-zinc-400/0'">
                 {{ validationErrors.pubg_nickname || '.' }}
               </p>
               <input id="pubg_nickname" v-model="formData.pubg_nickname" type="text" placeholder="請輸入 PUBG 暱稱" required
-                @input="clearValidationError('pubg_nickname')"
-                :class="[
+                @input="clearValidationError('pubg_nickname')" :class="[
                   'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500',
                   validationErrors.pubg_nickname
                     ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
@@ -879,7 +871,8 @@ onMounted(() => {
                 class="block ml-2 mb-1 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 PUBG Account ID <span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.pubg_account_id ? 'text-red-500 dark:text-red-400' : (!formData.pubg_nickname ? 'text-gray-500 dark:text-zinc-400' : (!pubgAccountError ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'))">
+              <p class="ml-2 mb-0.5 text-xs"
+                :class="validationErrors.pubg_account_id ? 'text-red-500 dark:text-red-400' : (!formData.pubg_nickname ? 'text-gray-500 dark:text-zinc-400' : (!pubgAccountError ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'))">
                 <span v-if="validationErrors.pubg_account_id">{{ validationErrors.pubg_account_id }}</span>
                 <span v-else-if="!formData.pubg_nickname">請先填寫 PUBG 暱稱，才能查詢</span>
                 <span v-else-if="!pubgAccountError">✅ 已填寫 PUBG 暱稱，可以查詢</span>
@@ -888,9 +881,7 @@ onMounted(() => {
               <div class="relative">
                 <input id="pubg_account_id" v-model="formData.pubg_account_id" type="text"
                   :placeholder="!formData.pubg_nickname ? '👈請先填PUBG暱稱' : '點我查詢👉'" :readonly="!pubgAccountError"
-                  required
-                  @input="clearValidationError('pubg_account_id')"
-                  :class="[
+                  required @input="clearValidationError('pubg_account_id')" :class="[
                     'w-full px-4 py-3 pr-12 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500',
                     validationErrors.pubg_account_id
                       ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
@@ -910,7 +901,8 @@ onMounted(() => {
               <label for="steam_id" class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 Steam ID <span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.steam_id ? 'text-red-500 dark:text-red-400' : (!hasViewedSteamIdHelp ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400')">
+              <p class="ml-2 mb-0.5 text-xs"
+                :class="validationErrors.steam_id ? 'text-red-500 dark:text-red-400' : (!hasViewedSteamIdHelp ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400')">
                 <span v-if="validationErrors.steam_id">{{ validationErrors.steam_id }}</span>
                 <span v-else-if="!hasViewedSteamIdHelp">請先點擊<i class="bi bi-question-circle" />，查看說明後才能填寫</span>
                 <span v-else>✅ 已查看說明，可以填寫</span>
@@ -918,9 +910,7 @@ onMounted(() => {
               <div class="relative">
                 <input id="steam_id" v-model="formData.steam_id" type="text"
                   :placeholder="hasViewedSteamIdHelp ? '請輸入 Steam ID' : '請先查看說明👉'" required maxlength="17"
-                  :disabled="!hasViewedSteamIdHelp"
-                  @input="clearValidationError('steam_id')"
-                  :class="[
+                  :disabled="!hasViewedSteamIdHelp" @input="clearValidationError('steam_id')" :class="[
                     'w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed',
                     validationErrors.steam_id
                       ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
@@ -940,13 +930,12 @@ onMounted(() => {
                 class="block ml-2 mb-1 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 總遊戲時間（小時）<span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.total_play_time ? 'text-red-500 dark:text-red-400' : 'text-gray-500/0 dark:text-zinc-400/0'">
+              <p class="ml-2 mb-0.5 text-xs"
+                :class="validationErrors.total_play_time ? 'text-red-500 dark:text-red-400' : 'text-gray-500/0 dark:text-zinc-400/0'">
                 {{ validationErrors.total_play_time || '.' }}
               </p>
               <input id="total_play_time" v-model="formData.total_play_time" type="number" min="0"
-                placeholder="請輸入總遊戲時間" required
-                @input="clearValidationError('total_play_time')"
-                :class="[
+                placeholder="請輸入總遊戲時間" required @input="clearValidationError('total_play_time')" :class="[
                   'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500',
                   validationErrors.total_play_time
                     ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
@@ -959,14 +948,13 @@ onMounted(() => {
               <label for="weekly_play_time" class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 每週遊戲時間（小時）<span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.weekly_play_time ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-zinc-400'">
+              <p class="ml-2 mb-0.5 text-xs"
+                :class="validationErrors.weekly_play_time ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-zinc-400'">
                 <span v-if="validationErrors.weekly_play_time">{{ validationErrors.weekly_play_time }}</span>
                 <span v-else>最多 144 小時，請合理填寫，列為往後考績目標</span>
               </p>
               <input id="weekly_play_time" v-model="formData.weekly_play_time" type="number" min="0" max="144"
-                placeholder="請輸入每週遊戲時間" required
-                @input="clearValidationError('weekly_play_time')"
-                :class="[
+                placeholder="請輸入每週遊戲時間" required @input="clearValidationError('weekly_play_time')" :class="[
                   'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500',
                   validationErrors.weekly_play_time
                     ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
@@ -989,14 +977,14 @@ onMounted(() => {
                 class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 是否願意參與戰隊任務？<span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.clan_task_willingness ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-zinc-400'">
+              <p class="ml-2 mb-0.5 text-xs"
+                :class="validationErrors.clan_task_willingness ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-zinc-400'">
                 <span v-if="validationErrors.clan_task_willingness">{{ validationErrors.clan_task_willingness }}</span>
                 <span v-else>每週會有簡單的任務需要完成</span>
               </p>
               <div class="relative">
                 <select id="clan_task_willingness" v-model="formData.clan_task_willingness" required
-                  @change="clearValidationError('clan_task_willingness')"
-                  :class="[
+                  @change="clearValidationError('clan_task_willingness')" :class="[
                     'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors appearance-none cursor-pointer',
                     validationErrors.clan_task_willingness
                       ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
@@ -1017,14 +1005,15 @@ onMounted(() => {
                 class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 是否願意活躍於 Discord？<span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.discord_activity_willingness ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-zinc-400'">
-                <span v-if="validationErrors.discord_activity_willingness">{{ validationErrors.discord_activity_willingness }}</span>
+              <p class="ml-2 mb-0.5 text-xs"
+                :class="validationErrors.discord_activity_willingness ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-zinc-400'">
+                <span v-if="validationErrors.discord_activity_willingness">{{
+                  validationErrors.discord_activity_willingness }}</span>
                 <span v-else>經常使用文字及語音頻道聊天</span>
               </p>
               <div class="relative">
                 <select id="discord_activity_willingness" v-model="formData.discord_activity_willingness" required
-                  @change="clearValidationError('discord_activity_willingness')"
-                  :class="[
+                  @change="clearValidationError('discord_activity_willingness')" :class="[
                     'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors appearance-none cursor-pointer',
                     validationErrors.discord_activity_willingness
                       ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
@@ -1045,14 +1034,15 @@ onMounted(() => {
                 class="block ml-2 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 是否願意活躍於 PUBG？<span class="text-red-500">*</span>
               </label>
-              <p class="ml-2 mb-0.5 text-xs" :class="validationErrors.pubg_activity_willingness ? 'text-red-500 dark:text-red-400' : 'text-red-500 dark:text-red-400'">
-                <span v-if="validationErrors.pubg_activity_willingness">{{ validationErrors.pubg_activity_willingness }}</span>
+              <p class="ml-2 mb-0.5 text-xs"
+                :class="validationErrors.pubg_activity_willingness ? 'text-red-500 dark:text-red-400' : 'text-red-500 dark:text-red-400'">
+                <span v-if="validationErrors.pubg_activity_willingness">{{ validationErrors.pubg_activity_willingness
+                  }}</span>
                 <span v-else>此三項未達標者，將影響考績分數</span>
               </p>
               <div class="relative">
                 <select id="pubg_activity_willingness" v-model="formData.pubg_activity_willingness" required
-                  @change="clearValidationError('pubg_activity_willingness')"
-                  :class="[
+                  @change="clearValidationError('pubg_activity_willingness')" :class="[
                     'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors appearance-none cursor-pointer',
                     validationErrors.pubg_activity_willingness
                       ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
