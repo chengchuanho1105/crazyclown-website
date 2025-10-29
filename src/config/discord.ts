@@ -30,7 +30,8 @@ export const DISCORD_TEMPLATES = {
 ❔ 若有任何疑問，可於此通知串內留言詢問。`,
 
   // 狀態變動通知
-  STATUS_CHANGE_NOTIFICATION: `嗨！<@{discord_user_id}>，審核/考核狀態有變動🔔。
+  STATUS_CHANGE_NOTIFICATION: `## 🔔 入隊申請審核/考核狀態變動通知
+嗨！<@{discord_user_id}>，審核/考核狀態有變動🔔。
 {changes}
 🔍 可前往「[您的審核進度](https://crazyclown.online/join/query?steam_id={steam_id})」頁面查看最新狀態與說明。
 ❔ 若有任何疑問，可於此通知串內留言詢問。`

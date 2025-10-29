@@ -175,6 +175,11 @@ const deleteApplication = async (application: ApplicationData) => {
 // Discord 通知相關函數
 const sendDiscordNotification = async (webhookUrl: string, content: string, threadId?: string) => {
   try {
+    console.log('📡 準備發送 Discord 通知')
+    console.log('🔗 Webhook URL:', webhookUrl)
+    console.log('📝 通知內容:', content)
+    console.log('🧵 Thread ID:', threadId)
+
     let targetUrl = webhookUrl
 
     // 如果有 thread_id，構建發送到特定討論串的 URL
@@ -185,6 +190,7 @@ const sendDiscordNotification = async (webhookUrl: string, content: string, thre
         const [, webhookId, webhookToken] = urlMatch
         // 構建發送到特定討論串的 URL
         targetUrl = `https://discord.com/api/webhooks/${webhookId}/${webhookToken}?thread_id=${threadId}`
+        console.log('🎯 構建討論串 URL:', targetUrl)
       }
     }
 
@@ -203,6 +209,8 @@ const sendDiscordNotification = async (webhookUrl: string, content: string, thre
       payload.thread_id = threadId
     }
 
+    console.log('📦 發送載荷:', payload)
+
     const response = await fetch(targetUrl, {
       method: 'POST',
       headers: {
@@ -211,10 +219,14 @@ const sendDiscordNotification = async (webhookUrl: string, content: string, thre
       body: JSON.stringify(payload)
     })
 
+    console.log('📊 回應狀態:', response.status, response.statusText)
+
     if (!response.ok) {
       const errorText = await response.text()
       console.error('❌ Discord 通知發送失敗：', response.status, response.statusText)
       console.error('❌ 錯誤詳情:', errorText)
+    } else {
+      console.log('✅ Discord 通知發送成功')
     }
 
   } catch (error) {
@@ -287,6 +299,30 @@ const sendStatusChangeNotification = async (application: ApplicationData, change
     })
     return
   }
+
+  // 檢查是否有案件狀態變為「已通過」，如果是則只發送通過通知，不發送一般變動通知
+  console.log('🔍 檢查案件狀態變動：', changes)
+  const caseStatusChange = changes.find(change => change.field === '整體狀態' && change.newValue === '✅ 已通過')
+  console.log('🎯 案件狀態變動檢查結果：', caseStatusChange)
+
+  if (caseStatusChange) {
+    console.log('🎉 檢測到案件狀態變為已通過，只發送通過通知')
+    const approvalNotificationContent = `## 🔔 入隊審核通過通知 ✅
+<@${application.discord_user_id}> 恭喜您 🎉 您的入隊審核已 全數通過，正式成為 Crazy_Clown 一員！
+請持續保持符合戰隊活躍與規範要求 🔍 [查看詳細規範](https://crazyclown.online/join/)
+
+若您對本次申請流程有任何想法或建議，也歡迎在下方留言 💬
+您的回饋將協助我們優化未來的審核體驗 🤝
+
+歡迎加入，祝您戰場順利吃雞 🎉`
+
+    console.log('📤 發送入隊審核通過通知')
+    await sendDiscordNotification(DISCORD_CONFIG.WEBHOOK_URL, approvalNotificationContent, application.thread_id)
+    return // 直接返回，不發送一般變動通知
+  }
+
+  // 如果不是通過狀態，則發送一般的狀態變動通知
+  console.log('📝 發送一般狀態變動通知')
 
   // 構建變動內容
   let changesText = ''
