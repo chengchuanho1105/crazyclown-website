@@ -21,6 +21,7 @@ interface ApplicationData {
   pubg_activity_willingness: string
   friend_pubg_nickname: string[]
   inviter_pubg_nickname: string[]
+  introduce_yourself: string
   note: string
   basic_status: string
   basic_reasons: string
@@ -773,6 +774,21 @@ onMounted(() => {
                     placeholder="Discord 討論串 ID" />
                 </div>
               </div>
+              <!-- 自我介紹和備註 -->
+              <div class="mt-4 space-y-4">
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-zinc-300">自我介紹</label>
+                  <textarea v-model="editingApplication.introduce_yourself" rows="2"
+                    class="w-full px-4 py-3 bg-white dark:bg-zinc-700 border-2 border-gray-200 dark:border-zinc-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                    placeholder="請簡單介紹自己..."></textarea>
+                </div>
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-gray-700 dark:text-zinc-300">備註</label>
+                  <textarea v-model="editingApplication.note" rows="2"
+                    class="w-full px-4 py-3 bg-white dark:bg-zinc-700 border-2 border-gray-200 dark:border-zinc-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                    placeholder="有任何想告訴我們的事情嗎？"></textarea>
+                </div>
+              </div>
             </div>
 
             <!-- 參與意願 -->
@@ -1096,7 +1112,7 @@ onMounted(() => {
                   </div>
                   <div>
                     <label class="block text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">案件備註</label>
-                    <textarea v-model="editingApplication.case_note" rows="3"
+                    <textarea v-model="editingApplication.case_note" rows="2"
                       class="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-600 border border-gray-300 dark:border-zinc-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
                       placeholder="輸入案件備註..."></textarea>
                   </div>

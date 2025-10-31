@@ -31,6 +31,7 @@ const formData = ref({
   pubg_activity_willingness: '',
   friend_pubg_nickname: [],
   inviter_pubg_nickname: [],
+  introduce_yourself: '',
   note: ''
 })
 
@@ -274,6 +275,19 @@ const fieldValidations: Record<string, { required: string; pattern?: RegExp; pat
   pubg_activity_willingness: {
     required: '請選擇是否願意活躍於 PUBG',
     custom: (value) => value !== 'TRUE' ? '必須選擇「願意」活躍於 PUBG' : undefined
+  },
+  introduce_yourself: {
+    required: '請簡單介紹自己 (遊戲經驗/風格/上線狀態、為什麼想加入群組、優點...等)',
+    custom: (value) => {
+      if (!value || (typeof value === 'string' && !value.trim())) {
+        return '請簡單介紹自己 (遊戲經驗/風格/上線狀態、為什麼想加入群組、優點...等)'
+      }
+      const trimmedValue = String(value).trim()
+      if (trimmedValue.length < 10) {
+        return '請簡單介紹自己 (遊戲經驗/風格/上線狀態、為什麼想加入群組、優點...等)（至少10個字元）'
+      }
+      return undefined
+    }
   }
 }
 
@@ -370,6 +384,7 @@ const handleSubmit = async () => {
       pubg_activity_willingness: formData.value.pubg_activity_willingness,
       friend_pubg_nickname: formData.value.friend_pubg_nickname,
       inviter_pubg_nickname: formData.value.inviter_pubg_nickname,
+      introduce_yourself: formData.value.introduce_yourself || '',
       note: formData.value.note || ''
     }
 
@@ -464,6 +479,7 @@ const resetForm = () => {
     pubg_activity_willingness: '',
     friend_pubg_nickname: [],
     inviter_pubg_nickname: [],
+    introduce_yourself: '',
     note: ''
   }
   hasViewedDiscordIdHelp.value = false
@@ -1163,12 +1179,31 @@ onMounted(() => {
               </div>
             </div>
 
+            <!-- 自我介紹 -->
+            <div class="col-span-12">
+              <label for="introduce_yourself" class="block ml-2 mb-1 text-sm font-semibold text-gray-700 dark:text-zinc-300">
+                自我介紹 <span class="text-red-500">*</span>
+              </label>
+              <p class="ml-2 mb-0.5 text-xs"
+                :class="validationErrors.introduce_yourself ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-zinc-400'">
+                <span v-if="validationErrors.introduce_yourself">{{ validationErrors.introduce_yourself }}</span>
+                <span v-else>請簡單介紹自己 (遊戲經驗/風格/上線狀態、為什麼想加入群組、優點...等)</span>
+              </p>
+              <textarea id="introduce_yourself" v-model="formData.introduce_yourself" rows="2" placeholder="請簡單介紹自己 (遊戲經驗/風格/上線狀態、為什麼想加入群組、優點...等)" required
+                @input="validateField('introduce_yourself', formData.introduce_yourself)" :class="[
+                  'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500 resize-none',
+                  validationErrors.introduce_yourself
+                    ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
+                    : 'border-gray-300 dark:border-zinc-600 focus:border-orange-500 dark:focus:border-orange-400'
+                ]"></textarea>
+            </div>
+
             <!-- 備註 -->
             <div class="col-span-12">
               <label for="note" class="block ml-2 mb-1 text-sm font-semibold text-gray-700 dark:text-zinc-300">
                 備註
               </label>
-              <textarea id="note" v-model="formData.note" rows="4" placeholder="有任何想告訴我們的事情嗎？（選填）"
+              <textarea id="note" v-model="formData.note" rows="2" placeholder="有任何想告訴我們的事情嗎？（選填）"
                 class="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 border-gray-300 dark:border-zinc-600 rounded-2xl focus:border-orange-500 dark:focus:border-orange-400 focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500 resize-none"></textarea>
             </div>
 

@@ -22,6 +22,7 @@ interface ApplicationData {
   pubg_activity_willingness: string
   friend_pubg_nickname: string[]
   inviter_pubg_nickname: string[]
+  introduce_yourself: string
   note: string
   basic_status: string
   basic_reasons: string
@@ -428,6 +429,20 @@ onMounted(() => {
                             ? queryResult.inviter_pubg_nickname.join(', ')
                             : '無' }}
                         </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 自我介紹 -->
+                  <div
+                    class="mt-4 px-4 py-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+                    <div class="flex items-start gap-3">
+                      <i class="bi bi-person-badge-fill text-purple-600 dark:text-purple-500 text-xl mt-0.5"></i>
+                      <div>
+                        <p class="font-semibold text-purple-800 dark:text-purple-300 mb-1">自我介紹</p>
+                        <p class="text-sm text-purple-700 dark:text-purple-400 whitespace-pre-line">
+                          {{ queryResult.introduce_yourself || '無自我介紹' }}
+                        </p>
                       </div>
                     </div>
                   </div>
