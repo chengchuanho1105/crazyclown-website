@@ -505,79 +505,11 @@ onMounted(() => {
         <div v-if="showInstructions" class="text-gray-900 dark:text-zinc-100">
           <div class="grid grid-cols-12 gap-4 p-6 bg-white dark:bg-zinc-800 rounded-3xl shadow-xl">
 
-            <!-- 歡迎訊息 -->
-            <div class="col-span-12 text-center mb-4">
-              <div
-                class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-4">
-                <i class="bi bi-book text-white text-3xl"></i>
-              </div>
-              <h2
-                class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
-                在開始申請前，請詳細閱讀以下說明
-              </h2>
-            </div>
-
-            <!-- 加入要求 -->
-            <div class="col-span-12">
-              <div
-                class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border-l-4 border-r-4 border-blue-500">
-                <h3 class="text-2xl font-bold text-blue-800 dark:text-blue-300 mb-4 flex items-end gap-2">
-                  <i class="bi bi-check-circle-fill"></i>
-                  入隊要求 <span class="text-base text-amber-600 dark:text-amber-400">完成皆有機會獲得獎勵</span>
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div class="flex items-start gap-3">
-                    <i class="bi bi-trophy text-yellow-500 text-lg mt-1"></i>
-                    <div>
-                      <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">積極參與 Discord 社群任務</p>
-                      <p class="text-base text-gray-600 dark:text-zinc-400">須參與每週
-                        <a href="https://discord.com/channels/490129931808931840/1416247790098583583" target="_blank"
-                          class="text-blue-500 dark:text-blue-400">戰隊 DC 社群任務</a>
-                        <br />
-                        <span class="text-amber-600 dark:text-amber-400 text-sm">任務都很簡單，請務必完成。</span>
-                      </p>
-                    </div>
-                  </div>
-                  <div class="flex items-start gap-3">
-                    <i class="bi bi-discord text-indigo-500 text-lg mt-1"></i>
-                    <div>
-                      <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">積極於 Discord 社群活躍</p>
-                      <p class="text-base text-gray-600 dark:text-zinc-400">須活躍於
-                        <a href="https://crazyclown.online/dc" target="_blank"
-                          class="text-blue-500 dark:text-blue-400">戰隊</a> / <a href="https://kraftontw.info/Discord"
-                          target="_blank" class="text-blue-500 dark:text-blue-400">官方 DC</a><br />
-                        <span class="text-amber-600 dark:text-amber-400 text-sm">每週聊天/語音至少各3次，語音每次30分鐘以上。</span>
-                      </p>
-                    </div>
-                  </div>
-                  <div class="flex items-start gap-3">
-                    <i class="bi bi-heart text-red-500 text-lg mt-1"></i>
-                    <div>
-                      <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">積極參與 Discord 社群活動</p>
-                      <p class="text-base text-gray-600 dark:text-zinc-400">須參與
-                        <a href="https://discord.com/channels/490129931808931840/1416247790098583583" target="_blank"
-                          class="text-blue-500 dark:text-blue-400">戰隊 DC 社群活動</a>
-                      </p>
-                      <span class="text-amber-600 dark:text-amber-400 text-sm">頻率不高、獎勵豐厚，請積極參與。</span>
-                    </div>
-                  </div>
-                  <div class="flex items-start gap-3">
-                    <i class="bi bi-clock text-orange-500 text-lg mt-1"></i>
-                    <div>
-                      <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">遊戲貢獻</p>
-                      <p class="text-base text-gray-600 dark:text-zinc-400">須積極遊玩，提升遊戲貢獻度。</p>
-                      <span class="text-amber-600 dark:text-amber-400 text-sm">每週遊玩10小時以上、每週XP 1萬以上、賽季場次至少300場。</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <!-- 福利區塊 -->
             <div class="col-span-12">
               <div
-                class="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl p-6 border-l-4 border-r-4 border-yellow-500">
-                <h3 class="text-xl font-bold text-yellow-800 dark:text-yellow-300 mb-4 flex items-center gap-2">
+                class="bg-sky-50 dark:bg-sky-900/20 rounded-2xl p-6 border-l-4 border-r-4 border-l-sky-500 border-r-sky-500">
+                <h3 class="text-xl font-bold text-indigo-800 dark:text-indigo-300 mb-4 flex items-center gap-2">
                   <i class="bi bi-gift-fill"></i>
                   戰隊福利
                 </h3>
@@ -628,11 +560,60 @@ onMounted(() => {
               </div>
             </div>
 
+            <!-- 加入要求 -->
+            <div class="col-span-12">
+              <div
+                class="bg-sky-50 dark:bg-sky-900/20 rounded-2xl p-6 border-l-4 border-r-4 border-l-sky-500 border-r-sky-500">
+                <h3 class="text-xl font-bold text-indigo-800 dark:text-indigo-300 mb-4 flex items-end gap-2">
+                  <i class="bi bi-check-circle-fill"></i>
+                  入隊要求 <span class="text-base text-amber-600 dark:text-amber-400">完成皆有機會獲得獎勵</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="flex items-start gap-3">
+                    <i class="bi bi-trophy text-yellow-500 text-lg mt-1"></i>
+                    <div>
+                      <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">積極參與 Discord 社群任務</p>
+                      <p class="text-base text-gray-600 dark:text-zinc-400">
+                        任務都很簡單，請務必完成。
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <i class="bi bi-discord text-indigo-500 text-lg mt-1"></i>
+                    <div>
+                      <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">積極於 Discord 社群活躍</p>
+                      <p class="text-base text-gray-600 dark:text-zinc-400">
+                        每週聊天/語音至少各3次，語音每次30分鐘以上。
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <i class="bi bi-heart text-red-500 text-lg mt-1"></i>
+                    <div>
+                      <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">積極參與 Discord 社群活動</p>
+                      <p class="text-base text-gray-600 dark:text-zinc-400">
+                        頻率不高、獎勵豐厚，請積極參與。
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <i class="bi bi-clock text-orange-500 text-lg mt-1"></i>
+                    <div>
+                      <p class="text-lg font-bold text-gray-800 dark:text-zinc-200">須積極遊玩．提升遊戲貢獻度</p>
+                      <p class="text-base text-gray-600 dark:text-zinc-400">
+                        每週遊玩10小時以上、每週XP 1萬以上、賽季場次至少300場。
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- 審核流程 -->
             <div class="col-span-12">
               <div
-                class="bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 rounded-2xl p-6 border-l-4 border-r-4 border-sky-500">
-                <h3 class="text-xl font-bold text-sky-800 dark:text-sky-300 mb-6 flex items-center gap-2">
+                class="bg-sky-50 dark:bg-sky-900/20 rounded-2xl p-6 border-l-4 border-r-4 border-l-sky-500 border-r-sky-500">
+                <h3 class="text-xl font-bold text-indigo-800 dark:text-indigo-300 mb-6 flex items-center gap-2">
                   <i class="bi bi-list-check"></i>
                   審核流程
                 </h3>
@@ -659,17 +640,6 @@ onMounted(() => {
                       <span class="text-base text-gray-700 dark:text-zinc-300">補充資料審核</span>
                     </div>
                   </div>
-
-                  <div
-                    class="mt-2 ml-6 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                    <div class="flex items-center gap-3">
-                      <i class="bi bi-info-circle-fill text-green-600 dark:text-green-500 text-xl mt-0.5"></i>
-                      <div>
-                        <p class="text-sm text-green-700 dark:text-green-400">請如實填寫，若有虛假資料將導致申請被拒絕。
-                        </p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
                 <!-- 第二階段：活躍考核 -->
@@ -685,7 +655,7 @@ onMounted(() => {
                       <i class="bi bi-check-circle text-blue-500 text-base"></i>
                       <p class="text-base text-gray-700 dark:text-zinc-300">
                         加入戰隊DC檢查 <br />
-                        <span class="text-xs text-amber-500 dark:text-amber-400">
+                        <span class="text-xs text-amber-600 dark:text-amber-400">
                           加入「
                           <a href="https://crazyclown.online/dc" target="_blank"
                             class="text-blue-500 dark:text-blue-400">
@@ -701,7 +671,7 @@ onMounted(() => {
                       <i class="bi bi-check-circle text-blue-500 text-base"></i>
                       <p class="text-base text-gray-700 dark:text-zinc-300">
                         戰隊DC報到檢查 <br />
-                        <span class="text-xs text-amber-500 dark:text-amber-400">
+                        <span class="text-xs text-amber-600 dark:text-amber-400">
                           於「
                           <a href="https://discord.com/channels/490129931808931840/1226549886145527999" target="_blank"
                             class="text-blue-500 dark:text-blue-400">
@@ -716,7 +686,7 @@ onMounted(() => {
                       <i class="bi bi-check-circle text-blue-500 text-base"></i>
                       <p class="text-base text-gray-700 dark:text-zinc-300">
                         加入官方DC檢查 <br />
-                        <span class="text-xs text-amber-500 dark:text-amber-400">
+                        <span class="text-xs text-amber-600 dark:text-amber-400">
                           加入「
                           <a href="https://kraftontw.info/Discord" target="_blank"
                             class="text-blue-500 dark:text-blue-400">
@@ -732,7 +702,7 @@ onMounted(() => {
                       <i class="bi bi-check-circle text-blue-500 text-base"></i>
                       <p class="text-base text-gray-700 dark:text-zinc-300">
                         社群活躍審核 <br />
-                        <span class="text-xs text-amber-500 dark:text-amber-400">
+                        <span class="text-xs text-amber-600 dark:text-amber-400">
                           需有過文字聊天/語音聊天/社群任務/社群活動的紀錄
                         </span>
                       </p>
@@ -1111,7 +1081,7 @@ onMounted(() => {
               <p class="ml-2 mb-0.5 text-xs"
                 :class="validationErrors.pubg_activity_willingness ? 'text-red-500 dark:text-red-400' : 'text-red-500 dark:text-red-400'">
                 <span v-if="validationErrors.pubg_activity_willingness">{{ validationErrors.pubg_activity_willingness
-                }}</span>
+                  }}</span>
                 <span v-else>此三項未達標者，將影響考績分數</span>
               </p>
               <div class="relative">
