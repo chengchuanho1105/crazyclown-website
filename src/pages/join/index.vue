@@ -520,7 +520,7 @@ onMounted(() => {
             <!-- 加入要求 -->
             <div class="col-span-12">
               <div
-                class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border-l-4 border-blue-500">
+                class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border-l-4 border-r-4 border-blue-500">
                 <h3 class="text-2xl font-bold text-blue-800 dark:text-blue-300 mb-4 flex items-end gap-2">
                   <i class="bi bi-check-circle-fill"></i>
                   入隊要求 <span class="text-base text-amber-600 dark:text-amber-400">完成皆有機會獲得獎勵</span>
@@ -576,7 +576,7 @@ onMounted(() => {
             <!-- 福利區塊 -->
             <div class="col-span-12">
               <div
-                class="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl p-6 border-l-4 border-yellow-500">
+                class="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl p-6 border-l-4 border-r-4 border-yellow-500">
                 <h3 class="text-xl font-bold text-yellow-800 dark:text-yellow-300 mb-4 flex items-center gap-2">
                   <i class="bi bi-gift-fill"></i>
                   戰隊福利
@@ -631,7 +631,7 @@ onMounted(() => {
             <!-- 審核流程 -->
             <div class="col-span-12">
               <div
-                class="bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 rounded-2xl p-6 border-l-4 border-sky-500">
+                class="bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 rounded-2xl p-6 border-l-4 border-r-4 border-sky-500">
                 <h3 class="text-xl font-bold text-sky-800 dark:text-sky-300 mb-6 flex items-center gap-2">
                   <i class="bi bi-list-check"></i>
                   審核流程
@@ -680,26 +680,66 @@ onMounted(() => {
                       2</div>
                     <h4 class="text-lg font-bold text-gray-800 dark:text-zinc-200">活躍考核</h4>
                   </div>
-                  <div class="ml-11 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <div class="flex items-center gap-2">
+                  <div class="ml-11 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="flex items-start gap-2">
                       <i class="bi bi-check-circle text-blue-500 text-base"></i>
-                      <span class="text-base text-gray-700 dark:text-zinc-300">加入戰隊DC檢查</span>
+                      <p class="text-base text-gray-700 dark:text-zinc-300">
+                        加入戰隊DC檢查 <br />
+                        <span class="text-xs text-amber-500 dark:text-amber-400">
+                          加入「
+                          <a href="https://crazyclown.online/dc" target="_blank"
+                            class="text-blue-500 dark:text-blue-400">
+                            <i class="bi bi-discord mr-1" />
+                            Crazy_Clown DC 社群
+                            <i class="bi bi-box-arrow-up-right ml-1" />
+                          </a>
+                          」
+                        </span>
+                      </p>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-start gap-2">
                       <i class="bi bi-check-circle text-blue-500 text-base"></i>
-                      <span class="text-base text-gray-700 dark:text-zinc-300">戰隊DC報到檢查</span>
+                      <p class="text-base text-gray-700 dark:text-zinc-300">
+                        戰隊DC報到檢查 <br />
+                        <span class="text-xs text-amber-500 dark:text-amber-400">
+                          於「
+                          <a href="https://discord.com/channels/490129931808931840/1226549886145527999" target="_blank"
+                            class="text-blue-500 dark:text-blue-400">
+                            🙋⇜自我介紹
+                            <i class="bi bi-box-arrow-up-right ml-1" />
+                          </a>
+                          」頻道完成自我介紹
+                        </span>
+                      </p>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-start gap-2">
                       <i class="bi bi-check-circle text-blue-500 text-base"></i>
-                      <span class="text-base text-gray-700 dark:text-zinc-300">加入官方DC檢查</span>
+                      <p class="text-base text-gray-700 dark:text-zinc-300">
+                        加入官方DC檢查 <br />
+                        <span class="text-xs text-amber-500 dark:text-amber-400">
+                          加入「
+                          <a href="https://kraftontw.info/Discord" target="_blank"
+                            class="text-blue-500 dark:text-blue-400">
+                            <i class="bi bi-discord mr-1" />
+                            PUBG 官方 DC 社群
+                            <i class="bi bi-box-arrow-up-right ml-1" />
+                          </a>
+                          」
+                        </span>
+                      </p>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-start gap-2">
                       <i class="bi bi-check-circle text-blue-500 text-base"></i>
-                      <span class="text-base text-gray-700 dark:text-zinc-300">社群活躍審核</span>
+                      <p class="text-base text-gray-700 dark:text-zinc-300">
+                        社群活躍審核 <br />
+                        <span class="text-xs text-amber-500 dark:text-amber-400">
+                          需有過文字聊天/語音聊天/社群任務/社群活動的紀錄
+                        </span>
+                      </p>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-start gap-2">
                       <i class="bi bi-check-circle text-blue-500 text-base"></i>
-                      <span class="text-base text-gray-700 dark:text-zinc-300">遊戲內活躍審核</span>
+                      <p class="text-base text-gray-700 dark:text-zinc-300">遊戲內活躍審核</p>
                     </div>
                   </div>
                 </div>
@@ -766,12 +806,12 @@ onMounted(() => {
             <div class="col-span-12 text-center pt-4">
               <div class="grid grid-cols-1 md:grid-cols-2 items-center justify-center gap-4">
                 <a href="https://crazyclown.online/dc" target="_blank" type="button"
-                  class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold text-lg rounded-2xl transition-all transform hover:scale-105 shadow-lg">
+                  class="px-6 py-3 bg-gradient-to-r from-blue-400 to-purple-400 hover:from-blue-600 hover:to-purple-700 text-white font-bold text-lg rounded-2xl transition-all transform hover:scale-103 shadow-lg">
                   <i class="bi bi-discord mr-2"></i>
                   先點我加入DC再申請
                 </a>
                 <button type="button"
-                  class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold text-lg rounded-2xl transition-all transform hover:scale-105 shadow-lg"
+                  class="px-6 py-3 bg-gradient-to-r from-blue-400 to-purple-400 hover:from-blue-600 hover:to-purple-700 text-white font-bold text-lg rounded-2xl transition-all transform hover:scale-103 shadow-lg"
                   @click="startApplication">
                   <i class="bi bi-check-lg mr-2"></i>
                   準備好了，開始申請
@@ -826,7 +866,8 @@ onMounted(() => {
               <div class="relative">
                 <input id="discord_user_id" v-model="formData.discord_user_id" type="text"
                   :placeholder="hasViewedDiscordIdHelp ? '請輸入 Discord ID' : '請先查看說明👉'" required
-                  :disabled="!hasViewedDiscordIdHelp" @input="validateField('discord_user_id', formData.discord_user_id)" :class="[
+                  :disabled="!hasViewedDiscordIdHelp"
+                  @input="validateField('discord_user_id', formData.discord_user_id)" :class="[
                     'w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed',
                     validationErrors.discord_user_id
                       ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
@@ -854,7 +895,8 @@ onMounted(() => {
               <div class="relative">
                 <input id="discord_username" v-model="formData.discord_username" type="text"
                   :placeholder="hasViewedDiscordUsernameHelp ? '請輸入 Discord 名稱' : '請先查看說明👉'" required
-                  :disabled="!hasViewedDiscordUsernameHelp" @input="validateField('discord_username', formData.discord_username)" :class="[
+                  :disabled="!hasViewedDiscordUsernameHelp"
+                  @input="validateField('discord_username', formData.discord_username)" :class="[
                     'w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed',
                     validationErrors.discord_username
                       ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
@@ -965,7 +1007,8 @@ onMounted(() => {
                 {{ validationErrors.total_play_time || '.' }}
               </p>
               <input id="total_play_time" v-model="formData.total_play_time" type="number" min="0"
-                placeholder="請輸入總遊戲時間" required @input="validateField('total_play_time', formData.total_play_time)" :class="[
+                placeholder="請輸入總遊戲時間" required @input="validateField('total_play_time', formData.total_play_time)"
+                :class="[
                   'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500',
                   validationErrors.total_play_time
                     ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
@@ -984,7 +1027,8 @@ onMounted(() => {
                 <span v-else>最多 144 小時，請合理填寫，列為往後考績目標</span>
               </p>
               <input id="weekly_play_time" v-model="formData.weekly_play_time" type="number" min="0" max="144"
-                placeholder="請輸入每週遊戲時間" required @input="validateField('weekly_play_time', formData.weekly_play_time)" :class="[
+                placeholder="請輸入每週遊戲時間" required @input="validateField('weekly_play_time', formData.weekly_play_time)"
+                :class="[
                   'w-full px-4 py-3 bg-gray-50 dark:bg-zinc-700 border-2 rounded-2xl focus:outline-none transition-colors placeholder-gray-400 dark:placeholder-zinc-500',
                   validationErrors.weekly_play_time
                     ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400'
@@ -1067,7 +1111,7 @@ onMounted(() => {
               <p class="ml-2 mb-0.5 text-xs"
                 :class="validationErrors.pubg_activity_willingness ? 'text-red-500 dark:text-red-400' : 'text-red-500 dark:text-red-400'">
                 <span v-if="validationErrors.pubg_activity_willingness">{{ validationErrors.pubg_activity_willingness
-                  }}</span>
+                }}</span>
                 <span v-else>此三項未達標者，將影響考績分數</span>
               </p>
               <div class="relative">
